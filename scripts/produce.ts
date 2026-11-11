@@ -5,7 +5,7 @@ import { produce } from '../src/server/production/workflow';
 import { configuredProvider } from '../src/ai/providers/config';
 loadEnvConfig(process.cwd());
 const args = process.argv.slice(2);
-const dbPath = resolve(process.env.CINEMAI_DB_PATH || (process.env.AI_PROVIDER === 'openai' ? '.data/cinemai.sqlite' : '.data/airl-demo.sqlite'));
+const dbPath = resolve(process.env.CINEMAI_DB_PATH || (['openai', 'hosted_openai'].includes(process.env.AI_PROVIDER || '') ? '.data/cinemai.sqlite' : process.env.AI_PROVIDER === 'ollama' ? '.data/airl-ollama.sqlite' : '.data/airl-demo.sqlite'));
 async function main() {
   if (args[0] === 'inspect' && args[1]) {
     const store = new ProductionStore(dbPath);
@@ -13,7 +13,7 @@ async function main() {
     return;
   }
   const provider = await configuredProvider();
-  console.log(provider.mode === 'demo' ? 'Demo-generated content · Simulated agent workflow' : 'Live OpenAI execution requested');
+  console.log(provider.mode === 'demo' ? 'Demo-generated content · Simulated agent workflow' : `${provider.mode} execution requested`);
   const winningChoice = args.join(' ').trim();
   if (!winningChoice) throw new Error('Usage: npm run production -- "Winning story choice"');
   const store = new ProductionStore(dbPath);

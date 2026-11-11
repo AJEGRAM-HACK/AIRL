@@ -24,12 +24,12 @@ export class ProductionStore {
     const seed = this.db.prepare('INSERT OR IGNORE INTO characters VALUES (?, ?)');
     for (const c of characters) seed.run(c.id, JSON.stringify(c));
   }
-  context(roomId: string, executionMode: 'demo' | 'openai' = 'openai') {
+  context(roomId: string, executionMode: import('@/ai/schemas/gateway').Mode | 'openai' = 'openai') {
     const profiles = this.db.prepare('SELECT profile FROM characters ORDER BY id').all().map(row => ({ ...characters.find(character => character.id === String(JSON.parse(String(row.profile)).id)), ...JSON.parse(String(row.profile)) }) as Character);
-    const history = this.db.prepare('SELECT e.artifact FROM episodes e JOIN productions p ON p.id=e.run_id WHERE e.room_id=? AND p.execution_mode=? ORDER BY e.created_at DESC LIMIT 5').all(roomId, executionMode).reverse().map(row => JSON.parse(String(row.artifact)));
+    const history = this.db.prepare("SELECT e.artifact FROM episodes e JOIN productions p ON p.id=e.run_id WHERE e.room_id=? AND (p.execution_mode=? OR (?='hosted_openai' AND p.execution_mode='openai')) ORDER BY e.created_at DESC LIMIT 5").all(roomId, executionMode, executionMode).reverse().map(row => JSON.parse(String(row.artifact)));
     return { characters: profiles, seededHistory: episodes, approvedHistory: history };
   }
-  create(input: ProductionInput, model: string, executionMode: 'demo' | 'openai' = 'openai') {
+  create(input: ProductionInput, model: string, executionMode: import('@/ai/schemas/gateway').Mode | 'openai' = 'openai') {
     const id = randomUUID(), now = new Date().toISOString();
     this.db.prepare('INSERT INTO productions(id,room_id,status,model,input,created_at,updated_at,execution_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(id, input.roomId, 'running', model, JSON.stringify(input), now, now, executionMode);
     return id;

@@ -1,3 +1,5 @@
+import { ReplyInput, ReplyOutput, type CharacterReplyInput, type Mode } from '@/ai/schemas/gateway';
+import { scriptedResponse } from '@/features/persona/scenarios';
 import { z } from 'zod';
 import { Concept, Script, Manifest, Critique, Input, validateManifest, validateScript, type Stage } from '@/server/production/schemas';
 import type { Executor } from '@/server/production/workflow';
@@ -8,7 +10,8 @@ export type ScriptOutput = z.infer<typeof Script>;
 export type SceneOutput = z.infer<typeof Manifest>;
 export type ReviewInput = { script: ScriptOutput; manifest: SceneOutput };
 export interface CreativeAIProvider {
-  readonly mode: 'demo' | 'openai';
+  readonly mode: Mode | 'openai';
+  generateCharacterReply(input: CharacterReplyInput): Promise<z.infer<typeof ReplyOutput>>;
   generateStory(input: StoryInput & { context?: unknown }): Promise<StoryOutput>;
   generateScript(input: ScriptInput): Promise<ScriptOutput>;
   generateScenes(input: ScriptOutput): Promise<SceneOutput>;
@@ -16,6 +19,10 @@ export interface CreativeAIProvider {
 }
 export class DemoCreativeProvider implements CreativeAIProvider {
   readonly mode = 'demo';
+  async generateCharacterReply(input: CharacterReplyInput) {
+    ReplyInput.parse(input);
+    return ReplyOutput.parse({ text: scriptedResponse(input.characterId, /karaoke/i.test(input.message) ? 'decision' : 'greeting') });
+  }
   async generateStory(input: StoryInput) {
     Input.parse(input);
     return Concept.parse({ title: `Barangay protocol: ${input.winningChoice}`, premise: input.winningChoice, conflict: 'Captain Bot treats a community idea as an optimization problem.', humor: 'Tita Nena questions the logic while Kuya Taho finds a business opportunity.', cliffhanger: 'The barangay group chat asks for a new vote.' });

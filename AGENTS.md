@@ -1,7 +1,7 @@
 # AIRL project conventions
 
 ## Scope
-The user approved continuing with Phase 2 community voting and light/dark themes. Shared local voting uses the existing SQLite adapter until hosted Supabase credentials are available. The local production slice remains available. Fixture interactions must stay labeled. Never fabricate successful jobs or logs.
+The authoritative updated directive authorizes foundation and multi-provider integration, including Demo, local Ollama, Hosted OpenAI and session-only creator BYOK. Paid requests require explicit approval. Shared local voting uses the existing SQLite adapter until hosted Supabase credentials are available. The local production slice remains available. Fixture interactions must stay labeled. Never fabricate successful jobs or logs.
 
 ## Architecture
 - One Next.js App Router repository, TypeScript strict mode, npm, Node.js 24 LTS.
@@ -37,3 +37,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## AIRL foundation
 AIRL is the platform. CinemAI is a module. PersonaAI owns shared character definitions in src/features/persona/characters.ts, re-exported from fixtures for compatibility. AI_PROVIDER defaults to demo. Demo uses deterministic templates with accurate labels and zero network calls. Live AI requires credentials, a model and explicit authorization. Keep provider configuration server-only. Feature flags in src/lib/config/features.ts control module availability, never authorization. Preserve legacy CinemAI URLs. New design tokens stay in globals.css.
+
+## Provider gateway
+Use src/ai/providers/registry.ts for provider selection. Preserve legacy AI_PROVIDER=openai as a hosted_openai alias. Never fall back between providers. BYOK keys exist only in page/request memory, require HTTPS and operator/creator authentication, and never enter jobs, usage tables, logs or storage. Paid model tests require explicit consent. Ollama is server-side loopback only, rejects Vercel, and uses the installed model list. Keep all cloud tracing disabled by default.

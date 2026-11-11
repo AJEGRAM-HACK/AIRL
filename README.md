@@ -116,3 +116,55 @@ npm run test:live
 ## Light and dark themes
 
 Use Color theme in the navigation to choose System, Light or Dark. The selection persists in local storage, follows system appearance changes when set to System, and synchronizes across tabs. A small pre-paint script applies the selected theme before hydration. Semantic tokens control platform surfaces, typography, borders and accents. Illustrated scene media retains a cinematic palette. No account or credentials are needed.
+
+## Multi-provider gateway
+
+The updated provider gateway preserves the AIRL UI, shared voting, light/dark themes, character definitions and production engine. Its registry is `src/ai/providers/registry.ts`. Four modes are available in `/studio/ai`.
+
+| Mode | Credential and execution behavior | Verified status |
+| --- | --- | --- |
+| `demo` | Deterministic local templates, zero network inference | PASS offline tests and HTTP pipeline |
+| `ollama` | Server-only loopback, installed-model discovery, shared local inference lease | PASS real `qwen3:4b-instruct` character inference and four-stage CLI workflow |
+| `hosted_openai` | Server key, configured model, environment authorization and explicit request consent | BLOCKED pending application credentials and authorized live test |
+| `creator_byok` | Request-scoped OpenAI key, creator access, HTTPS and explicit request consent | PASS mocked credential-isolation tests and HTTP security rejection. Live inference NOT TESTED |
+
+Existing `AI_PROVIDER=openai` settings remain compatible as an alias for `hosted_openai`. No provider silently falls back to another provider. Model identifiers come from configuration or the actual Ollama installed-model response. No additional dependencies were introduced.
+
+### Creator access and usage
+
+1. Open the room studio, join the room, and unlock operator access using `npm run live:operator` as described above. This local operator role currently also grants creator access.
+2. Open `/studio/ai`, select a mode and model, and explicitly test the connection. A successful connection test includes structured character inference.
+3. Run a four-stage workflow preview or a character conversation. PersonaAI profile pages link to this interface with the selected character.
+4. Inspect usage metadata and actual timestamped stage events. Generated manifests can be viewed through the existing illustrated storyboard player. This is a 15-second storyboard preview. Remotion rendering remains pending.
+
+The settings-page workflow uses an in-memory production store and returns a preview. It does not publish canon. The CLI continues to persist approved production results and character memory to mode-specific local databases. The settings gateway persists usage metadata in the existing local Live database, including owner, provider, model, operation, status, timestamps, token counts when reported, optional cost estimate and sanitized failure code. It excludes request bodies, prompt text and keys.
+
+The daily request cap defaults to 20 per creator session. `AIRL_AI_DAILY_ESTIMATED_USD_LIMIT` optionally gates additional paid requests using recorded cost estimates and a configurable reservation for pending or unknown-cost requests. Configure the input/output model rates and reservation conservatively. Estimates and reservations can differ from provider invoices, especially when a request fails after partial usage. Provider-side spend controls remain authoritative for account billing.
+
+`AIRL_AI_REQUEST_TIMEOUT_MS` is bounded to 1–110 seconds and `AIRL_AI_MAX_OUTPUT_TOKENS` to 256–4000. Ollama context is bounded to 4096–8192 tokens. Local inference uses sequential calls, temperature zero, one shared inference lease and a fixed loopback endpoint. Vercel mode explicitly rejects this localhost provider.
+
+### BYOK security
+
+Creator keys stay in React memory while the settings page is active and in the protected request's server memory. Disconnect clears the page credential and aborts the active request. Changes to provider clear the key. Keys are never placed in cookies, web storage, URLs, databases, usage events or job payloads. The backend checks creator identity, same-origin requests, size limits, rate limits, consent and HTTPS. Plain HTTP localhost rejects BYOK. Demo and Ollama work on the existing local HTTP development server.
+
+The hosted OpenAI and creator adapters use the installed Agents SDK, the same typed output schemas, bounded SDK calls and disabled cloud tracing. Anthropic, Gemini and background BYOK execution remain future extensions. The BYOK isolation test uses a mocked transport with synthetic credentials and a forced 401. A real creator-key request still needs authorized verification over HTTPS.
+
+### Local commands
+
+```sh
+# Defaults to the deterministic provider
+npm run production -- "Ban Monday meetings"
+
+# Use the exact installed Ollama model name verified on this machine
+AI_PROVIDER=ollama OLLAMA_MODEL=qwen3:4b-instruct npm run production -- "Ban Monday meetings"
+
+npm run test:providers
+npm run test:production
+npm run test:live
+npm run typecheck
+npm run build
+```
+
+Next milestone is connecting a finalized audience round to a persistent production job and playable output in the room. Hosted Supabase/RLS, Trigger.dev, QR access, submission moderation, voting deadlines, Remotion/export and browser visual QA remain pending. A live paid-provider smoke test requires explicit approval.
+
+The adapters follow [official OpenAI agent definitions](https://developers.openai.com/api/docs/guides/agents/define-agents) and the [Ollama chat API](https://docs.ollama.com/api/chat).

@@ -21,6 +21,8 @@ export class LiveStore {
       CREATE TABLE IF NOT EXISTS live_options(round_id TEXT NOT NULL,id TEXT NOT NULL,title TEXT NOT NULL,description TEXT NOT NULL,position INTEGER NOT NULL,PRIMARY KEY(round_id,id));
       CREATE TABLE IF NOT EXISTS live_votes(round_id TEXT NOT NULL,token_hash TEXT NOT NULL,option_id TEXT NOT NULL,PRIMARY KEY(round_id,token_hash));
       CREATE TABLE IF NOT EXISTS live_operator_codes(code_hash TEXT PRIMARY KEY,expires INTEGER NOT NULL);
+      CREATE TABLE IF NOT EXISTS ai_usage(id TEXT PRIMARY KEY,owner TEXT NOT NULL,mode TEXT NOT NULL,model TEXT NOT NULL,operation TEXT NOT NULL,status TEXT NOT NULL,started INTEGER NOT NULL,finished INTEGER,input_tokens INTEGER,output_tokens INTEGER,estimated_usd REAL,error_code TEXT);
+      CREATE TABLE IF NOT EXISTS ai_leases(resource TEXT PRIMARY KEY,lease_id TEXT NOT NULL,expires INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS live_limits(identity TEXT PRIMARY KEY,count INTEGER NOT NULL,reset_at INTEGER NOT NULL);`);
     if (!this.db.prepare('SELECT id FROM live_rounds WHERE room_id=? LIMIT 1').get(DEMO_ROOM)) {
       this.db.exec('BEGIN IMMEDIATE');
@@ -142,5 +144,38 @@ export class LiveStore {
       this.db.exec('COMMIT');
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
+  creator(token?: string) { return this.requireSession(token, true); }
+  acquireAI(resource: string) {
+    const lease = randomUUID();
+    const result = this.db.prepare('INSERT INTO ai_leases VALUES(?,?,?) ON CONFLICT(resource) DO UPDATE SET lease_id=excluded.lease_id,expires=excluded.expires WHERE expires<?').run(resource, lease, Date.now() + 150_000, Date.now());
+    if (!result.changes) throw new LiveError(409, 'An inference request is already running. Please wait.');
+    return lease;
+  }
+  releaseAI(resource: string, lease: string) { this.db.prepare('DELETE FROM ai_leases WHERE resource=? AND lease_id=?').run(resource, lease); }
+  beginUsage(owner: string, mode: string, model: string, operation: string) {
+    const configured = Number(process.env.AIRL_AI_DAILY_REQUEST_LIMIT || 20);
+    const limit = Number.isInteger(configured) && configured > 0 ? configured : 20;
+    const id = randomUUID();
+    this.db.exec('BEGIN IMMEDIATE');
+    try {
+      const count = this.db.prepare('SELECT COUNT(*) count FROM ai_usage WHERE owner=? AND started>?').get(owner, Date.now() - 86400_000)!;
+      if (Number(count.count) >= limit) throw new LiveError(429, 'Your daily provider request limit has been reached.');
+      if (['hosted_openai', 'creator_byok'].includes(mode) && process.env.AIRL_AI_DAILY_ESTIMATED_USD_LIMIT) {
+        const budget = Number(process.env.AIRL_AI_DAILY_ESTIMATED_USD_LIMIT);
+        const reservation = Number(process.env.AIRL_AI_REQUEST_RESERVATION_USD || 1);
+        if (!Number.isFinite(budget) || budget <= 0 || !Number.isFinite(reservation) || reservation <= 0) throw new LiveError(400, 'Provider budget configuration is invalid.');
+        const spending = this.db.prepare("SELECT COALESCE(SUM(COALESCE(estimated_usd,?)),0) total FROM ai_usage WHERE owner=? AND started>? AND mode IN ('hosted_openai','creator_byok')").get(reservation,owner,Date.now()-86400_000)!;
+        if (Number(spending.total) + reservation > budget) throw new LiveError(429, 'Your estimated daily spending budget has been reached.');
+      }
+      this.db.prepare('INSERT INTO ai_usage(id,owner,mode,model,operation,status,started) VALUES(?,?,?,?,?,?,?)').run(id,owner,mode,model,operation,'running',Date.now());
+      this.db.exec('COMMIT');
+      return id;
+    } catch (error) { this.db.exec('ROLLBACK'); throw error; }
+  }
+  setUsageModel(id: string, model: string) { this.db.prepare('UPDATE ai_usage SET model=? WHERE id=?').run(model,id); }
+  finishUsage(id: string, status: string, input: number | null, output: number | null, cost: number | null, error: string | null) {
+    this.db.prepare('UPDATE ai_usage SET status=?,finished=?,input_tokens=?,output_tokens=?,estimated_usd=?,error_code=? WHERE id=?').run(status,Date.now(),input,output,cost,error,id);
+  }
+  usage(owner: string) { return this.db.prepare('SELECT id,mode,model,operation,status,started,finished,input_tokens,output_tokens,estimated_usd,error_code FROM ai_usage WHERE owner=? ORDER BY started DESC LIMIT 20').all(owner); }
   dispose() { this.db.close(); }
 }

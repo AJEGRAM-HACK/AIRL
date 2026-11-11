@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { Concept, Script, Manifest, Critique, Input, validateScript, validateManifest, type Stage, type ProductionInput } from './schemas';
 import { ProductionStore } from './store';
 export interface Executor {
-  executionMode?: 'demo' | 'openai';
+  executionMode?: import('@/ai/schemas/gateway').Mode | 'openai';
   preflight(): Promise<void>;
   execute(stage: Stage, schema: z.ZodType, prompt: string): Promise<unknown>;
 }
