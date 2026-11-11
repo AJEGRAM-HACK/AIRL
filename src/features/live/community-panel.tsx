@@ -34,10 +34,11 @@ export function CommunityPanel({ operatorView = false,roomId='barangay-2099' }: 
     source.onmessage = event => {
       try { const state = RoomSnapshot.parse(JSON.parse(event.data)); setRoom(state); } catch { setError('Invalid room update. Reconnect to retry.'); }
     };
+    source.addEventListener('production', () => window.dispatchEvent(new CustomEvent(`airl-production:${roomId}`)));
     source.onerror = () => setConnected(false);
     window.addEventListener('focus', refresh);
     return () => { active = false; source.close(); window.removeEventListener('focus', refresh); };
-  }, []);
+  }, [base,roomId]);
   useEffect(() => { setSelection(''); }, [room?.roundId]);
   // Own vote is private and re-fetched whenever the active round changes.
   useEffect(() => {

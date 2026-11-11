@@ -14,16 +14,24 @@ export function EpisodeGallery({roomId="barangay-2099"}:{roomId?:string}) {
   const [error,setError]=useState('');
   useEffect(()=>{
     let active=true;
+    let loading=false;
+    let refreshAgain=false;
     async function refresh(){
+      if(document.hidden)return;
+      if(loading){refreshAgain=true;return;}
+      loading=true;
       try{
         const response=await fetch(`/api/production?universe=${roomId}`,{cache:'no-store'});
         if(!response.ok)throw new Error('Unable to load published episodes.');
         const data=z.object({jobs:z.array(Published)}).parse(await response.json());
         if(active){setProgress(data.jobs[0]&&data.jobs[0].status!=='published'?`${data.jobs[0].status} · ${data.jobs[0].progress?.stage||'Waiting for a worker'}`:'');setGenerated(data.jobs.filter(job=>job.status==='published'&&job.manifest));setError('');}
-      }catch(error){if(active)setError(error instanceof Error?error.message:'Unable to load episodes.');}
+      }catch(error){if(active)setError(error instanceof Error?error.message:'Unable to load episodes.');}finally{loading=false;if(active&&refreshAgain){refreshAgain=false;void refresh();}}
     }
-    void refresh();const timer=setInterval(refresh,1500);
-    return()=>{active=false;clearInterval(timer);};
+    void refresh();const timer=setInterval(refresh,30000);
+    window.addEventListener(`airl-production:${roomId}`,refresh);
+    window.addEventListener('focus',refresh);
+    document.addEventListener('visibilitychange',refresh);
+    return()=>{active=false;clearInterval(timer);window.removeEventListener(`airl-production:${roomId}`,refresh);window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',refresh);};
   },[roomId]);
   if(roomId!=='barangay-2099'&&!generated.length)return <section id="episode-library" className="room-production episode-gallery" aria-label="Episode library"><h2>Community episodes</h2>{progress&&<p role="status">Production {progress}</p>}{error&&<p role="alert">{error}</p>}<p>The first published episode will appear here.</p></section>;
   const id=selected || generated[0]?.id || episodes[episodes.length-1].id;

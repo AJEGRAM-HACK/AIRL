@@ -16,16 +16,23 @@ export function RoomProduction({ operator = false,roomId="barangay-2099" }: { op
   const [selected,setSelected] = useState('');
   useEffect(()=>{
     let active=true;
+    let loading=false;
+    let refreshAgain=false;
     async function refresh() {
+      if(document.hidden)return;
+      if(loading){refreshAgain=true;return;}
+      loading=true;
       try {
         const response=await fetch(`/api/production?universe=${roomId}${operator?'&operator=1':''}`,{cache:'no-store'});
         if(!response.ok) throw new Error('Production status is unavailable.');
         const data=z.object({jobs:z.array(Job),canPublish:z.boolean().optional()}).parse(await response.json());
         if(active) {setCanPublish(!!(data as any).canPublish);setJobs(data.jobs);setError('');}
-      } catch(error) {if(active)setError(error instanceof Error?error.message:'Unable to load jobs.');}
+      } catch(error) {if(active)setError(error instanceof Error?error.message:'Unable to load jobs.');}finally{loading=false;if(active&&refreshAgain){refreshAgain=false;void refresh();}}
     }
-    void refresh();const timer=setInterval(refresh,1500);
-    return()=>{active=false;clearInterval(timer);};
+    void refresh();const timer=setInterval(refresh,operator?5000:30000);
+    window.addEventListener(`airl-production:${roomId}`,refresh);
+    document.addEventListener('visibilitychange',refresh);
+    return()=>{active=false;clearInterval(timer);window.removeEventListener(`airl-production:${roomId}`,refresh);document.removeEventListener('visibilitychange',refresh);};
   },[operator,roomId]);
   async function action(jobId:string, action:string) {
     setPending(true);setError('');

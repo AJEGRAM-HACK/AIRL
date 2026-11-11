@@ -26,7 +26,9 @@
     "migrate:universes": "tsx scripts/migrate-universes.ts",
     "test:platform": "tsx --test tests/platform.test.ts",
     "test": "tsx --test tests/*.test.ts",
-    "benchmark:local": "tsx scripts/benchmark-worlds.ts"
+    "benchmark:local": "tsx scripts/benchmark-worlds.ts",
+    "demo:tunnel": "NODE_ENV=production node scripts/demo-tunnel.mjs",
+    "demo:rehearse": "tsx scripts/rehearse-audience.ts"
   },
   "dependencies": {
     "@next/env": "16.4.6",

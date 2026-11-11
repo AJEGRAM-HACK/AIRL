@@ -1,3 +1,4 @@
+import { roomEventStream } from '@/server/live/stream';
 import { after } from 'next/server';
 import { z } from 'zod';
 import { RoomProviderSelection } from '@/features/live/production-selection';
@@ -15,12 +16,7 @@ export async function GET(request:Request,context:Context){
     checkRequest(request);if(!['state','events'].includes(action))throw new LiveError(404,'Endpoint not found.');
     const token=await sessionToken();platform=new PlatformStore();platform.getWorld(roomId,platform.account(token));
     if(action==='state'){live=new LiveStore(platform.path,roomId);return Response.json({room:live.snapshot(),session:live.personal(token)},{headers:{'Cache-Control':'no-store'}});}
-    const path=platform.path,encoder=new TextEncoder();let timer:ReturnType<typeof setInterval>;let closed=false;let ticks=0;let stop=()=>{};
-    const stream=new ReadableStream({start(controller){
-      stop=()=>{if(closed)return;closed=true;clearInterval(timer);request.signal.removeEventListener('abort',stop);controller.close();};
-      const send=()=>{let access:PlatformStore|undefined;let room:LiveStore|undefined;try{access=new PlatformStore(path);access.getWorld(roomId,access.account(token));room=new LiveStore(path,roomId);controller.enqueue(encoder.encode(`data: ${JSON.stringify(room.snapshot())}\n\n`));if(++ticks>=60)stop();}catch{stop();}finally{access?.close();room?.dispose();}};
-      timer=setInterval(send,1000);request.signal.addEventListener('abort',stop,{once:true});send();
-    },cancel(){closed=true;clearInterval(timer);request.signal.removeEventListener('abort',stop);}});
+    const stream=roomEventStream(platform.path,roomId,token,request.signal);
     return new Response(stream,{headers:{'Content-Type':'text/event-stream','Cache-Control':'no-cache, no-transform','X-Accel-Buffering':'no'}});
   }catch(error){return errorResponse(error);}finally{platform?.close();live?.dispose();}
 }
