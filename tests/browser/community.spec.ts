@@ -22,15 +22,14 @@ for (const mode of ['demo','ollama'] as const) test(`${mode} audience votes beco
     await b.getByRole('button',{name:'Cast my vote'}).click();
     await expect(a.locator('.community-stats')).toContainText('2 votes');
     await expect(b.locator('.community-stats')).toContainText('2 votes');
+    const email=`${mode}-admin@example.test`;
+    await operatorContext.request.post('/api/account',{headers:{Origin:'http://127.0.0.1:3100'},data:{action:'signup',email,name:'Test admin',password:'test-password-1234'}});
+    const accounts=new (await import('../../src/server/platform/store')).PlatformStore(process.env.AIRL_LIVE_DB_PATH);try{accounts.bootstrapAdmin(email);}finally{accounts.close();}
     await operator.goto('/studio/barangay-2099');
     await operator.getByRole('button',{name:/Join room to vote/}).click();
     await expect(operator.getByRole('button',{name:/Join room to vote/})).toHaveCount(0);
-    const store=new LiveStore(process.env.AIRL_LIVE_DB_PATH);
-    let code:string;try{code=store.issueOperatorCode();}finally{store.dispose();}
-    await operator.getByLabel('One-time operator code').fill(code);
-    await operator.getByRole('button',{name:'Unlock controls'}).click();
-    await operator.getByLabel('Production provider',{exact:true}).selectOption(mode);
-    if(mode==='ollama')await operator.getByLabel('Production model',{exact:true}).fill('qwen3:4b-instruct');
+    await operator.locator('.operator-controls').getByLabel('Production provider',{exact:true}).selectOption(mode);
+    if(mode==='ollama')await operator.locator('.operator-controls').getByLabel('Production model',{exact:true}).selectOption('qwen3:4b-instruct');
     await operator.getByRole('button',{name:'Close voting & produce',exact:true}).first().click();
     const latencies:number[]=[];
     let job:any;

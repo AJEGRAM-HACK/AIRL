@@ -15,7 +15,7 @@ test('demo is deterministic, choice-sensitive, schema valid and makes zero netwo
   const directory = mkdtempSync(join(tmpdir(), 'airl-demo-'));
   const store = new ProductionStore(join(directory, 'demo.sqlite'));
   try {
-    const provider = await configuredProvider({});
+    const provider = await configuredProvider({AI_PROVIDER:'demo'});
     assert.equal(provider.mode, 'demo');
     const input = { roomId: 'barangay-2099' as const, winningChoice: 'Launch a mandatory karaoke night' };
     const first = await produce(store, provider.executor, input, provider.model);

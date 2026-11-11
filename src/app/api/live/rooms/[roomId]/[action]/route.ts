@@ -1,71 +1,37 @@
-import { RoomProviderSelection } from '@/features/live/production-selection';
 import { after } from 'next/server';
+import { z } from 'zod';
+import { RoomProviderSelection } from '@/features/live/production-selection';
 import { drainRoomJobs } from '@/server/production/room-jobs';
-import { RoomSnapshot, VoteInput, RoundInput } from '@/features/live/types';
-import { DEMO_ROOM } from '@/lib/fixtures';
+import { VoteInput, RoundInput } from '@/features/live/types';
 import { LiveError, LiveStore } from '@/server/live/store';
-import { body, checkRequest, errorResponse, sessionToken, withStore } from '@/server/live/http';
-export const runtime = 'nodejs';
-export const maxDuration = 120;
-export const dynamic = 'force-dynamic';
-type Context = { params: Promise<{ roomId: string; action: string }> };
-export async function GET(request: Request, context: Context) {
-  const { roomId, action } = await context.params;
-  if (roomId !== DEMO_ROOM || !['state', 'events'].includes(action)) return Response.json({ error: 'Room endpoint not found.' }, { status: 404 });
-  if (action === 'state') return withStore(request, async store => ({ room: store.snapshot(), session: store.personal(await sessionToken()) }));
-  try { checkRequest(request); } catch (error) { return errorResponse(error); }
-  const encoder = new TextEncoder();
-  let timer: ReturnType<typeof setInterval> | undefined;
-  let stop = () => {};
-  let cleanup = () => {};
-  const stream = new ReadableStream({
-    start(controller) {
-      let closed = false;
-      let ticks = 0;
-      cleanup = () => {
-        closed = true;
-        clearInterval(timer);
-        request.signal.removeEventListener('abort', stop);
-      };
-      stop = () => {
-        if (closed) return;
-        cleanup();
-        controller.close();
-      };
-      function send() {
-        if (closed) return;
-        let store: LiveStore | undefined;
-        try {
-          store = new LiveStore();
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(RoomSnapshot.parse(store.snapshot()))}\n\n`));
-          // Periodic reconnect bounds stream lifetime and recovers across workers.
-          if (++ticks >= 60) stop();
-        } catch { stop(); } finally { store?.dispose(); }
-      }
-      timer = setInterval(send, 1000);
-      request.signal.addEventListener('abort', stop, { once: true });
-      send();
-    },
-    cancel() { cleanup(); },
-  });
-  return new Response(stream, { headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', 'X-Accel-Buffering': 'no' } });
+import { checkRequest, errorResponse, sessionToken } from '@/server/live/http';
+import { PlatformStore } from '@/server/platform/store';
+import { jsonBody } from '@/server/platform/http';
+export const runtime='nodejs';export const maxDuration=120;export const dynamic='force-dynamic';
+type Context={params:Promise<{roomId:string;action:string}>};
+export async function GET(request:Request,context:Context){
+  const {roomId,action}=await context.params;let platform:PlatformStore|undefined;let live:LiveStore|undefined;
+  try{
+    checkRequest(request);if(!['state','events'].includes(action))throw new LiveError(404,'Endpoint not found.');
+    const token=await sessionToken();platform=new PlatformStore();platform.getWorld(roomId,platform.account(token));
+    if(action==='state'){live=new LiveStore(platform.path,roomId);return Response.json({room:live.snapshot(),session:live.personal(token)},{headers:{'Cache-Control':'no-store'}});}
+    const path=platform.path,encoder=new TextEncoder();let timer:ReturnType<typeof setInterval>;let closed=false;let ticks=0;let stop=()=>{};
+    const stream=new ReadableStream({start(controller){
+      stop=()=>{if(closed)return;closed=true;clearInterval(timer);request.signal.removeEventListener('abort',stop);controller.close();};
+      const send=()=>{let access:PlatformStore|undefined;let room:LiveStore|undefined;try{access=new PlatformStore(path);access.getWorld(roomId,access.account(token));room=new LiveStore(path,roomId);controller.enqueue(encoder.encode(`data: ${JSON.stringify(room.snapshot())}\n\n`));if(++ticks>=60)stop();}catch{stop();}finally{access?.close();room?.dispose();}};
+      timer=setInterval(send,1000);request.signal.addEventListener('abort',stop,{once:true});send();
+    },cancel(){closed=true;clearInterval(timer);request.signal.removeEventListener('abort',stop);}});
+    return new Response(stream,{headers:{'Content-Type':'text/event-stream','Cache-Control':'no-cache, no-transform','X-Accel-Buffering':'no'}});
+  }catch(error){return errorResponse(error);}finally{platform?.close();live?.dispose();}
 }
-export async function POST(request: Request, context: Context) {
-  const { roomId, action } = await context.params;
-  return withStore(request, async store => {
-    if (roomId !== DEMO_ROOM) throw new LiveError(404, 'Room not found.');
-    const token = await sessionToken();
-    const input = await body(request);
-    if (action === 'vote') {
-      const vote = VoteInput.parse(input);
-      store.vote(token, vote.roundId, vote.optionId);
-    } else if (action === 'close' || action === 'next') {
-      if (action === 'close') {
-        const parsed = RoundInput.extend({ provider: RoomProviderSelection.optional() }).parse(input);
-        store.closeRound(token, parsed.roundId, parsed.provider);
-        after(async () => { await drainRoomJobs(); });
-      } else store.nextRound(token, RoundInput.parse(input).roundId);
-    } else throw new LiveError(404, 'Room action not found.');
-    return { room: store.snapshot(), session: store.personal(token) };
-  });
+export async function POST(request:Request,context:Context){
+  const {roomId,action}=await context.params;let platform:PlatformStore|undefined;let live:LiveStore|undefined;
+  try{
+    checkRequest(request);const token=await sessionToken();platform=new PlatformStore();platform.getWorld(roomId,platform.account(token));live=new LiveStore(platform.path,roomId);const input=await jsonBody(request);
+    if(action==='vote'){const vote=VoteInput.parse(input);live.vote(token,vote.roundId,vote.optionId);}
+    else if(action==='close'){const parsed=RoundInput.extend({provider:RoomProviderSelection.optional()}).parse(input);live.closeRound(token,parsed.roundId,parsed.provider||{mode:'ollama',model:'qwen3:4b-instruct',consent:false});const path=platform.path;after(async()=>{await drainRoomJobs(path);});}
+    else if(action==='next'){const parsed=RoundInput.extend({options:z.array(z.object({id:z.string().regex(/^[a-z0-9-]+$/).max(80),title:z.string().min(1).max(200),description:z.string().max(300)})).min(2).max(6).optional()}).parse(input);if(parsed.options&&new Set(parsed.options.map(option=>option.id)).size!==parsed.options.length)throw new LiveError(400,'Choice IDs must be unique.');live.nextRound(token,parsed.roundId,parsed.options);}
+    else throw new LiveError(404,'Endpoint not found.');
+    return Response.json({room:live.snapshot(),session:live.personal(token)},{headers:{'Cache-Control':'no-store'}});
+  }catch(error){return errorResponse(error);}finally{platform?.close();live?.dispose();}
 }

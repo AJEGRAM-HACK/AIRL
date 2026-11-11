@@ -1,0 +1,530 @@
+{
+  "fixture": {
+    "model": "qwen3:4b-instruct",
+    "settings": {
+      "contextWindow": 8192,
+      "temperature": 0,
+      "timeoutMs": 110000,
+      "maxOutputTokens": 2400
+    },
+    "officialChoice": "taho",
+    "pitchInterests": {
+      "genres": [
+        "Mystery"
+      ],
+      "settings": [
+        "An orbital observatory"
+      ],
+      "themes": [
+        "Trust"
+      ],
+      "tone": "Hopeful suspense",
+      "languages": [
+        "English"
+      ],
+      "avoid": [
+        "Graphic violence"
+      ],
+      "idea": "A missing star map brings an isolated community together."
+    },
+    "storyQuestion": "What happened to Tita Nena in this episode?"
+  },
+  "settings": {
+    "timeoutMs": 110000,
+    "outputTokens": 2400,
+    "contextWindow": 8192
+  },
+  "results": [
+    {
+      "task": "official-episode",
+      "mode": "ollama",
+      "model": "qwen3:4b-instruct",
+      "elapsedMs": 38569,
+      "previewDuringCritic": true,
+      "attempts": 1,
+      "validationFailures": 0,
+      "events": [
+        {
+          "stage": "Connection",
+          "status": "started",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:41:14.670Z"
+        },
+        {
+          "stage": "Connection",
+          "status": "succeeded",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:41:14.675Z"
+        },
+        {
+          "stage": "Story Director",
+          "status": "started",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:41:14.675Z"
+        },
+        {
+          "stage": "Story Director",
+          "status": "succeeded",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:41:22.055Z"
+        },
+        {
+          "stage": "Screenwriter",
+          "status": "started",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:41:22.055Z"
+        },
+        {
+          "stage": "Screenwriter",
+          "status": "succeeded",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:41:35.399Z"
+        },
+        {
+          "stage": "Visual Producer",
+          "status": "started",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:41:35.400Z"
+        },
+        {
+          "stage": "Visual Producer",
+          "status": "succeeded",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:41:45.002Z"
+        },
+        {
+          "stage": "Creative Critic",
+          "status": "started",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:41:45.003Z"
+        },
+        {
+          "stage": "Creative Critic",
+          "status": "succeeded",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:41:52.698Z"
+        }
+      ],
+      "episodeId": "383d486c-eaa4-447a-bf03-7886fb7ffe7f",
+      "choice": "Declare taho the official currency",
+      "manifest": {
+        "title": "Taho Takes Over! (Barangay 2099)",
+        "scenes": [
+          {
+            "id": "scene-001",
+            "style": "dramatic-reveal",
+            "background": "barangay-hall",
+            "characters": [
+              "captain-bot"
+            ],
+            "animation": "slide-in",
+            "durationSeconds": 6,
+            "dialogue": [
+              {
+                "characterId": "captain-bot",
+                "text": "I propose taho as the official currency—efficient, sustainable, and universally consumed."
+              }
+            ]
+          },
+          {
+            "id": "scene-002",
+            "style": "character-dialogue",
+            "background": "taho-stall",
+            "characters": [
+              "kuya-taho"
+            ],
+            "animation": "fade-in",
+            "durationSeconds": 6,
+            "dialogue": [
+              {
+                "characterId": "kuya-taho",
+                "text": "Taho? Yes! It’s the only thing that tastes like real life—now it’s money, and I’m selling it!"
+              }
+            ]
+          },
+          {
+            "id": "scene-003",
+            "style": "reaction-comedy",
+            "background": "taho-stall",
+            "characters": [
+              "tita-nena"
+            ],
+            "animation": "slide-in",
+            "durationSeconds": 6,
+            "dialogue": [
+              {
+                "characterId": "tita-nena",
+                "text": "So, Captain Bot, if taho is now money, does that mean I get a discount on my next order?"
+              }
+            ]
+          }
+        ],
+        "cast": [
+          {
+            "id": "captain-bot",
+            "name": "Captain Bot",
+            "color": "#c7aafa",
+            "symbol": "bot"
+          },
+          {
+            "id": "kuya-taho",
+            "name": "Kuya Taho",
+            "color": "#8be2d2",
+            "symbol": "coffee"
+          },
+          {
+            "id": "tita-nena",
+            "name": "Tita Nena",
+            "color": "#f3b3de",
+            "symbol": "glasses"
+          }
+        ]
+      },
+      "quality": {
+        "threeScenes": true,
+        "review": "Critic approved; human creative quality review remains recommended"
+      }
+    },
+    {
+      "task": "universe-pitches",
+      "elapsedMs": 14370,
+      "result": {
+        "pitches": [
+          {
+            "title": "Stellar Echo",
+            "settings": {
+              "languages": [
+                "English"
+              ],
+              "setting": "Orbital observatory",
+              "era": "2247",
+              "genre": "Mystery",
+              "tone": "Hopeful suspense",
+              "premise": "A star map vanishes, sparking unity in isolation.",
+              "storyline": "",
+              "rules": []
+            },
+            "characters": [
+              {
+                "id": "01",
+                "name": "Dr. Elara Voss",
+                "role": "",
+                "personality": [
+                  "Calm",
+                  "Curious",
+                  "Determined"
+                ],
+                "voice": "Quiet, steady, with a soft hum of wonder",
+                "appearance": "",
+                "motivations": [
+                  "Uncover a hidden truth"
+                ],
+                "speakingStyle": "",
+                "backstory": "",
+                "rules": [],
+                "memories": [],
+                "assets": [],
+                "color": "#a78bfa",
+                "symbol": "person"
+              }
+            ],
+            "conflict": "A missing star map threatens the observatory's mission.",
+            "firstVote": [
+              "Reveal the map's origin",
+              "Trust a new crewmate",
+              "Rebuild the data core"
+            ]
+          },
+          {
+            "title": "Signal in the Void",
+            "settings": {
+              "languages": [
+                "English"
+              ],
+              "setting": "Orbital observatory",
+              "era": "2247",
+              "genre": "Mystery",
+              "tone": "Hopeful suspense",
+              "premise": "A signal leads to a missing star map.",
+              "storyline": "",
+              "rules": []
+            },
+            "characters": [
+              {
+                "id": "02",
+                "name": "Kai Rho",
+                "role": "",
+                "personality": [
+                  "Brave",
+                  "Intuitive",
+                  "Loyal"
+                ],
+                "voice": "Warm, resonant, with a quiet urgency",
+                "appearance": "",
+                "motivations": [
+                  "Find a lost signal"
+                ],
+                "speakingStyle": "",
+                "backstory": "",
+                "rules": [],
+                "memories": [],
+                "assets": [],
+                "color": "#a78bfa",
+                "symbol": "person"
+              }
+            ],
+            "conflict": "A signal from deep space suggests a hidden map exists.",
+            "firstVote": [
+              "Decipher the signal",
+              "Share the data with others",
+              "Test a forgotten protocol"
+            ]
+          },
+          {
+            "title": "The Map That Remembers",
+            "settings": {
+              "languages": [
+                "English"
+              ],
+              "setting": "Orbital observatory",
+              "era": "2247",
+              "genre": "Mystery",
+              "tone": "Hopeful suspense",
+              "premise": "A fragment of a star map ignites trust.",
+              "storyline": "",
+              "rules": []
+            },
+            "characters": [
+              {
+                "id": "03",
+                "name": "Mira Chen",
+                "role": "",
+                "personality": [
+                  "Witty",
+                  "Observant",
+                  "Protective"
+                ],
+                "voice": "Playful, sharp, with a hint of warmth",
+                "appearance": "",
+                "motivations": [
+                  "Reclaim a legacy"
+                ],
+                "speakingStyle": "",
+                "backstory": "",
+                "rules": [],
+                "memories": [],
+                "assets": [],
+                "color": "#a78bfa",
+                "symbol": "person"
+              }
+            ],
+            "conflict": "A map fragment is found, but its origin is unknown.",
+            "firstVote": [
+              "Trace the fragment's path",
+              "Challenge a long-held belief",
+              "Reunite the team for a shared mission"
+            ]
+          }
+        ]
+      },
+      "mode": "ollama",
+      "model": "qwen3:4b-instruct",
+      "validationFailures": 0,
+      "usage": {
+        "inputTokens": 153,
+        "outputTokens": 563
+      },
+      "quality": {
+        "threePitches": true,
+        "review": "Inspect originality, preference fidelity and editability"
+      }
+    },
+    {
+      "task": "private-episode",
+      "mode": "ollama",
+      "model": "qwen3:4b-instruct",
+      "elapsedMs": 27498,
+      "previewDuringCritic": true,
+      "attempts": 1,
+      "validationFailures": 0,
+      "events": [
+        {
+          "stage": "Connection",
+          "status": "started",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:42:07.369Z"
+        },
+        {
+          "stage": "Connection",
+          "status": "succeeded",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:42:07.377Z"
+        },
+        {
+          "stage": "Story Director",
+          "status": "started",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:42:07.378Z"
+        },
+        {
+          "stage": "Story Director",
+          "status": "succeeded",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:42:10.572Z"
+        },
+        {
+          "stage": "Screenwriter",
+          "status": "started",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:42:10.572Z"
+        },
+        {
+          "stage": "Screenwriter",
+          "status": "succeeded",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:42:21.983Z"
+        },
+        {
+          "stage": "Visual Producer",
+          "status": "started",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:42:21.985Z"
+        },
+        {
+          "stage": "Visual Producer",
+          "status": "succeeded",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:42:29.748Z"
+        },
+        {
+          "stage": "Creative Critic",
+          "status": "started",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:42:29.748Z"
+        },
+        {
+          "stage": "Creative Critic",
+          "status": "succeeded",
+          "attempt": 1,
+          "timestamp": "2026-11-11T19:42:34.752Z"
+        }
+      ],
+      "episodeId": "7eeabe30-5aba-409a-91e0-be7962d951fa",
+      "choice": "Reveal the map's origin",
+      "manifest": {
+        "title": "Stellar Echo: The Map's Origin Revealed",
+        "scenes": [
+          {
+            "id": "scene_001",
+            "style": "dramatic-reveal",
+            "background": "interior",
+            "characters": [
+              "01"
+            ],
+            "animation": "slide-in",
+            "durationSeconds": 6,
+            "dialogue": [
+              {
+                "characterId": "01",
+                "text": "The map was never gone—it was always here, beneath the floor."
+              }
+            ]
+          },
+          {
+            "id": "scene_002",
+            "style": "news-broadcast",
+            "background": "neutral-day",
+            "characters": [
+              "01"
+            ],
+            "animation": "fade-in",
+            "durationSeconds": 6,
+            "dialogue": [
+              {
+                "characterId": "01",
+                "text": "The stars whisper: 'We are not alone.'"
+              }
+            ]
+          },
+          {
+            "id": "scene_003",
+            "style": "reaction-comedy",
+            "background": "interior",
+            "characters": [
+              "01"
+            ],
+            "animation": "fade-in",
+            "durationSeconds": 6,
+            "dialogue": [
+              {
+                "characterId": "01",
+                "text": "They placed it to see if we’d find each other again."
+              }
+            ]
+          }
+        ],
+        "cast": [
+          {
+            "id": "01",
+            "name": "Dr. Elara Voss",
+            "color": "#a78bfa",
+            "symbol": "person"
+          }
+        ]
+      },
+      "quality": {
+        "threeScenes": true,
+        "review": "Critic approved; human creative quality review remains recommended"
+      }
+    },
+    {
+      "task": "story-answer",
+      "elapsedMs": 4195,
+      "result": {
+        "answer": "Tita Nena challenges Captain Bot's proposal with a sarcastic remark about taho discounts, showing her wit and skepticism.",
+        "citationIds": [
+          "383d486c-eaa4-447a-bf03-7886fb7ffe7f:scene-003",
+          "383d486c-eaa4-447a-bf03-7886fb7ffe7f:memory:2"
+        ],
+        "unclear": false
+      },
+      "mode": "ollama",
+      "model": "qwen3:4b-instruct",
+      "validationFailures": 0,
+      "usage": {
+        "inputTokens": 543,
+        "outputTokens": 110
+      },
+      "citations": [
+        {
+          "id": "383d486c-eaa4-447a-bf03-7886fb7ffe7f:scene-003",
+          "episodeId": "383d486c-eaa4-447a-bf03-7886fb7ffe7f",
+          "sceneId": "scene-003",
+          "storyOrder": 1,
+          "timestamp": 12,
+          "episodeTitle": "Taho Takes Over! (Barangay 2099)",
+          "text": "Tita Nena delivers a sharp, witty counterpoint with a smirk. tita-nena: So, Captain Bot, if taho is now money, does that mean I get a discount on my next order?",
+          "draft": false,
+          "href": "/universes/barangay-2099/episodes/383d486c-eaa4-447a-bf03-7886fb7ffe7f?t=12#scene-scene-003"
+        },
+        {
+          "id": "383d486c-eaa4-447a-bf03-7886fb7ffe7f:memory:2",
+          "episodeId": "383d486c-eaa4-447a-bf03-7886fb7ffe7f",
+          "sceneId": "scene-003",
+          "storyOrder": 1,
+          "timestamp": 12,
+          "episodeTitle": "Taho Takes Over! (Barangay 2099)",
+          "text": "Challenged Captain Bot's proposal with a sarcastic remark about taho discounts.",
+          "draft": false,
+          "href": "/universes/barangay-2099/episodes/383d486c-eaa4-447a-bf03-7886fb7ffe7f?t=12#scene-scene-003"
+        }
+      ],
+      "quality": {
+        "citationsInRequestedEpisode": true,
+        "review": "Compare answer to cited dialogue"
+      }
+    }
+  ],
+  "privateUniverse": "90c4be8f-54b0-4419-992a-89b2d49adf92",
+  "privateEpisode": "7eeabe30-5aba-409a-91e0-be7962d951fa"
+}

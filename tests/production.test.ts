@@ -79,3 +79,30 @@ test('one active run per room prevents overlapping continuity writes',()=>{
   const t=setup();
   try {const id=t.store.create(input,'test-model');assert.throws(()=>t.store.create(input,'test-model'));t.store.finish(id,'failed');assert.ok(t.store.create(input,'test-model'));} finally {t.cleanup();}
 });
+
+test('a Critic transport failure preserves a playable private preview and compatible retries reuse validated stages', async () => {
+  const t = setup();
+  let failedId = '';
+  try {
+    await assert.rejects(produce(t.store, executor(stage => {
+      if (stage === 'Creative Critic') throw new Error('transport failure');
+      return outputs()[stage];
+    }), input, 'test-model', id => { failedId = id; }, true));
+    const preview = t.store.preview(failedId);
+    assert.equal(preview.version, 1);
+    assert.equal(preview.manifest.scenes.length, 3);
+    assert.equal(preview.script.title, 'Karaoke protocol');
+    assert.equal(t.store.inspect(failedId).episode, undefined);
+    assert.deepEqual(t.store.resumable(failedId, input, 'different-model', 'openai'), {});
+    assert.deepEqual(t.store.resumable(failedId, {...input, winningChoice: 'Changed'}, 'test-model', 'openai'), {});
+    const resume = t.store.resumable(failedId, input, 'test-model', 'openai');
+    const calls: Stage[] = [];
+    const result = await produce(t.store, executor(stage => {
+      calls.push(stage);
+      return outputs()[stage];
+    }), input, 'test-model', undefined, true, resume);
+    assert.equal(result.status, 'review');
+    assert.deepEqual(calls, ['Creative Critic']);
+    assert.ok(t.store.preview(failedId).manifest);
+  } finally { t.cleanup(); }
+});

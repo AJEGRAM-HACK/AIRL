@@ -15,7 +15,7 @@ export async function selectProvider(selection: ProviderSelection, signal: Abort
       const { OllamaCreativeProvider, ollamaModels } = await import('./ollama');
       if (env.VERCEL) throw new ProviderError('ollama_requires_local_server');
       const available = await ollamaModels(AbortSignal.any([signal, AbortSignal.timeout(3000)]));
-      selectedModel = model || available[0];
+      selectedModel = model || env.OLLAMA_MODEL || 'qwen3:4b-instruct';
       if (!selectedModel || !available.includes(selectedModel)) throw new ProviderError('model_not_installed');
       const local = new OllamaCreativeProvider(selectedModel, signal, onUsage);
       provider = local; preflight = () => local.preflight(); break;
@@ -27,6 +27,8 @@ export async function selectProvider(selection: ProviderSelection, signal: Abort
       if (!key) throw new ProviderError('credential_missing');
       if (selection.mode === 'hosted_openai' && env.AIRL_ALLOW_LIVE_REQUESTS !== 'true') throw new ProviderError('hosted_requests_not_enabled');
       selectedModel = ModelId.parse(model || (selection.mode === 'hosted_openai' ? env.OPENAI_MODEL : undefined));
+      const allowed=(env.OPENAI_ALLOWED_MODELS || env.OPENAI_MODEL || '').split(',').map(value=>value.trim()).filter(Boolean);
+      if(selection.mode==='hosted_openai'&&!allowed.includes(selectedModel))throw new ProviderError('model_not_allowed');
       const { OpenAICreativeProvider } = await import('./openai');
       const openai = new OpenAICreativeProvider(key, selectedModel, signal, onUsage);
       provider = openai; preflight = () => openai.preflight(); break;

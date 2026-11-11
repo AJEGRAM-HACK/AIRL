@@ -1,5 +1,5 @@
 import { AbsoluteFill, Sequence, interpolate, useCurrentFrame } from 'remotion';
-import { Bot, Glasses, Coffee } from 'lucide-react';
+import { Bot, Glasses, Coffee, UserRound } from 'lucide-react';
 import { z } from 'zod';
 import { Manifest } from '@/server/production/schemas';
 import { backgrounds, characterAssets } from './assets';
@@ -14,7 +14,8 @@ export function sceneAtFrame(manifest: EpisodeManifest, frame: number) {
   }
   return { scene: manifest.scenes[manifest.scenes.length-1], start };
 }
-function Scene({ scene, captions, reducedMotion }: { reducedMotion: boolean; scene: EpisodeManifest['scenes'][number]; captions: boolean }) {
+function Scene({ scene, captions, reducedMotion, cast }: { cast?:EpisodeManifest['cast']; reducedMotion: boolean; scene: EpisodeManifest['scenes'][number]; captions: boolean }) {
+  const assetFor=(id:string)=>cast?.find(character=>character.id===id)||characterAssets[id]||{name:id,color:'#a78bfa',symbol:'person'};
   const frame = useCurrentFrame();
   const duration = scene.durationSeconds * FPS;
   const opacity = reducedMotion ? 1 : interpolate(frame,[0,12,duration-10,duration],[0,1,1,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'});
@@ -32,15 +33,15 @@ function Scene({ scene, captions, reducedMotion }: { reducedMotion: boolean; sce
     <div style={{position:'absolute',top:140,left:50,right:50,fontSize:38,fontWeight:700,lineHeight:1.15}}>{palette.label}</div>
     <div style={{position:'absolute',top:320,left:35,right:35,display:'flex',justifyContent:'center',gap:15,alignItems:'end'}}>
       {scene.characters.map(id => {
-        const asset = characterAssets[id];
-        const Icon = id === 'captain-bot' ? Bot : id === 'tita-nena' ? Glasses : Coffee;
+        const asset = assetFor(id);
+        const Icon = asset.symbol==='bot'?Bot:asset.symbol==='glasses'||id==='tita-nena'?Glasses:asset.symbol==='coffee'||id==='kuya-taho'?Coffee:UserRound;
         const shift = !reducedMotion && scene.animation === 'slide-in' ? interpolate(frame,[0,20],[100,0],{extrapolateRight:'clamp'}) : 0;
         const bob = !reducedMotion && (scene.animation === 'gentle-bob' || scene.style === 'reaction-comedy') ? Math.sin(frame/8)*8 : 0;
         return <div key={id} style={{width:200,textAlign:'center',transform:`translate(${shift}px,${bob}px)`,color:asset.color}}><div style={{height:250,borderRadius:'80px 80px 35px 35px',background:palette.floor,border:`3px solid ${asset.color}`,display:'grid',placeItems:'center',boxShadow:`0 0 50px ${asset.color}33`}}><Icon size={100} strokeWidth={1.4}/></div><div style={{fontSize:20,fontWeight:700,marginTop:22}}>{asset.name}</div></div>;
       })}
     </div>
     {scene.style === 'news-broadcast' && <div style={{position:'absolute',top:250,left:50,background:'#8b5cf6',padding:'10px 22px',fontSize:22,fontWeight:700}}>BARANGAY BULLETIN</div>}
-    {captions && line && <div style={{position:'absolute',bottom:160,left:40,right:40,textAlign:'center',background:'#0d0d17ed',padding:28,borderRadius:18,border:'1px solid #ffffff33'}}><div style={{fontSize:23,color:characterAssets[line.characterId].color,marginBottom:12}}>{characterAssets[line.characterId].name}</div><div style={{fontSize:32,lineHeight:1.4}}>{line.text}</div></div>}
+    {captions && line && <div style={{position:'absolute',bottom:160,left:40,right:40,textAlign:'center',background:'#0d0d17ed',padding:28,borderRadius:18,border:'1px solid #ffffff33'}}><div style={{fontSize:23,color:assetFor(line.characterId).color,marginBottom:12}}>{assetFor(line.characterId).name}</div><div style={{fontSize:32,lineHeight:1.4}}>{line.text}</div></div>}
     {scene.style === 'cliffhanger' && <div style={{position:'absolute',bottom:95,width:'100%',textAlign:'center',fontSize:20,letterSpacing:5,color:'#e879f9'}}>TO BE CONTINUED…</div>}
   </AbsoluteFill>;
 }
@@ -49,6 +50,6 @@ export function EpisodeComposition({ manifest, captions = true, reducedMotion = 
   return <AbsoluteFill style={{background:'#0d0d17'}}>{manifest.scenes.map(scene => {
     const start = from;
     from += scene.durationSeconds * FPS;
-    return <Sequence key={scene.id} from={start} durationInFrames={scene.durationSeconds * FPS}><Scene scene={scene} captions={captions} reducedMotion={reducedMotion}/></Sequence>;
+    return <Sequence key={scene.id} from={start} durationInFrames={scene.durationSeconds * FPS}><Scene cast={manifest.cast} scene={scene} captions={captions} reducedMotion={reducedMotion}/></Sequence>;
   })}</AbsoluteFill>;
 }

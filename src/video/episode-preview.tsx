@@ -3,8 +3,9 @@ import { Player, type PlayerRef } from '@remotion/player';
 import { useEffect, useRef, useState } from 'react';
 import { Manifest } from '@/server/production/schemas';
 import { EpisodeComposition, compositionFrames, FPS } from './composition';
-export function EpisodePreview({ manifest: raw }: { manifest: unknown }) {
+export function EpisodePreview({ manifest: raw, seekFrame }: { manifest: unknown; seekFrame?:number }) {
   const player = useRef<PlayerRef>(null);
+  useEffect(()=>{if(seekFrame!==undefined&&Number.isFinite(seekFrame))player.current?.seekTo(Math.max(0,Math.floor(seekFrame)));},[seekFrame]);
   const [frame,setFrame] = useState(0);
   useEffect(() => {
     const current = player.current;

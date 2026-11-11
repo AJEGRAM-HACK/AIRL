@@ -1,6 +1,5 @@
-import { features } from '@/lib/config/features';
-import { notFound } from 'next/navigation';
-import { Nav, Footer } from '@/components/nav';
+import { PublicShell } from '@/components/layout/public-shell';
 import { Studio } from '@/components/studio';
-import { DEMO_ROOM } from '@/lib/fixtures';
-export default async function StudioPage({params}:{params:Promise<{roomId:string}>}) {const {roomId}=await params;if(!features.cinemai || roomId!==DEMO_ROOM)notFound();return <><Nav active="studio"/><main id="main"><Studio/></main><Footer/></>;}
+import { readableUniverse } from '@/server/platform/page';
+export const dynamic='force-dynamic';
+export default async function Page({params}:{params:Promise<{roomId:string}>}){const {roomId}=await params;await readableUniverse(roomId);return <PublicShell active="studio" universeId={roomId}><Studio roomId={roomId}/></PublicShell>;}

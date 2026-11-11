@@ -5,7 +5,7 @@ import { produce } from '../src/server/production/workflow';
 import { configuredProvider } from '../src/ai/providers/config';
 loadEnvConfig(process.cwd());
 const args = process.argv.slice(2);
-const dbPath = resolve(process.env.CINEMAI_DB_PATH || (['openai', 'hosted_openai'].includes(process.env.AI_PROVIDER || '') ? '.data/cinemai.sqlite' : process.env.AI_PROVIDER === 'ollama' ? '.data/airl-ollama.sqlite' : '.data/airl-demo.sqlite'));
+const dbPath = resolve(process.env.CINEMAI_DB_PATH || (['openai', 'hosted_openai'].includes(process.env.AI_PROVIDER || '') ? '.data/cinemai.sqlite' : (process.env.AI_PROVIDER || 'ollama') === 'ollama' ? '.data/airl-ollama.sqlite' : '.data/airl-demo.sqlite'));
 async function main() {
   if (args[0] === 'inspect' && args[1]) {
     const store = new ProductionStore(dbPath);

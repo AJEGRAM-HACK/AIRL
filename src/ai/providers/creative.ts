@@ -1,3 +1,4 @@
+import { PitchSet, StoryAnswer, WorldSettings } from '@/lib/domain';
 import { canonicalCharacters } from '@/ai/memory/canonical';
 import { ReplyInput, ReplyOutput, type CharacterReplyInput, type Mode } from '@/ai/schemas/gateway';
 import { scriptedResponse } from '@/features/persona/scenarios';
@@ -12,6 +13,7 @@ export type SceneOutput = z.infer<typeof Manifest>;
 export type ReviewInput = { script: ScriptOutput; manifest: SceneOutput };
 export interface CreativeAIProvider {
   readonly mode: Mode | 'openai';
+  generateStructured<T extends z.ZodType>(schema:T,instruction:string,input:unknown):Promise<z.infer<T>>;
   generateCharacterReply(input: CharacterReplyInput): Promise<z.infer<typeof ReplyOutput>>;
   generateStory(input: StoryInput & { context?: unknown }): Promise<StoryOutput>;
   generateScript(input: ScriptInput): Promise<ScriptOutput>;
@@ -20,6 +22,11 @@ export interface CreativeAIProvider {
 }
 export class DemoCreativeProvider implements CreativeAIProvider {
   readonly mode = 'demo';
+  async generateStructured<T extends z.ZodType>(schema:T,_instruction:string,input:unknown):Promise<z.infer<T>> {
+    const task=input as {kind:string;question?:string;sources?:{id:string;text:string}[];interests?:{settings?:string[];genres?:string[];tone?:string;languages?:string[];idea?:string}};
+    if(task.kind==='pitches')return schema.parse(PitchSet.parse({pitches:[0,1,2].map(index=>({title:`${task.interests?.settings?.[0]||'A new world'} · ${index+1}`,settings:WorldSettings.parse({setting:task.interests?.settings?.[0]||'An unfamiliar community',genre:task.interests?.genres?.[0]||'Adventure',tone:task.interests?.tone||'Hopeful',premise:task.interests?.idea||'Neighbors face an unexpected shared challenge.',rules:[]}),conflict:'The community must decide whether to trust a stranger.',characters:[{id:'guide',name:'The Guide',role:'Local guide',personality:['curious'],voice:'Thoughtful',appearance:'An original fictional guide',motivations:['Protect the community'],speakingStyle:'Clear and concise',backstory:'Knows the local paths',rules:[],memories:[],assets:[],color:'#a78bfa',symbol:'person'}],firstVote:['Trust the visitor','Investigate first','Ask the council']}))}));
+    const source=task.sources?.[0];return schema.parse(StoryAnswer.parse({answer:source?source.text:'The available sources leave this unclear.',citationIds:source?[source.id]:[],unclear:!source}));
+  }
   async generateCharacterReply(input: CharacterReplyInput) {
     ReplyInput.parse(input);
     const character = canonicalCharacters().find(item => item.id === input.characterId)!;
@@ -27,9 +34,16 @@ export class DemoCreativeProvider implements CreativeAIProvider {
   }
   async generateStory(input: StoryInput) {
     Input.parse(input);
+    if(input.roomId!=='barangay-2099')return Concept.parse({title:input.winningChoice,premise:input.winningChoice,conflict:'The cast disagrees about the next step.',humor:'A practical complication changes the plan.',cliffhanger:'The audience must decide what happens next.'});
     return Concept.parse({ title: `Barangay protocol: ${input.winningChoice}`, premise: input.winningChoice, conflict: 'Captain Bot treats a community idea as an optimization problem.', humor: 'Tita Nena questions the logic while Kuya Taho finds a business opportunity.', cliffhanger: 'The barangay group chat asks for a new vote.' });
   }
-  async generateScript({ input, concept }: ScriptInput) {
+  async generateScript(request: ScriptInput) {
+    const {input,concept}=request;
+    if(input.roomId!=='barangay-2099'){
+      const extended=request as ScriptInput & {base?:string};const cast=extended.base?JSON.parse(extended.base).context.characters:[];
+      if(!cast.length)throw new Error('A cast is required.');
+      return Script.parse({title:concept.title,summary:input.winningChoice,scenes:[0,1,2].map(index=>({id:`scene-${index+1}`,description:'The cast responds to the audience decision.',dialogue:[{characterId:cast[index%cast.length].id,text:`${input.winningChoice}. We must choose our next step carefully.`}]})),memoryUpdates:[]});
+    }
     Input.parse(input);
     Concept.parse(concept);
     return Script.parse({ title: concept.title, summary: `Demo-generated content: ${input.winningChoice}`, scenes: [
@@ -41,7 +55,7 @@ export class DemoCreativeProvider implements CreativeAIProvider {
   async generateScenes(script: ScriptOutput) {
     Script.parse(script);
     validateScript(script);
-    return Manifest.parse({ title: script.title, scenes: script.scenes.map((scene, index) => ({ id: scene.id, style: index === 0 ? 'dramatic-reveal' : index === 1 ? 'reaction-comedy' : 'cliffhanger', background: index === 2 ? 'taho-stall' : 'barangay-plaza', characters: [...new Set(scene.dialogue.map(line => line.characterId))], animation: 'fade-in', durationSeconds: 6, dialogue: scene.dialogue })) });
+    return Manifest.parse({ title: script.title, scenes: script.scenes.map((scene, index) => ({ id: scene.id, style: index === 0 ? 'dramatic-reveal' : index === 1 ? 'reaction-comedy' : 'cliffhanger', background: script.scenes.some(item=>item.dialogue.some(line=>!['captain-bot','tita-nena','kuya-taho'].includes(line.characterId)))?'neutral-night':index === 2 ? 'taho-stall' : 'barangay-plaza', characters: [...new Set(scene.dialogue.map(line => line.characterId))], animation: 'fade-in', durationSeconds: 6, dialogue: scene.dialogue })) });
   }
   async reviewContent({ script, manifest }: ReviewInput) {
     validateScript(Script.parse(script));

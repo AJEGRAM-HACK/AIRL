@@ -1,12 +1,13 @@
 import { z } from 'zod';
-export const CharacterId = z.enum(['captain-bot', 'tita-nena', 'kuya-taho']);
+export const CharacterId = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).min(1).max(80);
 export const SceneStyle = z.enum(['dramatic-reveal', 'character-dialogue', 'reaction-comedy', 'news-broadcast', 'cliffhanger']);
 export const Concept = z.object({ title: z.string(), premise: z.string(), conflict: z.string(), humor: z.string(), cliffhanger: z.string() });
 export const ScriptScene = z.object({ id: z.string(), description: z.string(), dialogue: z.array(z.object({ characterId: CharacterId, text: z.string() })) });
-export const Script = z.object({ title: z.string(), summary: z.string(), scenes: z.array(ScriptScene), memoryUpdates: z.array(z.object({ characterId: CharacterId, memory: z.string() })) });
-export const Manifest = z.object({ title: z.string(), scenes: z.array(z.object({ id: z.string(), style: SceneStyle, background: z.enum(['barangay-plaza', 'barangay-hall', 'taho-stall']), characters: z.array(CharacterId), animation: z.enum(['fade-in', 'slide-in', 'gentle-bob']), durationSeconds: z.number(), dialogue: z.array(z.object({ characterId: CharacterId, text: z.string() })) })) });
+import { RelationshipChange } from '@/lib/domain';
+export const Script = z.object({ title: z.string(), summary: z.string(), scenes: z.array(ScriptScene), memoryUpdates: z.array(z.object({ characterId: CharacterId, memory: z.string() })), relationshipUpdates:z.array(RelationshipChange).optional() });
+export const Manifest = z.object({ title: z.string(), cast:z.array(z.object({id:CharacterId,name:z.string().max(100),color:z.string().regex(/^#[0-9a-fA-F]{6}$/),symbol:z.string().max(30)})).optional(), scenes: z.array(z.object({ id: z.string(), style: SceneStyle, background: z.enum(['barangay-plaza', 'barangay-hall', 'taho-stall','neutral-night','neutral-day','interior']), characters: z.array(CharacterId), animation: z.enum(['fade-in', 'slide-in', 'gentle-bob']), durationSeconds: z.number(), dialogue: z.array(z.object({ characterId: CharacterId, text: z.string() })) })) });
 export const Critique = z.object({ approved: z.boolean(), continuity: z.string(), characterVoice: z.string(), visualFeasibility: z.string(), feedback: z.array(z.string()) });
-export const Input = z.object({ roomId: z.literal('barangay-2099'), winningChoice: z.string().trim().min(1).max(1000) });
+export const Input = z.object({ roomId: z.string().min(1).max(80), universeId:z.string().max(80).optional(), snapshot:z.record(z.string(),z.unknown()).optional(), winningChoice: z.string().trim().min(1).max(1000) });
 export type ProductionInput = z.infer<typeof Input>;
 export const Stages = ['Story Director', 'Screenwriter', 'Visual Producer', 'Creative Critic'] as const;
 export type Stage = typeof Stages[number];

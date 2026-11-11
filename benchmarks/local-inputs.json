@@ -1,0 +1,7 @@
+{
+  "model": "qwen3:4b-instruct",
+  "settings": {"contextWindow":8192,"temperature":0,"timeoutMs":110000,"maxOutputTokens":2400},
+  "officialChoice": "taho",
+  "pitchInterests": {"genres":["Mystery"],"settings":["An orbital observatory"],"themes":["Trust"],"tone":"Hopeful suspense","languages":["English"],"avoid":["Graphic violence"],"idea":"A missing star map brings an isolated community together."},
+  "storyQuestion": "What happened to Tita Nena in this episode?"
+}

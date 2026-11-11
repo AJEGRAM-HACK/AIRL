@@ -3,15 +3,16 @@ import Link from 'next/link';
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { features } from '@/lib/config/features';
 import { Button } from './ui/button';
-export function Nav({ active = '' }: { active?: string }) {
+export function Nav({ active = '', universeId }: { active?: string; universeId?:string }) {
   return <header className="nav airl-nav">
     <Link href="/" className="brand" aria-label="AIRL home"><Sparkles aria-hidden="true"/><span>AIRL<span className="brand-period">.</span></span></Link>
     <nav aria-label="Main navigation">
-      <Link aria-current={active === 'discover' ? 'page' : undefined} href="/discover">Discover</Link>
-      {features.live && <Link aria-current={active === 'live' ? 'page' : undefined} href="/live">Live</Link>}
-      {features.cinemai && <Link aria-current={['watch', 'universe', 'cinemai'].includes(active) ? 'page' : undefined} href="/cinemai">CinemAI</Link>}
-      {features.persona && <Link aria-current={active === 'persona' ? 'page' : undefined} href="/persona">PersonaAI</Link>}
-      <Link aria-current={active === 'studio' ? 'page' : undefined} href="/studio">Studio</Link>
+      <Link aria-current={active === 'discover' ? 'page' : undefined} href="/universes">Explore</Link>
+      {features.live && <Link aria-current={active === 'live' ? 'page' : undefined} href={universeId?`/live/${universeId}`:"/live"}>Live</Link>}
+      {features.cinemai && <Link aria-current={['watch', 'universe', 'cinemai'].includes(active) ? 'page' : undefined} href={universeId?`/universes/${universeId}/episodes`:"/cinemai"}>CinemAI</Link>}
+      {features.persona && <Link aria-current={active === 'persona' ? 'page' : undefined} href={universeId?`/universes/${universeId}/characters`:"/persona"}>PersonaAI</Link>}
+      <Link aria-current={active === 'studio' ? 'page' : undefined} href={universeId?`/studio/worlds/${universeId}`:"/studio"}>Studio</Link>
+      <Link href="/account">Account</Link>
     </nav>
     <ThemeSwitcher/>
     <Button asChild variant="outline" size="sm"><Link href="/discover">Find your experience <ArrowUpRight size={14}/></Link></Button>

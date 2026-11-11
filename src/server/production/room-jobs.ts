@@ -4,8 +4,8 @@ import { DatabaseSync } from 'node:sqlite';
 import { resolve } from 'node:path';
 import { LiveStore } from '@/server/live/store';
 import { ProductionStore } from './store';
-import { produce } from './workflow';
-import { selectProvider } from '@/ai/providers/registry';
+import { produce, safeFailure } from './workflow';
+import { selectProvider, ProviderError } from '@/ai/providers/registry';
 import { inferenceLimits } from '@/ai/config/limits';
 import { Manifest, Critique } from './schemas';
 export const roomDatabasePath = () => resolve(process.env.AIRL_LIVE_DB_PATH || '.data/airl-live.sqlite');
@@ -23,6 +23,7 @@ export class RoomJobs {
       const job = this.db.prepare("SELECT * FROM room_jobs WHERE (status='queued' OR (status='running' AND lease_until<?)) AND NOT EXISTS(SELECT 1 FROM room_jobs active WHERE active.status='running' AND active.lease_until>=?) ORDER BY created LIMIT 1").get(Date.now(),Date.now());
       if (job) {
         this.claimUntil = Date.now()+150_000;
+        this.db.prepare('DELETE FROM job_failures WHERE job_id=?').run(String(job.id));
         this.db.prepare("UPDATE room_jobs SET status='running',lease_until=?,updated=? WHERE id=?").run(this.claimUntil,Date.now(),String(job.id));
       }
       this.db.exec('COMMIT');
@@ -33,33 +34,43 @@ export class RoomJobs {
   attach(id: string, runId: string) {
     const result = this.db.prepare("UPDATE room_jobs SET run_id=?,attempts=attempts+1,updated=? WHERE id=? AND status='running' AND lease_until=?").run(runId,Date.now(),id,this.claimUntil);
     if (!result.changes) throw new Error('Production lease expired');
+    this.db.prepare('INSERT OR IGNORE INTO job_runs VALUES(?,?,?)').run(id,runId,Date.now());
+  }
+  failure(id:string,code:string,attached:boolean) {
+    this.db.prepare('INSERT INTO job_failures VALUES(?,?,?) ON CONFLICT(job_id) DO UPDATE SET code=excluded.code,created=excluded.created').run(id,code,new Date().toISOString());
+    if(!attached)this.db.prepare('UPDATE room_jobs SET attempts=attempts+1 WHERE id=? AND lease_until=?').run(id,this.claimUntil);
   }
   finish(id: string, status: 'review' | 'failed') { this.db.prepare('UPDATE room_jobs SET status=?,lease_until=NULL,updated=? WHERE id=? AND lease_until=?').run(status,Date.now(),id,this.claimUntil); }
   list(roomId: string, operator = false) {
     const jobs = this.db.prepare('SELECT id,round_id,choice,status,attempts,run_id,created,updated,mode,model,paid_consent FROM room_jobs WHERE room_id=? ORDER BY created DESC LIMIT 20').all(roomId);
-    const production = new ProductionStore(this.path);
+    const production = new ProductionStore(this.path,undefined,roomId);
     try {
       return jobs.map(job => {
         const runId = job.run_id ? String(job.run_id) : null;
         const artifact = runId ? (job.status === 'published' ? production.inspect(runId).episode : null) : null;
         const published = artifact ? JSON.parse(String(artifact.artifact)) : null;
+        const versions=operator?this.db.prepare('SELECT run_id FROM job_runs WHERE job_id=? ORDER BY created DESC').all(String(job.id)):[];
+        const previous=operator?versions.map(row=>production.preview(String(row.run_id))).find(value=>value.manifest):null;
+        const preview=operator&&runId?production.preview(runId):null;
         const draft = operator && runId ? production.draft(runId) : null;
+        const progress=runId?this.db.prepare('SELECT stage,status FROM events WHERE run_id=? ORDER BY sequence DESC LIMIT 1').get(runId):null;
         const recorded = operator && runId ? production.inspect(runId).events : [];
+        const failure=operator?this.db.prepare('SELECT * FROM job_failures WHERE job_id=?').get(String(job.id)):null;
         const critic = recorded.filter(event => event.stage === 'Creative Critic' && event.status === 'succeeded').at(-1);
-        return { id: String(job.id), round_id: String(job.round_id), choice: String(job.choice), status: String(job.status), attempts: Number(job.attempts), run_id: runId, created: Number(job.created), updated: Number(job.updated), mode: String(job.mode), model: job.model ? String(job.model) : null, manifest: (published || draft)?.manifest || null, feedback: operator ? (draft?.critique || (critic ? JSON.parse(String(critic.data)).output : null)) : null,
-          events: operator && runId ? recorded.map(event => ({ stage: event.stage, status: event.status, attempt: event.attempt, timestamp: event.created_at, ...(event.status === 'failed' ? { failure: JSON.parse(String(event.data)) } : {}) })) : [] };
+        return { id: String(job.id), round_id: String(job.round_id), choice: String(job.choice), status: String(job.status), attempts: Number(job.attempts), run_id: runId, created: Number(job.created), updated: Number(job.updated), progress,mode: String(job.mode), model: job.model ? String(job.model) : null, manifest: (published || draft)?.manifest || preview?.manifest || previous?.manifest || null, script:operator?(draft?.script || preview?.script || null):undefined,previewVersion:operator?(preview?.version || previous?.version || null):undefined, feedback: operator ? (draft?.critique || (critic ? JSON.parse(String(critic.data)).output : null)) : null,
+          events: operator ? [...recorded.map(event => ({ stage: event.stage, status: event.status, attempt: event.attempt, timestamp: event.created_at, ...(event.status === 'failed' ? { failure: JSON.parse(String(event.data)) } : {}) })), ...(failure&&!recorded.some(event=>event.status==='failed')?[{stage:'Connection',status:'failed',attempt:Number(job.attempts),timestamp:String(failure.created),failure:{code:String(failure.code)}}]:[])] : [] };
       });
     } finally { production.close(); }
   }
-  action(id: string, action: 'publish' | 'reject' | 'retry') {
+  action(id: string, action: 'publish' | 'reject' | 'retry', corrections?:unknown) {
     const job = this.db.prepare('SELECT * FROM room_jobs WHERE id=?').get(id);
     if (!job) throw new Error('Job not found');
     if (action === 'publish') {
-      const production = new ProductionStore(this.path);
+      const production = new ProductionStore(this.path,undefined,String(job.room_id));
       try {
         const draft = job.run_id ? production.draft(String(job.run_id)) : null;
         if (job.status !== 'published') { Manifest.parse(draft?.manifest); if (!Critique.parse(draft?.critique).approved) throw new Error('Review required'); }
-        production.publishRoomJob(id);
+        production.publishRoomJob(id,corrections);
       } finally { production.close(); }
       return;
     }
@@ -83,9 +94,10 @@ export async function runRoomJob(path = roomDatabasePath()) {
   const job = jobs.claim();
   if (!job) { jobs.close(); return false; }
   const id = String(job.id);
-  const production = new ProductionStore(path);
-  const live = new LiveStore(path);
+  const production = new ProductionStore(path,undefined,String(job.room_id));
+  const live = new LiveStore(path,String(job.room_id));
   let usageId: string | undefined;
+  let attached=false;
   let inputTokens = 0, outputTokens = 0;
   let mode: 'demo' | 'ollama' | 'hosted_openai' = 'demo';
   try {
@@ -100,11 +112,14 @@ export async function runRoomJob(path = roomDatabasePath()) {
     const selected = await selectProvider({ mode, model: job.model ? String(job.model) : undefined, consent: job.paid_consent === 1 }, AbortSignal.timeout(inferenceLimits().timeoutMs), usage => { inputTokens += usage.inputTokens || 0; outputTokens += usage.outputTokens || 0; });
     jobs.setModel(id,selected.model);
     live.setUsageModel(usageId,selected.model);
-    const result = await produce(production, selected.executor, { roomId: 'barangay-2099', winningChoice: String(job.choice) }, selected.model, runId => jobs.attach(id,runId), true);
+    const input={roomId:String(job.room_id),universeId:String(job.room_id),winningChoice:String(job.choice),...(job.snapshot?{snapshot:JSON.parse(String(job.snapshot))}:{})};
+    const resume=job.run_id?production.resumable(String(job.run_id),input,selected.model,mode):{};
+    const result = await produce(production, selected.executor, input, selected.model, runId => {jobs.attach(id,runId);attached=true;}, true,resume);
     const status = result.status === 'review' && production.draft(result.id) ? 'review' : 'failed';
     jobs.finish(id,status);
     live.finishUsage(usageId,status,inputTokens,outputTokens,estimateCost({inputTokens,outputTokens},mode),status === 'failed' ? 'creative_review_failed' : null);
-  } catch {
+  } catch(error) {
+    jobs.failure(id,error instanceof ProviderError?error.code:safeFailure(error).code,attached);
     jobs.finish(id,'failed');
     if (usageId) live.finishUsage(usageId,'failed',inputTokens,outputTokens,estimateCost({inputTokens,outputTokens},mode),'production_failed');
   } finally { live.dispose(); production.close(); jobs.close(); }

@@ -1,7 +1,7 @@
 # AIRL project conventions
 
 ## Scope
-The authoritative updated directive authorizes foundation and multi-provider integration, including Demo, local Ollama, Hosted OpenAI and session-only creator BYOK. Paid requests require explicit approval. Shared local voting uses the existing SQLite adapter until hosted Supabase credentials are available. The local production slice remains available. Fixture interactions must stay labeled. Never fabricate successful jobs or logs.
+The authoritative updated directive authorizes foundation and multi-provider integration, including multi-universe profiles/permissions, worlds, canon, story retrieval, Demo, local Ollama, Hosted OpenAI and session-only BYOK. Paid requests require explicit approval. Keep SQLite for this milestone. Hosted infrastructure requires separate authorization. The local production slice remains available. Fixture interactions must stay labeled. Never fabricate successful jobs or logs.
 
 ## Architecture
 - One Next.js App Router repository, TypeScript strict mode, npm, Node.js 24 LTS.
@@ -14,7 +14,7 @@ The authoritative updated directive authorizes foundation and multi-provider int
 - Add future Supabase, Agents SDK, Trigger.dev and Remotion adapters behind explicit server/client boundaries, only when in scope.
 
 ## Security and boundaries
-No secrets in source or client bundles. Ignore environment files except .env.example. No paid provisioning, external pushes, or deployment without authorization. Future operator authorization must be server-side and role based. Future participants must use authenticated anonymous sessions; never trust client identity claims.
+No secrets in source or client bundles. Ignore environment files except .env.example. No paid provisioning, external pushes, or deployment without authorization. Enforce account roles, universe ownership, private access and official-admin publication server-side. Participants use opaque server-side sessions; never trust client identity claims.
 
 ## Verification
 Run npm run typecheck and npm run build. Start npm run start and check /, /watch/barangay-2099, /studio/barangay-2099, /universe/barangay-2099 plus unknown-room 404 behavior. Browser QA should include mobile and desktop layouts, playback/captions, episode selection, choice/reset behavior, studio tabs and keyboard focus. Respect reduced motion. Do not add tests that merely mirror CSS or low-impact markup.
@@ -36,10 +36,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 <!-- END:nextjs-agent-rules -->
 
 ## AIRL foundation
-AIRL is the platform. CinemAI is a module. PersonaAI owns shared character definitions in src/features/persona/characters.ts, re-exported from fixtures for compatibility. AI_PROVIDER defaults to demo. Demo uses deterministic templates with accurate labels and zero network calls. Live AI requires credentials, a model and explicit authorization. Keep provider configuration server-only. Feature flags in src/lib/config/features.ts control module availability, never authorization. Preserve legacy CinemAI URLs. New design tokens stay in globals.css.
+AIRL is the platform. CinemAI is a module. PersonaAI owns shared character definitions in src/features/persona/characters.ts, re-exported from fixtures for compatibility. AI_PROVIDER defaults to ollama with qwen3:4b-instruct. Demo uses deterministic templates with accurate labels and zero network calls. Live AI requires credentials, a model and explicit authorization. Keep provider configuration server-only. Feature flags in src/lib/config/features.ts control module availability, never authorization. Preserve legacy CinemAI URLs. New design tokens stay in globals.css.
 
 ## Provider gateway
-Use src/ai/providers/registry.ts for provider selection. Preserve legacy AI_PROVIDER=openai as a hosted_openai alias. Never fall back between providers. BYOK keys exist only in page/request memory, require HTTPS and operator/creator authentication, and never enter jobs, usage tables, logs or storage. Paid model tests require explicit consent. Ollama is server-side loopback only, rejects Vercel, and uses the installed model list. Keep all cloud tracing disabled by default.
+Use src/ai/providers/registry.ts for provider selection. Preserve legacy AI_PROVIDER=openai as a hosted_openai alias. Never fall back between providers. BYOK keys exist only in page/request memory, require HTTPS and account authentication, with creator privileges for generation, and never enter jobs, usage tables, logs or storage. Paid model tests require explicit consent. Ollama is server-side loopback only, rejects Vercel, and uses the installed model list. Keep all cloud tracing disabled by default.
 
 ## Integrated room production
 The integrated room pipeline connects closed rounds to persisted provider-selected jobs, review, publication, approved canonical memory and Remotion previews. Room jobs share AIRL_LIVE_DB_PATH with voting so enqueue and publication remain transactional. The integration sprint authorizes Demo and local Ollama room jobs. Hosted OpenAI jobs require explicit per-round consent and enabled server credentials. BYOK keys never enter jobs. Preserve ARCHITECTURE_PLAN.md as the current/proposed architecture and route inventory, and update README.md when runnable behavior changes.

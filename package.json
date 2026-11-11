@@ -21,7 +21,12 @@
     "test:sprint": "tsx --test tests/sprint.test.ts",
     "test:browser": "playwright test",
     "demo:setup": "node scripts/demo-lan.mjs --setup",
-    "demo:lan": "NODE_ENV=production node scripts/demo-lan.mjs"
+    "demo:lan": "NODE_ENV=production node scripts/demo-lan.mjs",
+    "account:admin": "tsx scripts/account-admin.ts",
+    "migrate:universes": "tsx scripts/migrate-universes.ts",
+    "test:platform": "tsx --test tests/platform.test.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "benchmark:local": "tsx scripts/benchmark-worlds.ts"
   },
   "dependencies": {
     "@next/env": "16.4.6",

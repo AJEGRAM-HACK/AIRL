@@ -1,3 +1,4 @@
+import { migratePlatform, worldSnapshot, OFFICIAL } from '@/server/platform/migration';
 import { RoomProviderSelection, type RoomProvider } from '@/features/live/production-selection';
 import { DatabaseSync } from 'node:sqlite';
 import { randomBytes, randomUUID, createHash } from 'node:crypto';
@@ -11,7 +12,7 @@ export class LiveError extends Error {
 }
 export class LiveStore {
   private db: DatabaseSync;
-  constructor(path = resolve(process.env.AIRL_LIVE_DB_PATH || '.data/airl-live.sqlite')) {
+  constructor(path = resolve(process.env.AIRL_LIVE_DB_PATH || '.data/airl-live.sqlite'), readonly roomId: string = DEMO_ROOM) {
     mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path, { timeout: 5000 });
     this.db.exec(`PRAGMA journal_mode=WAL;
@@ -30,19 +31,21 @@ export class LiveStore {
     for (const [name, definition] of [['mode',"TEXT NOT NULL DEFAULT 'demo'"],['model','TEXT'],['paid_consent','INTEGER NOT NULL DEFAULT 0'],['requested_by','TEXT']]) {
       if (!jobColumns.some(column => column.name === name)) this.db.exec(`ALTER TABLE room_jobs ADD COLUMN ${name} ${definition}`);
     }
-    if (!this.db.prepare('SELECT id FROM live_rounds WHERE room_id=? LIMIT 1').get(DEMO_ROOM)) {
+    migratePlatform(this.db);
+    if (!this.db.prepare('SELECT room_id FROM universe_rooms WHERE room_id=?').get(this.roomId)) throw new LiveError(404,'Room not found.');
+    if (!this.db.prepare('SELECT id FROM live_rounds WHERE room_id=? LIMIT 1').get(this.roomId)) {
       this.db.exec('BEGIN IMMEDIATE');
       try {
         // Recheck after the lock in case another process seeded this room.
-        if (!this.db.prepare('SELECT id FROM live_rounds WHERE room_id=? LIMIT 1').get(DEMO_ROOM)) this.insertRound();
+        if (!this.db.prepare('SELECT id FROM live_rounds WHERE room_id=? LIMIT 1').get(this.roomId)) this.insertRound();
         this.db.exec('COMMIT');
       } catch (error) { this.db.exec('ROLLBACK'); throw error; }
     }
   }
-  private insertRound() {
+  private insertRound(options = this.roomId === DEMO_ROOM ? choices : [{id:"option-1",title:"Continue the plan",description:"Follow the current direction."},{id:"option-2",title:"Investigate the unexpected",description:"Find the source of the mystery."},{id:"option-3",title:"Seek an ally",description:"Ask someone for help."}]) {
     const id = randomUUID();
-    this.db.prepare('INSERT INTO live_rounds VALUES(?,?,?,NULL,?)').run(id, DEMO_ROOM, 'open', Date.now());
-    choices.forEach((choice, index) => this.db.prepare('INSERT INTO live_options VALUES(?,?,?,?,?)').run(id, choice.id, choice.title, choice.description, index));
+    this.db.prepare('INSERT INTO live_rounds VALUES(?,?,?,NULL,?)').run(id, this.roomId, 'open', Date.now());
+    options.forEach((choice, index) => this.db.prepare('INSERT INTO live_options VALUES(?,?,?,?,?)').run(id, choice.id, choice.title, choice.description, index));
     return id;
   }
   limit(identity: string, maximum = 40) {
@@ -52,28 +55,36 @@ export class LiveStore {
   }
   session(token?: string) {
     if (!token) return undefined;
-    return this.db.prepare('SELECT token_hash,role FROM live_sessions WHERE token_hash=? AND expires>?').get(hash(token), Date.now());
+    return this.db.prepare('SELECT l.token_hash,l.role,a.id AS account_id,a.role AS account_role FROM live_sessions l LEFT JOIN account_sessions s ON s.token_hash=l.token_hash LEFT JOIN accounts a ON a.id=s.account_id WHERE l.token_hash=? AND l.expires>?').get(hash(token), Date.now());
   }
   join(token?: string) {
     const existing = this.session(token);
     const value = existing && token ? token : randomBytes(32).toString('base64url');
     if (!existing) this.db.prepare('INSERT INTO live_sessions VALUES(?,?,?)').run(hash(value), 'participant', Date.now() + 7 * 86400_000);
-    this.db.prepare('INSERT OR IGNORE INTO live_members VALUES(?,?)').run(DEMO_ROOM, hash(value));
+    this.db.prepare('INSERT OR IGNORE INTO live_members VALUES(?,?)').run(this.roomId, hash(value));
     return value;
   }
   private requireSession(token?: string, operator = false) {
     const session = this.session(token);
     if (!session) throw new LiveError(401, 'Join the room first.');
-    if (operator && session.role !== 'operator') throw new LiveError(403, 'Operator access is required.');
+    if (operator && !this.canOperate(session)) throw new LiveError(403, 'Room management access is required.');
     return String(session.token_hash);
+  }
+  private canOperate(session: Record<string,unknown>) {
+    if(session.account_role==='admin')return true;
+    const world=this.db.prepare('SELECT owner_id,official FROM universes WHERE id=(SELECT universe_id FROM universe_rooms WHERE room_id=?)').get(this.roomId);
+    return (session.account_role==='creator'&&!world?.official&&world?.owner_id===session.account_id)||(session.role==='operator'&&this.roomId===OFFICIAL);
   }
   issueOperatorCode() {
     const code = randomBytes(24).toString('base64url');
     this.db.prepare('INSERT INTO live_operator_codes VALUES(?,?)').run(hash(code), Date.now() + 10 * 60_000);
+    this.db.prepare('INSERT INTO room_operator_codes VALUES(?,?)').run(hash(code),this.roomId);
     return code;
   }
   redeemOperatorCode(token: string | undefined, code: string) {
     const identity = this.requireSession(token);
+    const scope=this.db.prepare('SELECT room_id FROM room_operator_codes WHERE code_hash=?').get(hash(code));
+    if((scope&&scope.room_id!==this.roomId)||(!scope&&this.roomId!==OFFICIAL))throw new LiveError(403,'This code belongs to another room.');
     this.limit(`operator:${identity}`, 10);
     this.db.exec('BEGIN IMMEDIATE');
     try {
@@ -82,37 +93,43 @@ export class LiveStore {
       // Rotate the cookie token when privilege changes.
       const rotated = randomBytes(32).toString('base64url');
       this.db.prepare('INSERT INTO live_sessions VALUES(?,?,?)').run(hash(rotated), 'operator', Date.now() + 8 * 3600_000);
+      this.db.prepare('UPDATE account_sessions SET token_hash=? WHERE token_hash=?').run(hash(rotated),identity);
       this.db.prepare('DELETE FROM live_sessions WHERE token_hash=?').run(identity);
-      this.db.prepare('INSERT OR IGNORE INTO live_members VALUES(?,?)').run(DEMO_ROOM, hash(rotated));
+      this.db.prepare('INSERT OR IGNORE INTO live_members VALUES(?,?)').run(this.roomId, hash(rotated));
       // Keep the same participant identity for votes and membership.
       this.db.prepare('UPDATE live_votes SET token_hash=? WHERE token_hash=?').run(hash(rotated), identity);
+      this.db.prepare('INSERT OR IGNORE INTO live_members SELECT room_id,? FROM live_members WHERE token_hash=?').run(hash(rotated),identity);
       this.db.prepare('DELETE FROM live_members WHERE token_hash=?').run(identity);
       this.db.exec('COMMIT');
       return rotated;
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
-  snapshot(): RoomState {
+  snapshot(roundId?:string): RoomState {
     this.db.exec('BEGIN');
     try {
-      const round = this.db.prepare('SELECT * FROM live_rounds WHERE room_id=? ORDER BY created DESC,rowid DESC LIMIT 1').get(DEMO_ROOM)!;
+      const round = roundId
+        ? this.db.prepare('SELECT * FROM live_rounds WHERE room_id=? AND id=?').get(this.roomId,roundId)
+        : this.db.prepare('SELECT * FROM live_rounds WHERE room_id=? ORDER BY created DESC,rowid DESC LIMIT 1').get(this.roomId);
+      if(!round)throw new LiveError(404,'Round not found.');
       const options = this.db.prepare('SELECT o.id,o.title,o.description,COUNT(v.token_hash) votes FROM live_options o LEFT JOIN live_votes v ON v.round_id=o.round_id AND v.option_id=o.id WHERE o.round_id=? GROUP BY o.id ORDER BY o.position').all(String(round.id));
-      const participants = this.db.prepare('SELECT COUNT(*) count FROM live_members WHERE room_id=?').get(DEMO_ROOM)!;
+      const participants = this.db.prepare('SELECT COUNT(*) count FROM live_members WHERE room_id=?').get(this.roomId)!;
       this.db.exec('COMMIT');
-      return { roomId: DEMO_ROOM, roundId: String(round.id), status: round.status as 'open' | 'closed', winner: round.winner ? String(round.winner) : null, participantCount: Number(participants.count), totalVotes: options.reduce((sum, item) => sum + Number(item.votes), 0), options: options.map(item => ({ id: String(item.id), title: String(item.title), description: String(item.description), votes: Number(item.votes) })) };
+      return { roomId: this.roomId, roundId: String(round.id), status: round.status as 'open' | 'closed', winner: round.winner ? String(round.winner) : null, participantCount: Number(participants.count), totalVotes: options.reduce((sum, item) => sum + Number(item.votes), 0), options: options.map(item => ({ id: String(item.id), title: String(item.title), description: String(item.description), votes: Number(item.votes) })) };
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
   personal(token?: string) {
     const session = this.session(token);
     const state = this.snapshot();
     const vote = session ? this.db.prepare('SELECT option_id FROM live_votes WHERE round_id=? AND token_hash=?').get(state.roundId, String(session.token_hash)) : undefined;
-    return { joined: !!session, operator: session?.role === 'operator', vote: vote ? String(vote.option_id) : null };
+    return { joined: !!session && !!this.db.prepare('SELECT room_id FROM live_members WHERE room_id=? AND token_hash=?').get(this.roomId,String(session.token_hash)), operator: !!session && this.canOperate(session), vote: vote ? String(vote.option_id) : null };
   }
   vote(token: string | undefined, roundId: string, optionId: string) {
     const identity = this.requireSession(token);
+    if(!this.db.prepare('SELECT room_id FROM live_members WHERE room_id=? AND token_hash=?').get(this.roomId,identity))throw new LiveError(403,'Join this room before voting.');
     this.limit(`vote:${identity}`);
     this.db.exec('BEGIN IMMEDIATE');
     try {
-      const round = this.db.prepare('SELECT status FROM live_rounds WHERE id=? AND room_id=?').get(roundId, DEMO_ROOM);
+      const round = this.db.prepare('SELECT status FROM live_rounds WHERE id=? AND room_id=?').get(roundId, this.roomId);
       if (!round) throw new LiveError(404, 'Round not found.');
       const old = this.db.prepare('SELECT option_id FROM live_votes WHERE round_id=? AND token_hash=?').get(roundId, identity);
       if (old) {
@@ -126,12 +143,14 @@ export class LiveStore {
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
   closeRound(token: string | undefined, roundId: string, requested: Partial<RoomProvider> = {}) {
-    const owner = this.requireSession(token, true);
+    const identity = this.requireSession(token, true);
+    const session=this.session(token);const owner=String(session?.account_id||identity);
     const provider = RoomProviderSelection.parse(requested);
+    if(provider.mode==='hosted_openai'&&!['admin','creator'].includes(String(session?.account_role)))throw new LiveError(403,'Hosted production requires an authorized account.');
     if (provider.mode === 'hosted_openai' && (!provider.consent || process.env.AIRL_ALLOW_LIVE_REQUESTS !== 'true' || !process.env.OPENAI_API_KEY || !process.env.OPENAI_MODEL)) throw new LiveError(403,'Hosted production requires explicit consent and enabled server credentials.');
     this.db.exec('BEGIN IMMEDIATE');
     try {
-      const round = this.db.prepare('SELECT * FROM live_rounds WHERE id=? AND room_id=?').get(roundId, DEMO_ROOM);
+      const round = this.db.prepare('SELECT * FROM live_rounds WHERE id=? AND room_id=?').get(roundId, this.roomId);
       if (!round) throw new LiveError(404, 'Round not found.');
       if (round.status === 'open') {
         const winner = this.db.prepare('SELECT o.id FROM live_options o LEFT JOIN live_votes v ON v.round_id=o.round_id AND v.option_id=o.id WHERE o.round_id=? GROUP BY o.id ORDER BY COUNT(v.token_hash) DESC,o.position ASC LIMIT 1').get(roundId);
@@ -139,18 +158,24 @@ export class LiveStore {
       }
       const closed = this.db.prepare('SELECT winner FROM live_rounds WHERE id=?').get(roundId)!;
       const option = this.db.prepare('SELECT title FROM live_options WHERE round_id=? AND id=?').get(roundId,String(closed.winner))!;
-      this.db.prepare("INSERT OR IGNORE INTO room_jobs(id,round_id,room_id,choice,status,created,updated,mode,model,paid_consent,requested_by) VALUES(?,?,?,?,?,?,?,?,?,?,?)").run(randomUUID(),roundId,DEMO_ROOM,String(option.title),'queued',Date.now(),Date.now(),provider.mode,provider.model || null,provider.consent ? 1 : 0,owner);
+      const existing=this.db.prepare('SELECT id FROM room_jobs WHERE round_id=?').get(roundId);
+      if(!existing){
+        const snapshot=worldSnapshot(this.db,this.roomId);
+        if(!snapshot.characters.length)throw new LiveError(400,'Add at least one character before production.');
+        this.db.prepare("INSERT INTO room_jobs(id,round_id,room_id,choice,status,created,updated,mode,model,paid_consent,requested_by,snapshot,story_order) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)").run(randomUUID(),roundId,this.roomId,String(option.title),'queued',Date.now(),Date.now(),provider.mode,provider.model || null,provider.consent ? 1 : 0,owner,JSON.stringify(snapshot),snapshot.storyOrder);
+        this.db.prepare('UPDATE universes SET next_order=next_order+1 WHERE id=?').run(snapshot.universeId);
+      }
       this.db.exec('COMMIT');
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
-  nextRound(token: string | undefined, previousId: string) {
+  nextRound(token: string | undefined, previousId: string, options?: {id:string;title:string;description:string}[]) {
     this.requireSession(token, true);
     this.db.exec('BEGIN IMMEDIATE');
     try {
-      const latest = this.db.prepare('SELECT id,status FROM live_rounds WHERE room_id=? ORDER BY created DESC,rowid DESC LIMIT 1').get(DEMO_ROOM)!;
+      const latest = this.db.prepare('SELECT id,status FROM live_rounds WHERE room_id=? ORDER BY created DESC,rowid DESC LIMIT 1').get(this.roomId)!;
       if (latest.id === previousId) {
         if (latest.status !== 'closed') throw new LiveError(409, 'Close the current round first.');
-        this.insertRound();
+        this.insertRound(options);
       }
       this.db.exec('COMMIT');
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }

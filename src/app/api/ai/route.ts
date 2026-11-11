@@ -1,3 +1,4 @@
+import { PlatformStore } from '@/server/platform/store';
 import { canonicalCharacters } from '@/ai/memory/canonical';
 import { inferenceLimits } from '@/ai/config/limits';
 import { GatewayRequest, type Usage } from '@/ai/schemas/gateway';
@@ -13,7 +14,7 @@ export const maxDuration = 120;
 export async function GET() {
   const store = new LiveStore();
   try {
-    const owner = store.creator(await sessionToken());
+    const accounts=new PlatformStore();let owner:string;try{owner=accounts.requireAccount(await sessionToken(),true).id;}finally{accounts.close();}
     return Response.json({ usage: store.usage(owner), hostedConfigured: !!process.env.OPENAI_API_KEY && !!process.env.OPENAI_MODEL && process.env.AIRL_ALLOW_LIVE_REQUESTS === 'true', hostedModel: process.env.OPENAI_MODEL || null, ollamaSupported: !process.env.VERCEL }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) { return errorResponse(error); } finally { store.dispose(); }
 }
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
   let inputTokens: number | null = null, outputTokens: number | null = null;
   let selectedMode = '';
   try {
-    const owner = store.creator(await sessionToken());
+    const accounts=new PlatformStore();let owner:string;try{owner=accounts.requireAccount(await sessionToken(),true).id;}finally{accounts.close();}
     if (request.headers.get('origin') !== `${new URL(request.url).protocol}//${request.headers.get('host')}`) throw new LiveError(403, 'A same-origin request is required.');
     store.limit(`ai:${owner}`, 8);
     const text = await request.text();

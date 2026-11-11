@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, Radio, Vote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RoomSnapshot, type RoomState, type SessionState } from './types';
-const base = '/api/live/rooms/barangay-2099';
-export function CommunityPanel({ operatorView = false }: { operatorView?: boolean }) {
+import { ProviderPicker } from '@/components/platform/provider-picker';
+export function CommunityPanel({ operatorView = false,roomId='barangay-2099' }: { operatorView?: boolean;roomId?:string }) {
+  const base=`/api/live/rooms/${roomId}`;
   const sessionRevision = useRef(0);
   const [room, setRoom] = useState<RoomState | null>(null);
   const [session, setSession] = useState<SessionState>({ joined: false, operator: false, vote: null });
@@ -14,7 +15,7 @@ export function CommunityPanel({ operatorView = false }: { operatorView?: boolea
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
-  const [provider, setProvider] = useState<RoomProvider>({ mode: 'demo', consent: false });
+  const [provider, setProvider] = useState<RoomProvider>({ mode: 'ollama',model:'qwen3:4b-instruct',consent: false });
   const [connected, setConnected] = useState(false);
   useEffect(() => {
     let active = true;
@@ -43,26 +44,26 @@ export function CommunityPanel({ operatorView = false }: { operatorView?: boolea
     if (!room) return;
     let active = true;
     const revision = sessionRevision.current;
-    fetch('/api/live/session', { cache: 'no-store' }).then(response => response.json()).then(value => { if (active && revision === sessionRevision.current && !value.error) setSession(value); }).catch(() => {});
+    fetch(roomId==='barangay-2099'?'/api/live/session':`/api/live/session?universe=${roomId}`, { cache: 'no-store' }).then(response => response.json()).then(value => { if (active && revision === sessionRevision.current && !value.error) setSession(value); }).catch(() => {});
     return () => { active = false; };
   }, [room?.roundId]);
   async function action(url: string, input: unknown) {
     sessionRevision.current++;
     setPending(true); setError('');
     try {
-      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
+      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(url==='/api/live/session'?{...(input as object),universe:roomId}:input) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Unable to complete this action.');
       if (data.room) setRoom(RoomSnapshot.parse(data.room));
       sessionRevision.current++;
       setSession(data.session || data);
       if (url === '/api/live/operator') setCode('');
-    } catch (error) { setError(error instanceof Error ? error.message : 'Please retry.'); } finally { setPending(false); }
+    } catch (error) { setError(error instanceof Error ? error.message : 'Please retry.'); } finally { setPending(false);if(url.endsWith('/close'))setProvider(value=>({...value,consent:false})); }
   }
   const winner = room?.options.find(option => option.id === room.winner);
   return <section id="community-vote" className="vote-panel community-panel" aria-label={operatorView ? 'Room voting controls' : 'Community vote'}>
     <div className="eyebrow mint"><Radio size={15}/>{connected ? 'CONNECTED TO ROOM' : 'CONNECTING · RETRYING AUTOMATICALLY'}</div>
-    <h2>{operatorView ? 'Community control' : 'What should Captain Bot do next?'}</h2>
+    <h2>{operatorView ? 'Community control' : 'What happens next?'}</h2>
     <p>Real local votes · Operator-selected production</p>
     {error && <div className="form-error" role="alert">{error}</div>}
     {!room ? <p role="status">Loading room…</p> : <>
@@ -82,8 +83,8 @@ export function CommunityPanel({ operatorView = false }: { operatorView?: boolea
       {operatorView && <div className="operator-controls"><h3>Operator controls</h3>{!session.operator ? <>
         <p>Run <code>npm run live:operator</code> in the project terminal, then enter the one-time code.</p>
         <form onSubmit={event => { event.preventDefault(); void action('/api/live/operator', { code }); }}><label htmlFor="operator-code">One-time operator code</label><input id="operator-code" type="password" autoComplete="off" value={code} onChange={event => setCode(event.target.value)} required/><Button variant="outline" disabled={!session.joined || pending || !code}>Unlock controls</Button></form><small>Join the room before unlocking controls.</small>
-      </> : <><label className="job-picker">Production provider<select aria-label="Production provider" disabled={pending || room.status !== 'open'} value={provider.mode} onChange={event => setProvider({mode:event.target.value as RoomProvider['mode'],consent:false})}><option value="demo">Demo · deterministic</option><option value="ollama">Ollama · local inference</option><option value="hosted_openai">Hosted OpenAI · paid</option></select></label>{provider.mode !== 'demo' && <label className="job-picker">Model identifier (optional for local discovery)<input aria-label="Production model" value={provider.model || ''} onChange={event => setProvider({...provider,model:event.target.value || undefined})}/></label>}{provider.mode === 'hosted_openai' && <label><input type="checkbox" checked={provider.consent} onChange={event=>setProvider({...provider,consent:event.target.checked})}/> I authorize this round's paid hosted production.</label>}<Button variant="outline" disabled={pending || room.status !== 'open' || (provider.mode === 'hosted_openai' && !provider.consent)} onClick={() => action(`${base}/close`, { roundId: room.roundId, provider })}>Close voting & produce</Button><Button variant="outline" disabled={pending || room.status !== 'closed'} onClick={() => action(`${base}/next`, { roundId: room.roundId })}>Start next round</Button></>}</div>}
+      </> : <><ProviderPicker background value={provider} onChange={value=>setProvider({mode:value.mode as RoomProvider["mode"],model:value.model,consent:value.consent})}/><Button variant="outline" disabled={pending || room.status !== 'open' || (provider.mode === 'hosted_openai' && !provider.consent)} onClick={() => action(`${base}/close`, { roundId: room.roundId, provider })}>Close voting & produce</Button><Button variant="outline" disabled={pending || room.status !== 'closed'} onClick={() => action(`${base}/next`, { roundId: room.roundId })}>Start next round</Button></>}</div>}
     </>}
-    {operatorView && <RoomProduction operator={session.operator}/>}
+    {operatorView && <RoomProduction operator={session.operator} roomId={roomId}/>}
   </section>;
 }
