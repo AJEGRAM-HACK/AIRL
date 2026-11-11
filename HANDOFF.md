@@ -1,151 +1,122 @@
 # AIRL development handoff
 
-Updated November 12, 2026. Repository location is `/Users/ajegram/CinemAI`.
-
-This file is a durable checkpoint for continued work in the current Codex conversation. A new chat is optional if context compaction becomes problematic or the user requests one. Recheck Git status and local service availability when resuming; temporary runtimes, screenshots and running servers may have expired.
+Updated November 12, 2026. Repository `/Users/ajegram/CinemAI`. Continue in this conversation. Read `AGENTS.md`, this file, `ARCHITECTURE_PLAN.md` and `VERIFICATION.md` before editing.
 
 ## Product and architecture
 
-AIRL means Artificial In Real Life. “The real world is the prompt.” AIRL Live gathers community decisions, CinemAI produces fictional episodes, and PersonaAI maintains shared characters and approved story memory. The current universe is Barangay 2099 with Captain Bot, Tita Nena and Kuya Taho. QuestAI, RemixAI, WorldForge and AIRL Memories remain Coming Soon.
+AIRL is a community-shaped storytelling platform. Live owns audience decisions, CinemAI owns episodes, PersonaAI owns scoped characters/canon, and Studio owns creator management and human review. Barangay 2099 remains the official public universe with its original IDs, cast, episodes, memories and compatible URLs. Authorized creators can create private worlds and explicitly publish them to Explore.
 
-One Next.js App Router application uses React, strict TypeScript, Tailwind v4, Zod, shadcn-style controls and Lucide. Node.js 24 LTS and npm are required. Local SQLite through `node:sqlite` stores sessions, votes, jobs, artifacts and canon. SSE delivers voting snapshots. The production UI polls persisted job progress. Server-only provider adapters select Demo, Ollama or OpenAI. Remotion renders browser previews.
+One Next.js App Router repository uses strict TypeScript, React, Tailwind v4, Zod, shadcn-style buttons, Lucide, Node 24 LTS and npm. Local SQLite through `node:sqlite` holds accounts, opaque sessions, universe ownership, cast, relationships, assets, votes, job snapshots, stage outputs, versioned previews, ordered episodes and canon events. SSE streams vote totals. Job progress is polled. Remotion plays browser compositions. The OpenAI Agents SDK adapter shares the four-stage contracts with local Ollama.
 
-The intended hosted architecture adds Supabase Auth/PostgreSQL/RLS/Realtime/Storage and durable Trigger.dev jobs. These integrations remain future work. SQLite requires a persistent writable filesystem. Hosted functions cannot reach this Mac's loopback Ollama server.
+SQLite and the local recovery worker remain the active architecture. Supabase, Trigger.dev, public deployment, MP4 rendering, generated art/audio, universe forks and team collaboration remain future milestones requiring separate decisions.
 
-Read `AGENTS.md` before development, `ARCHITECTURE_PLAN.md` for current/proposed architecture and routes, and `VERIFICATION.md` for evidence and limitations. Preserve existing work and labeled fixtures. Paid calls, provisioning, deployment and external pushes require authorization.
+## Implementation and checkpoint
 
-## Current status and verified commit
+The pre-expansion baseline was clean `6d4a170`, with verified application commit `cc5f690a738157ccab7a496051653adbfc763a1d`. Latest verified multi-universe application checkpoint is `2f37d3602ba2d619f38b8fb2ab07fd04739be5c3`. The newest section of `VERIFICATION.md` records its evidence. Check `git status` and `git log -3` when resuming.
 
-Latest verified application commit is `cc5f690` — `Target Safari 16 to restore iPhone client startup`. The audience/session checkpoint is `e0c0155`. LAN/recovery fixes are in `1e34cbb`; the preceding baseline was `318b2f0`.
+Implemented functionality includes signup/signin/signout, viewer defaults, admin creator grants, private editable interests, personalized genre discovery, private/public/archive/restore worlds, settings/languages/rules, configurable cast, scoped relationships/assets and two creation paths. Script outlines and playable versioned previews are persisted before Critic review. Compatible retries retain provider/model/winner/snapshot and reuse validated stages. Canon proposals are correctable during review. Publication atomically commits episodes and approved canon, with replay protection.
 
-Full application commit ID is `cc5f690a738157ccab7a496051653adbfc763a1d`. Later documentation commits may follow it. Check Git status when resuming. Verification records include the integration sprint and LAN rehearsal.
+Unavailable model failures persist a sanitized Connection reason and consume the three-attempt retry limit. The current workflow is audience vote → frozen winner/world/cast → Director → Screenwriter → Visual Producer → Critic → private human review → transactional publication/canon → audience playback and cited story answers. Model responses and manifests use Zod validation. Paid operations require explicit consent. Legacy operator codes provide official-room round management and draft inspection. Official publication requires an admin account. Custom publication requires the creator owner or admin.
 
-The complete local workflow passed production-browser acceptance using both Demo and genuine Ollama inference.
+### Code ownership
 
-1. Independent audience sessions vote once per round.
-2. An authenticated operator closes the round and atomically enqueues its winning decision.
-3. Story Director → Screenwriter → Visual Producer → Creative Critic generate validated structured outputs.
-4. The successful artifact becomes a private draft for operator review.
-5. Approval atomically publishes the episode and canonical character memories.
-6. Audience members select and play the generated Remotion episode.
+- `src/server/platform/` handles migrations, profiles, universe access, assets, pitches and spoiler-scoped retrieval.
+- `src/server/live/` handles session-bound votes, memberships, round closure and job enqueueing.
+- `src/server/production/` handles orchestration, snapshots, previews, retries, review and publication.
+- `src/ai/providers/` handles provider selection, shared live stage contracts and transport adapters.
+- `src/components/platform/` handles accounts, discovery, world editing, story pages and the helper.
+- `src/features/live/`, `src/features/production/` and `src/features/persona/` preserve existing module interfaces.
+- `src/video/` handles reusable assets, composition and playback.
 
-Sessions use opaque HttpOnly cookies and server-side roles. Repeated closure/publication is protected against duplicates. Ties use displayed option order. Persisted jobs retain provider/model/consent metadata and real events. Claims, retries and Critic revision are bounded. Next.js `after` starts work locally, and a recovery worker handles pending or expired claims. Creator BYOK stays outside background jobs.
+## Routes and APIs
 
-System/Light/Dark themes are implemented. Generated and reference episodes share one selector. PersonaAI profiles and prompts read approved canon. Provider previews use request-local memory. CLI production retains separate mode-specific storage.
+UI routes include `/`, `/account`, `/universes`, `/universes/[id]`, `/universes/[id]/episodes`, `/universes/[id]/episodes/[episodeId]`, `/universes/[id]/characters`, `/universes/[id]/characters/[slug]`, `/studio`, `/studio/worlds/[id]` and `/live/[id]`. A scoped `?round=` query shows the source round's actual results. Navigation carries the selected universe. System/light/dark themes remain available.
 
-### Main implementation locations
+Existing `/watch/barangay-2099`, `/universe/barangay-2099`, `/studio/barangay-2099`, `/cinemai/watch/barangay-2099`, `/cinemai/universe/barangay-2099`, `/persona/[officialCharacter]`, `/studio/ai` and `/discover` remain. Unknown/inaccessible private identifiers return 404.
 
-- `src/server/live/` owns sessions, roles, voting and shared SQLite storage.
-- `src/server/production/` owns orchestration, artifacts, room jobs and publication.
-- `src/ai/providers/` owns provider selection, configuration and inference adapters.
-- `src/ai/memory/canonical.ts` owns approved character-memory reads.
-- `src/features/live/`, `src/features/production/`, `src/features/persona/` and `src/features/ai/` own module interfaces.
-- `src/video/` owns validated reusable assets, composition and Player.
-- `scripts/` contains production, worker and operator commands. `tests/` contains regression and browser coverage.
-
-## Working routes and APIs
-
-Implemented UI routes include `/`, `/discover`, `/live`, `/live/barangay-2099`, `/studio`, `/studio/barangay-2099`, `/studio/ai`, `/cinemai`, `/cinemai/watch/barangay-2099`, `/cinemai/universe/barangay-2099`, `/persona` and `/persona/{captain-bot,tita-nena,kuya-taho}`. Braced character names describe three individual routes. Legacy `/watch/barangay-2099` and `/universe/barangay-2099` remain available. Unknown room/world/character IDs return 404.
-
-| API | Behavior |
+| API | Function |
 | --- | --- |
-| `GET/POST /api/live/session` | Session inspection/join |
-| `POST /api/live/operator` | One-time operator-code redemption |
-| `GET /api/live/rooms/[roomId]/state` | Public aggregate state |
-| `GET /api/live/rooms/[roomId]/events` | SSE aggregate updates |
-| `GET /api/live/rooms/[roomId]/join-qr` | Same-origin audience QR generated locally |
-| `POST /api/live/rooms/[roomId]/vote` | Session-bound vote |
-| `POST /api/live/rooms/[roomId]/close` | Protected closure and provider-selected enqueue |
-| `POST /api/live/rooms/[roomId]/next` | Protected next round |
-| `GET /api/production` | Public status and published manifests |
-| `GET /api/production?operator=1` | Protected drafts and internal events |
-| `POST /api/production` | Protected publish/reject/retry using job ID and action |
-| `GET/POST /api/ai` | Creator-protected provider metadata, tests, generation and replies |
+| `GET/POST /api/account` | Current profile, signup/signin/signout/interests |
+| `GET/POST /api/admin` | Admin account list and viewer/creator grants |
+| `GET/POST /api/universes` | Discovery/owned worlds and private creation |
+| `GET/PATCH/DELETE /api/universes/[id]` | Accessible world, settings/visibility and recoverable archive |
+| `POST /api/universes/[id]/{characters,relationships,assets,ask}` | Scoped cast, relationships, reference images and story answers |
+| `DELETE /api/universes/[id]/characters` | Remove an unreferenced character |
+| `GET /api/assets/[id]` | Visibility-protected image bytes |
+| `GET /api/models`, `POST /api/pitches` | Installed/allowed models and three editable starting pitches |
+| `/api/live/session`, `/api/live/operator` | Join/inspect and narrow official operator-code redemption |
+| `/api/live/rooms/[id]/{state,events,join-qr,vote,close,next}` | Scoped voting, local QR and production enqueue |
+| `GET/POST /api/production` | Scoped progress, protected drafts, publish/reject/retry |
+| `GET/POST /api/ai` | Creator/admin provider gateway previews |
 
-## Providers, BYOK and Ollama
+Story helpers default to This episode on episode pages and offer Through this episode and Latest canon. Visibility, universe, character and story-order limits apply before inference. Studio draft mode requires management permissions. Signed-in viewers can ask about accessible stories. Citation IDs must match retrieved sources, with scene/timestamp links where available. Semantic answer correctness still needs human evaluation.
 
-Use `.env.example` as the configuration inventory. At the latest integration verification, application credentials and hosted enablement were absent, with only `.env.example` present. No secret values belong in this document or source control.
+## Local setup and migration
 
-| Mode | Configuration and verification |
-| --- | --- |
-| `demo` | Default `AI_PROVIDER=demo`. Deterministic offline templates, explicitly labeled. Full local loop verified. |
-| `ollama` | Server-only loopback on port 11434. Installed `qwen3:4b-instruct` completed all four stages and browser playback. |
-| `hosted_openai` | Requires server `OPENAI_API_KEY`, `OPENAI_MODEL`, `AIRL_ALLOW_LIVE_REQUESTS=true` and explicit paid-request consent. Live integration awaits credentials and authorization. Legacy `openai` aliases this mode. |
-| `creator_byok` | HTTPS, same-origin creator/operator session and explicit consent required. Key stays in page/request memory and clears on disconnect. Isolation/security tests passed with doubles. Real HTTPS inference remains untested. |
-
-All four hosted agents share the configured OpenAI credential through the OpenAI Agents SDK with Zod output schemas. Model choice is configurable. Providers never silently fall back, and cloud trace export is disabled. Keys never enter jobs or usage records. Room jobs freeze their explicit provider/model selection independently of the CLI's `AI_PROVIDER` default. Plain HTTP localhost rejects BYOK.
-
-Verified local settings follow. Use the exact name returned by Ollama's installed-model list.
-
-```dotenv
-AI_PROVIDER=ollama
-OLLAMA_MODEL=qwen3:4b-instruct
-OLLAMA_CONTEXT_WINDOW=8192
-AIRL_AI_REQUEST_TIMEOUT_MS=110000
-AIRL_AI_MAX_OUTPUT_TOKENS=2400
-AIRL_AI_DAILY_REQUEST_LIMIT=20
-```
-
-Local inference is serialized with compact per-stage output limits. Optional rate/spend estimate settings are documented in `.env.example`. The web app, operator CLI and worker must share `AIRL_LIVE_DB_PATH`, default `.data/airl-live.sqlite`. `CINEMAI_DB_PATH` overrides standalone CLI storage. Keep environment files and SQLite artifacts ignored.
-
-## M2 Pro / 16 GB development constraints
-
-The integration sprint verified Apple M2 Pro hardware with 16 GiB unified memory. Ollama reported one resident `qwen3:4b-instruct` model at an 8192-token context and approximately 3.55 GiB model residency. Model residency is only part of total system memory use. System swap was approximately 5.75 GiB during inspection; attribution to AIRL remains unresolved, and the process sampler did not establish useful Ollama CPU/RSS measurements.
-
-A corrected sampler covered a genuine four-stage CLI run completed in 30.45 seconds. llama-server peaked at approximately 1.48 GiB RSS and 397.4% CPU across cores; production Node peaked at 140.3 MiB RSS. System swap stayed at 6040.88 MiB during that run. These sampled peaks and model residency overlap in unified memory and cannot be summed as independent allocations. Long-duration capacity remains unverified.
-
-Keep the known-good local demo on this single model with serialized inference, the bounded context above and compact stage outputs. Avoid simultaneous large-model inference and heavy media exports during rehearsal. Use a production build for acceptance and presentation, since development recompilation previously caused transient manifest-loading errors. Repeated-run performance and memory-pressure testing remain pending.
-
-## Run and verify
-
-Use an existing Node 24 installation. The previous session used `/tmp/node-v24.22.2-darwin-arm64/bin`, which may disappear. Open `http://127.0.0.1:3000` after starting the app. Generate an operator code locally, join the room studio and redeem it there.
+Use the existing dependency installation. The temporary Node runtime is available through the following PATH while it remains under `/tmp`.
 
 ```sh
+export PATH=/tmp/node-v24.22.2-darwin-arm64/bin:$PATH
+export AIRL_LIVE_DB_PATH="$PWD/.data/airl-live.sqlite"
 npm run dev
-npm run live:operator
-npm run production:drain
-npm run production:worker
-AI_PROVIDER=ollama OLLAMA_MODEL=qwen3:4b-instruct npm run production -- "Ban Monday meetings"
 ```
 
-Run these checks when implementing changes.
+Sign up at `/account`, then grant the first admin from the trusted local terminal. No default account password is provisioned.
 
 ```sh
-npm run test:production
-npm run test:live
-npm run test:providers
-npm run test:room-production
-npm run test:sprint
-npm run typecheck
-npm run build
-npm run start
-npm run test:browser
+npm run account:admin -- your-email@example.com
 ```
 
-Latest recorded results at `e0c0155` were 29 passing unit/regression tests, successful typecheck/build and three passing browser cases across separate runs. The final two full-flow cases passed with Demo in 6.7 seconds and Ollama in 36.5 seconds, including a 31.5-second production and maximum sampled audience API latency of 28 ms. A focused delayed-session regression passed separately in 692 ms after correcting a test assumption about a previously closed round. Browser checks covered voting, review, publication, advancing playback, seeking, captions, selection and approved memory. Database-lock and canonical-memory isolation regressions passed.
+Admins grant creator access in `/studio`. Creator owners manage custom worlds. Official canon requires admin authority. Anonymous audience voting continues without an account.
 
-An actual HTTPS app kill during Story Director inference recovered through the normal worker after natural 150-second lease expiry. Recovery took 178.3 seconds and two attempts. Votes, idempotent publication and the single published episode survived further restarts. See the LAN rehearsal section in `VERIFICATION.md` for failures found, fixes and resource measurements.
+The additive migration was verified on an ignored SQLite backup before being applied to the live database. Original six legacy-table projections, three characters, one published episode, original artifacts/IDs/memories and two votes were preserved. Backups remain under `.data/universe-migration-*.sqlite`. Use the migration utility for another legacy database, with writers stopped while taking and validating the snapshot.
 
-Browser acceptance builds and serves on port 3100 using temporary SQLite storage. It requires installed Chrome and Ollama serving `qwen3:4b-instruct`, and performs real local inference without OpenAI calls. Temporary screenshots/databases may disappear. These checks were rerun during the reliability rehearsal.
+```sh
+npm run migrate:universes
+npm run migrate:universes -- --apply
+```
 
-For physical phones, export the assigned private IPv4 address as `AIRL_DEMO_HOST`, run `npm run demo:setup`, build, then run `npm run demo:lan`. README.md has exact commands and iPhone trust instructions. Studio displays a same-origin QR code. Keep `npm run production:worker` running with the same database for crash recovery. The Safari 16.0 startup failure was traced to a class static block in the default Next client bundle. An explicit Browserslist Safari 16 target plus a clean generated build fixed joining and voting on the physical iPhone. The real taho winning decision then produced and published an 18-second episode in 28.3 seconds through all four Ollama stages. The user sees the generated episode but reports playback or captions fail; exact playback diagnostics remain pending. Temporary /demo-check diagnostics are active only through ignored Node preload files. Disable them after diagnosis. WebKit automation crashed at launch and native Safari automation was unavailable.
+## Providers and development constraints
 
-## Known issues and limitations
+Local Ollama with `qwen3:4b-instruct` is the default. Ollama listens solely on `127.0.0.1:11434`. Do not expose it publicly. The registry discovers installed models and rejects unavailable selections without fallback. Use `ollama list` and `ollama ps` to inspect availability/residency.
 
-- One earlier real Critic run exceeded the 110-second deadline. Context/output compaction enabled subsequent passes. Long-session load, resource use and repeated-run durability still need measurement.
-- Real Critic approval is verified. Rejection/revision control flow currently has deterministic-double coverage.
-- HTTPS LAN transport and QR decoding are verified locally. Physical iPhone joining and voting now pass after targeting Safari 16 and clean rebuilding. The generated episode appears but the user reports playback/caption failure. That device check remains unresolved. Default scripts bind to loopback; the dedicated demo launcher binds the configured private address. Broader accessibility QA and hosting remain pending.
-- Clearing cookies creates another anonymous identity. Multi-room management, moderation and hardened hosted identity remain future work.
-- Local scheduling depends on process lifetime and recovery workers. Supabase and Trigger.dev adapters remain pending.
-- Video is a portrait browser composition using reusable pictograms and CSS scenes. MP4 rendering, generated artwork, audio and voice synthesis remain pending. Confirm Remotion commercial license eligibility before commercial hosting.
-- Hosted OpenAI and real HTTPS BYOK remain unverified. Preserve explicit authorization gates and credential isolation.
+The M2 Pro has 16 GB unified memory. Current bounds are one serialized inference, 8192-token context, temperature 0, 2400-token overall output cap and 110-second deadline. Stage-specific caps reduce episode output. Earlier measurement sampled llama-server at 1520.1 MiB RSS, production Node at 140.3 MiB and daemon at 25.3 MiB during a 30.45-second run. Ollama reported approximately 3.55 GiB model residency. These measurements overlap unified-memory accounting and should be interpreted independently. Long-duration memory pressure remains unverified. Avoid overlapping inference tests and heavy exports.
 
-## Next priorities
+Demo is explicitly labeled deterministic/offline. Hosted OpenAI needs server `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_ALLOWED_MODELS`, `AIRL_ALLOW_LIVE_REQUESTS=true`, and per-operation paid consent. Legacy `AI_PROVIDER=openai` aliases hosted mode. All agents share one selected credential/model. Hosted live validation awaits credentials and separate paid-call authorization.
 
-1. Diagnose the reported physical-iPhone generated-episode playback/caption failure. Joining, voting, real Ollama publication, HTTPS transport and actual restart recovery have passed.
-2. Run repeated local productions and measure failures, latency and memory under presentation conditions.
-3. Perform a minimal Hosted OpenAI smoke test once credentials/model and explicit paid-call authorization are supplied. Verify real BYOK separately over HTTPS.
-4. Complete keyboard, theme, caption and reduced-motion QA across mobile and desktop.
-5. Choose hosted persistence/scheduling and media-export milestones according to demo needs and available resources.
+Session BYOK requires authenticated HTTPS requests and paid consent. Keys stay in page/request memory and remain outside jobs, persistence, usage records and logs. BYOK supports request-scoped pitches/answers/gateway previews. Background episodes accept Demo, Ollama or configured Hosted OpenAI. Cloud tracing is disabled. Environment variables are documented in `.env.example`; keep real credentials ignored.
 
-Recommended next task is capturing and resolving the remaining physical-iPhone playback/caption failure. Keep application changes scoped to rehearsal findings.
+## Tests and evidence
+
+```sh
+npm run typecheck
+npm test
+npm run build
+npm run test:browser
+npm run benchmark:local
+```
+
+Known-good results are strict typecheck, optimized build, 36 passing unit tests and four production-browser cases passing in 51.2 seconds. The genuine Ollama browser production took 23.0 seconds, with maximum sampled audience API latency 11 ms. Its full case took 29.0 seconds. The fixed-input benchmark completed official/private production in 38.569/27.498 seconds, pitches in 14.370 seconds and a cited answer in 4.195 seconds.
+
+`npm test` runs focused unit/regression tests including roles, universe isolation, frozen snapshots, private previews, canon correction/idempotency, retrieval spoiler limits, malformed output, provider/consent/key isolation, concurrency and SQLite locks. Deterministic executor/transport doubles are explicitly identified. `test:browser` builds a production server on port 3100 with isolated SQLite, Chrome and genuine Ollama for its real-provider scenario. It also covers both creator creation paths in Demo. It rebuilds `.next`, so stop the presentation server before running it.
+
+`benchmark:local` uses tracked fixed inputs, paid calls disabled, isolated databases and real Ollama for official/private episodes, three pitches and a grounded answer. See `benchmarks/README.md`, tracked results and the newest `VERIFICATION.md` section for exact timing, failures and output observations.
+
+## Demo launch and remaining work
+
+```sh
+export PATH=/tmp/node-v24.22.2-darwin-arm64/bin:$PATH
+export AIRL_LIVE_DB_PATH="$PWD/.data/airl-live.sqlite"
+export AIRL_DEMO_HOST="$(ipconfig getifaddr en0)"
+npm run demo:setup
+npm run build
+npm run demo:lan
+```
+
+At handoff, the rebuilt application and refreshed recovery worker are running against the normal database with paid requests disabled. Current HTTPS origin is `https://192.168.88.9:3443`. Nine-route/404/theme/QR/source-round smoke checks and CA verification passed. Use the printed HTTPS address on Mac and iPhone with the same Wi-Fi. The iPhone already trusted AIRL Local Demo CA during the earlier rehearsal. If IP/certificate changes, repeat setup and verify trust. Transfer only `.data/demo-tls/root.crt` when enrollment is needed. Private TLS keys stay on the Mac. Use plain launcher commands, with temporary diagnostic preloads disabled. Studio provides the same-origin room QR.
+
+In a second terminal with the same PATH/database and paid gate disabled, run `npm run production:worker`. It polls every two seconds and recovers expired 150-second claims. Earlier genuine restart recovery took 178.3 seconds, preserving votes and single publication. This expansion retains automated recovery coverage, while another physical kill/restart rehearsal remains advisable.
+
+Physical iPhone joining and voting were user-confirmed at `cc5f690` after the clean Safari 16 target build. The generated episode appeared, but playback/captions failed on that device. Chrome touch/mobile acceptance supplements that result. Physical Safari completion remains unresolved.
+
+Next priorities are physical-phone playback/captions and QR rehearsal, repeated-run demo reliability/load measurement, then separately authorized hosted OpenAI/HTTPS BYOK validation. Account email verification/reset, hosted identity/rate-limit hardening, richer semantic grounding evaluation, broader accessibility/device QA, MP4/audio/custom artwork, forks and teams remain open. Reference-image storage/linking is implemented; a creator upload UI and artwork rendering remain follow-on work.

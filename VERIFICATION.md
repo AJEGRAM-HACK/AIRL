@@ -226,3 +226,62 @@ Application commit `cc5f690a738157ccab7a496051653adbfc763a1d` adds an explicit S
 Temporary diagnostics run through ignored local Node preload files and keep bounded error/path metadata on the Mac. They are separate from application source and must be disabled after diagnosis. No key or credential values were collected. A leftover isolated rehearsal worker was stopped. No paid inference or infrastructure change occurred.
 
 A follow-up Chrome check used actual touch input with isMobile and hasTouch enabled. Tapping Play advanced from frame 73 to frame 194 across subsequent production polling. Captions toggled off and on, with no page JavaScript errors. This checks touch controls in Chrome and leaves the reported physical Safari playback failure unresolved.
+
+# Multi-universe platform acceptance — November 12, 2026
+
+The starting repository was clean at documentation commit `6d4a170`, following verified application `cc5f690`. The current directive authorized accounts, universe ownership/settings/cast, shared-module navigation, early previews, canon review, story retrieval and real local inference. Original application work and stored IDs were preserved. Verified application checkpoint is `2f37d3602ba2d619f38b8fb2ab07fd04739be5c3`.
+
+## Implemented and exercised
+
+- Accounts use salted scrypt hashes, opaque HttpOnly sessions, viewer defaults, server-side admin creator grants and signout invalidation. Private optional interests support genre-based discovery and per-request pitch overrides. Anonymous voting remains available.
+- Universes start private, have owned settings/languages/rules/cast/relationships and can be published or archived/restored. Official edits/publication require admin. Composite character IDs and access checks isolate assets, episodes, canon, drafts and helper sources. Characters referenced by frozen production snapshots remain retained.
+- The migration utility backed up and verified original table projections, IDs, artifact contents and memories before applying additive transactional migrations. Final copy `.data/universe-migration-1794426202054.sqlite` and live verification retained three characters, one episode, one production, one job, one round and two votes. Foreign-key checks were empty and integrity returned ok. Private backup files remain ignored.
+- Closing a round freezes world/cast/history/winner/model/story order. Validated script outlines and versioned playable manifests persist before Critic review. A later Critic failure retains its preview. Compatible retries reuse saved validated stages and preserve selection. Model-selection failures retain sanitized Connection reasons and count toward the three-attempt bound.
+- Human review can correct memory/relationship proposals. Publication commits the episode and approved canon transactionally and idempotently. Public job responses omit draft script/preview content. Published episodes link to their actual source round and ordered character canon.
+- Episode pages provide playback/seek/captions, readable dialogue transcripts, featured-character links and story answers. Character pages provide definitions, relationships and source-linked timelines. Helper scope filters universe/visibility/character/story order before inference. Citation IDs are restricted to retrieved sources. Draft mode requires Studio access.
+- Creator Studio supports blank drafts and three generated editable pitches. World settings, cast and relationship editing use scoped APIs. Original deep links remain compatible. Narrow-screen audience voting now precedes playback, avoiding a layout shift that hid join controls after an episode loaded.
+
+## Verification record
+
+- PASS — `npm run typecheck`.
+- PASS — `npm test`, all 36 tests, zero failures, 1.911 seconds in the final combined run.
+- PASS — optimized `npm run build`, also executed by production-browser acceptance.
+- PASS — `npm run test:browser`, all four cases in 51.2 seconds. Demo case 6.8 s, genuine Ollama case 29.0 s, delayed-session regression 482 ms and creator journey 3.8 s. Genuine generation took 23.0 s, with maximum sampled audience API latency 11 ms. These are one-run samples.
+- PASS — copy-first live migration verification and a subsequent repeatable copy check at `.data/universe-migration-1794426421952.sqlite`, including the original publication's source-round link.
+- PASS — `npm run benchmark:local`, both real universe episodes, three pitches and a cited answer. Complete timing/output details follow.
+
+OpenAI/BYOK network tests remain mocked, and Demo cases remain deterministic. Actual local Ollama is used in the real browser case and benchmark.
+
+The four browser cases cover independent mobile audience sessions with Demo, the same journey with genuine Ollama, delayed-session mutation protection, and signup/interests/admin creator grants/both creation paths/private asset-and-helper rejection/canon publication/playback in a custom universe. Tests use isolated SQLite and Chrome. Account/admin fixture setup uses synthetic identities and the trusted local bootstrap. Demo-generated content remains labeled.
+
+The real local benchmark used `qwen3:4b-instruct`, 8192 context, temperature 0, 110000 ms deadline and 2400 maximum output tokens. Its final fixed-input run completed official production in 38.569 s, three pitches in 14.370 s, private production in 27.498 s and a cited story answer in 4.195 s. Both episodes succeeded on attempt one with zero failed stage events. A playable preview was observed while Critic ran in both universes. Pitches/answers had zero schema-validation retries. Publication replay preserved one episode per run. Exact outputs and observations are in `benchmarks/qwen3-4b-instruct-2026-11-12.json` and `benchmarks/README.md`.
+
+The first pitch benchmark timed out with the expanded full schema. Bounded compact pitch fields expanded server-side resolved that failure. A browser run failed because its provider selector matched the production and story-helper pickers. Scoping the selector to round controls corrected the test. Another run reproduced the mobile Vote-anchor layout shift after async episode loading. Moving the mobile vote panel first corrected the application behavior. Earlier failures remain failures in this record.
+
+## Files and boundaries
+
+New platform code lives in `src/server/platform/`, `src/components/platform/`, `src/app/account/`, `src/app/universes/`, `src/app/studio/worlds/` and their account/admin/universe/assets/models/pitches API handlers. Shared live stage contracts live in `src/ai/providers/stage-contracts.ts`. Existing live/session/production handlers, stores, providers, domain schemas, navigation, audience/studio views and video composition were extended. New scripts cover admin bootstrap, migration verification and repeatable benchmarks. Focused platform tests and production/browser regression tests were added or updated. README, handoff, architecture, project conventions and environment examples were updated. Git commit manifests provide the complete file list.
+
+No application dependencies or infrastructure services were added for this expansion. No paid API request, deployment or external push occurred. No credentials were added to source, benchmark outputs or documentation. Hosted OpenAI uses a server model allowlist and explicit consent, including paid retry consent. Session BYOK remains authenticated HTTPS request/page memory and stays outside background jobs and persistence. Both live adapters share bounded stage contracts, instructions and validated deterministic visual assembly.
+
+## Remaining limits
+
+- Physical iPhone joining/voting remains user-confirmed from the prior checkpoint. Its generated playback/caption failure remains unresolved. Chrome mobile/touch coverage provides separate evidence. This expansion has not completed a physical-phone or Safari acceptance pass.
+- Hosted OpenAI and real HTTPS BYOK await credentials and separate paid-call authorization. Transport/consent/isolation tests use doubles. Model capability errors are sanitized and surfaced, while real compatibility remains unverified.
+- Browser video uses reusable pictograms and CSS backgrounds. Protected reference-image storage and profile links are available. Upload UI, custom artwork rendering, generated images/audio/voices, MP4 export, forks and collaboration remain follow-on work.
+- Initial admin setup requires a signed-up account and local bootstrap. Email verification, password reset, deletion workflows and stronger hosted anti-abuse controls remain open.
+- Canon/story citation IDs and spoiler boundaries are validated. Human semantic grounding, preference fidelity and long-history continuity evaluation remain limited. The benchmark official dialogue is English despite its Taglish tone.
+- SQLite requires persistent local disk, and scheduling requires a running process/recovery worker. Earlier actual crash recovery passed with a natural 150-second lease. The new expansion retains regression coverage and still needs another long-duration/crash rehearsal under presentation conditions. No new memory-peak claim is made from the benchmark.
+
+## Final committed-build smoke check
+
+Application commit `2f37d3602ba2d619f38b8fb2ab07fd04739be5c3` was rebuilt successfully and served using the normal HTTPS launcher with diagnostic preloads removed and paid requests disabled. A smoke check initially encountered the previous build's QR alternative text. Rebuilding the committed source resolved the stale artifact.
+
+- PASS — nine existing/new routes returned 200, including account, universe, episode/character directories and compatible watch/studio/universe routes.
+- PASS — unknown world, room and episode returned 404.
+- PASS — the original stored episode retained its source round. Its historical results displayed two votes and the winning direction.
+- PASS — locally generated Studio QR displayed on the HTTPS origin.
+- PASS — desktop 1440-pixel and mobile 390-pixel landing/discovery checks, light/dark selection, no horizontal overflow and zero page JavaScript errors. Screenshots were visually inspected and remain under `/tmp/airl-home-*.png`.
+- PASS — curl verified the local CA and returned HTTP 200 from the room-state API. Listener inspection showed HTTPS bound to `192.168.88.9:3443` and Ollama only `127.0.0.1:11434`.
+
+The normal HTTPS demo and refreshed recovery worker were left running against `.data/airl-live.sqlite`, with paid requests disabled. No new persistent demo account was provisioned. Sign up on the HTTPS origin and use the local admin bootstrap to administer creator access or official publication. Physical iPhone playback remains pending.

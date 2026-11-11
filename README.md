@@ -2,9 +2,9 @@
 
 **The real world is the prompt.**
 
-AIRL combines community participation, fictional characters and creative production in one Next.js application. AIRL Live owns voting, CinemAI owns episodes, and PersonaAI supplies the shared characters of Barangay 2099.
+AIRL combines community participation, fictional characters and creative production in one Next.js application. AIRL Live owns voting, CinemAI owns episodes, and PersonaAI maintains universe-scoped characters and approved canon. Barangay 2099 is the official public universe. Creators can build private worlds and publish them to Explore.
 
-The current local milestone connects real votes to a persisted provider-selected production job, operator review and a portrait Remotion preview. Existing hosted OpenAI, request-scoped BYOK and local Ollama adapters remain available through creator settings and the CLI.
+The current local milestone connects real votes to a persisted provider-selected production job, role-protected human review and a portrait Remotion preview. Profiles, private interests, world settings, character/relationship editing, three AI-generated starting pitches and spoiler-scoped story answers are available. Existing hosted OpenAI, request-scoped BYOK and local Ollama adapters remain available through creator settings and the CLI.
 
 For system design, data ownership, migration options and candidate routes, read [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Actual test outcomes and verification limits are recorded in [VERIFICATION.md](VERIFICATION.md).
 
@@ -29,7 +29,7 @@ Install Node 24 normally for ongoing work because files under `/tmp` can disappe
 
 1. Open `/live/barangay-2099` in a normal window and a separate browser profile or private window.
 2. Join the room and cast a vote from each session. Aggregated results stream through the local server.
-3. Open `/studio/barangay-2099`, join and unlock operator access. Generate a one-time code in your own terminal with `npm run live:operator` and enter it in the studio.
+3. Sign up at `/account`. Bootstrap your existing account as admin using the local command below, then open `/studio/barangay-2099` and join. Admins manage official canon. Creator owners manage their custom worlds.
 4. Select Demo or Ollama, then choose Close voting & produce. The winner is frozen and one provider-tagged job is persisted for the round. The response schedules local execution using Next.js `after`.
 5. Inspect the production panel for actual stage timestamps, attempts and critic feedback. A successful draft enters review.
 6. Choose Approve & publish. The audience's Community episodes panel receives the published manifest and can play the new composition. Rejected drafts remain private.
@@ -37,9 +37,53 @@ Install Node 24 normally for ongoing work because files under `/tmp` can disappe
 
 Anonymous identities belong to sessions. Clearing cookies can create another identity. Ties, including an empty round, use displayed option order. Votes, closure, queued jobs and publication have database-backed idempotency protections.
 
+## Profiles and custom universes
+
+Accounts start as viewers. Interests are optional, private and editable. Anonymous voting remains available. An admin grants creator access from `/studio`. Initialize the first admin from the trusted local terminal after signing up.
+
+```sh
+npm run account:admin -- your-email@example.com
+```
+
+Creators use `/studio` to start from scratch or generate three editable pitches. Save a private world, edit its settings and cast, join its room, select a provider and close the vote. A validated script appears first, followed by a versioned playable preview while the Critic runs. Review and optionally correct proposed canon JSON before publication. Publish the universe separately to make its episodes and characters visible in Explore.
+
+| Route | Experience |
+| --- | --- |
+| `/account` | Signup, signin, signout and private interests |
+| `/universes` | Personalized public discovery |
+| `/universes/[id]` | Accessible world, episodes and timeline |
+| `/universes/[id]/episodes/[episodeId]` | Playback, seeking, captions, transcript, winning round and cited story helper |
+| `/universes/[id]/characters/[slug]` | Profile, relationships, canon timeline and story helper |
+| `/studio/worlds/[id]` | Owner/admin world settings, cast, relationships and production review |
+| `/live/[id]?round=[roundId]` | Scoped source-round results plus current room |
+
+The helper defaults to This episode on episode pages. Through this episode and Latest canon retrieve sources before inference. Studio draft sources require management permissions. Asking requires a signed-in profile. Hosted OpenAI and session BYOK require explicit consent for each operation. BYOK is supported for request-scoped pitches, answers and gateway previews. Background episodes support Demo, Ollama and configured Hosted OpenAI.
+
+### Existing data migration
+
+```sh
+npm run migrate:universes
+# After the preserved copy passes verification
+npm run migrate:universes -- --apply
+```
+
+The script backs up the existing database under ignored `.data/`, applies additive transactional migrations to the copy and checks legacy rows, IDs, memories, foreign keys and integrity. The current local database was migrated after copy verification, retaining its three characters, one published episode and both votes. Retain backups. New installations initialize the same schema automatically.
+
+### Verification and benchmark
+
+```sh
+npm run typecheck
+npm test
+npm run build
+npm run test:browser
+npm run benchmark:local
+```
+
+The benchmark uses fixed inputs in `benchmarks/local-inputs.json`, isolated SQLite, genuine local inference and disabled paid calls. It records model/settings, elapsed time, stage failures, attempts, preview availability, output artifacts and citations. Results and quality observations are recorded in `benchmarks/README.md`. Run inference checks sequentially on the M2 Pro / 16 GB Mac.
+
 ## Worker and recovery
 
-Room jobs use the existing local Live database. Room production defaults to Demo. Operators can select installed Ollama inference, or explicitly consent to Hosted OpenAI when server credentials are enabled. No creator key enters a job. Job states are queued, running, review, failed, published and rejected. Stage-level schema retries and one critic revision are bounded. Operators can retry failed room jobs up to three production attempts.
+Room jobs use the existing local Live database. Room production defaults to Ollama with `qwen3:4b-instruct`. Operators can select installed Ollama inference, or explicitly consent to Hosted OpenAI when server credentials are enabled. No creator key enters a job. Job states are queued, running, review, failed, published and rejected. Stage-level schema retries and one critic revision are bounded. Operators can retry failed room jobs up to three production attempts.
 
 If a process stops before an `after` callback completes, recover persisted work with:
 
@@ -61,18 +105,18 @@ Worker claims are serialized and have a bounded lease. Completed drafts are reus
 | `/discover` | Available modules and coming-soon concepts |
 | `/live` | Room directory |
 | `/live/barangay-2099` | Voting, streamed results and published community episodes |
-| `/studio` | Studio entry and provider settings link |
+| `/studio` | Owned worlds, both creation paths and admin creator grants |
 | `/studio/barangay-2099` | Room controls, job events, review and publication |
 | `/studio/ai` | Creator-protected provider tests and previews |
 | `/cinemai` | CinemAI landing page |
 | `/cinemai/watch/barangay-2099` | Existing storyboards and shared community panel |
 | `/cinemai/universe/barangay-2099` | Fictional universe |
-| `/persona` | Shared character library |
+| `/persona` | Universe directory for character libraries |
 | `/persona/captain-bot` | Character profile, scripted scenarios and AI conversation entry |
 | `/persona/tita-nena` | Tita Nena profile |
 | `/persona/kuya-taho` | Kuya Taho profile |
 
-Legacy `/watch/barangay-2099` and `/universe/barangay-2099` routes remain available. Unknown IDs return 404. The architecture plan distinguishes implemented routes from proposed series, episode, job, moderation, asset and account routes.
+Legacy `/watch/barangay-2099` and `/universe/barangay-2099` routes remain available. Unknown IDs return 404. The architecture plan records the implemented universe/account routes and candidate hosted features.
 
 ## AI modes
 
@@ -83,7 +127,7 @@ Legacy `/watch/barangay-2099` and `/universe/barangay-2099` routes remain availa
 | `hosted_openai` | Server key, configured model and explicit consent | Awaiting application credentials and authorized live test |
 | `creator_byok` | Creator's OpenAI key in page/request memory | Mocked key-isolation and security rejection tests passed. Real HTTPS inference pending |
 
-`AI_PROVIDER=demo` is the safe CLI default. The legacy `openai` identifier maps to `hosted_openai`. Room production has its own explicit provider selector. The selected mode/model is frozen on the round job. Hosted runs require per-round paid consent and server enablement. Creator BYOK remains request-only.
+`AI_PROVIDER=ollama` is the CLI default. Set `AI_PROVIDER=demo` for an offline rehearsal. The legacy `openai` identifier maps to `hosted_openai`. Room production has its own explicit provider selector. The selected mode/model is frozen on the round job. Hosted runs require per-round paid consent and server enablement. Creator BYOK remains request-only.
 
 ```sh
 npm run production -- "Ban Monday meetings"
@@ -95,7 +139,7 @@ Use the exact model name returned by your Ollama installation. A hosted function
 
 ## Provider settings and security
 
-Creator settings currently reuse the local operator role. Join and unlock the room studio, then open `/studio/ai`. Test connection performs a real structured character inference for the selected model. A successful Demo test is labeled deterministic.
+Creator settings require an account with admin or authorized creator role. Sign in, then open `/studio/ai`. Test connection performs a real structured character inference for the selected model. A successful Demo test is labeled deterministic.
 
 BYOK requires HTTPS, same-origin requests, authenticated creator access and explicit paid-request consent. Plain HTTP localhost rejects BYOK. Keys stay in page/request memory, clear when disconnected or the provider changes, and never enter cookies, web storage, URLs, logs, usage records or background jobs. Hosted OpenAI additionally requires server environment enablement. Providers never silently fall back.
 
@@ -141,16 +185,13 @@ npm run start
 
 Queue tests cover one job per round, private review drafts, idempotent publication, rejection, lease recovery, bounded retries and invalid media rejection. Media tests verify scene boundaries, timing, asset references and selected-choice content. These checks do not replace real-browser playback and accessibility testing.
 
-## Next development milestones
+## Next development priorities
 
-1. Complete browser playback, mobile voting, keyboard, caption and theme QA.
-2. Migrate shared data and identity to Supabase with transaction and RLS tests.
-3. Move hosted scheduling to durable jobs with renewable leases and an outbox.
-4. Add QR access, room management, deadlines and moderation for audience suggestions.
-5. Extend approved art and implement bounded MP4/audio export after license and performance verification.
-
-QuestAI, RemixAI, WorldForge and AIRL Memories remain discoverable Coming Soon entries. The architecture plan records possible routes and the prerequisites for each.
-
+1. Finish physical-iPhone playback/caption verification.
+2. Rehearse repeated world productions and recovery under presentation load.
+3. Validate hosted OpenAI and HTTPS BYOK after credentials and paid-call approval.
+4. Extend device, keyboard, reduced-motion and accessibility coverage.
+5. Plan universe forks, creator-supplied art/audio and team collaboration. Hosted storage, scheduling and exports require a separate milestone.
 
 ## Integration sprint acceptance
 
@@ -179,7 +220,7 @@ If Wi-Fi uses another interface, select its assigned private IPv4 address. Setup
 
 Open the printed `https://<LAN-IP>:3443/studio/barangay-2099` address on the Mac. Its room-joining panel displays a QR code and clickable audience URL. Scan it using the iPhone camera after trusting the CA. At the top of the audience room, Vote on next chapter jumps directly to joining and choices; Watch episodes returns to playback. The normal loopback Studio instead explains how to get a phone-accessible QR. Port 3443 is configurable using `AIRL_DEMO_PORT`. If access fails, check the IP, Wi-Fi client isolation, certificate trust and macOS incoming-connection prompt. Keep router port forwarding disabled.
 
-In a second terminal using Node 24 and the same `AIRL_LIVE_DB_PATH`, run `npm run live:operator` and redeem the displayed code privately in Studio. Select Ollama and `qwen3:4b-instruct`, collect phone votes, close voting, inspect actual stage events, then approve and play the episode on the phone. Test captions, scene seeking and locking/unlocking Safari. Operator sessions belong to the chosen HTTPS origin; a localhost login does not transfer.
+Sign in as an admin on the HTTPS origin to publish official canon. Bootstrap the signed-up account locally using `npm run account:admin -- your-email@example.com` with the same database. Legacy operator codes provide official-room round controls and draft inspection. Publication requires the admin account. Select Ollama and `qwen3:4b-instruct`, collect phone votes, close voting, inspect actual stage events, then approve and play the episode on the phone. Test captions, scene seeking and locking/unlocking Safari. Operator sessions belong to the chosen HTTPS origin; a localhost login does not transfer.
 
 For crash recovery, restart `npm run demo:lan` with the same database and start `npm run production:worker` in another terminal with that database. A killed running job becomes claimable after its 150-second lease expires. The worker polls every two seconds. Recovery can repeat inference, reuses completed drafts when available and preserves publication idempotency. Failed jobs require operator retry and retain the three-attempt limit. Keep the worker running during the presentation.
 

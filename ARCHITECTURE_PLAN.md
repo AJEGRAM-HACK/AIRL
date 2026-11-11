@@ -2,6 +2,34 @@
 
 _Last updated November 12, 2026._
 
+## Multi-universe implementation
+
+The local implementation now includes profiles, viewer/creator/admin roles, optional private interests, owned worlds, public discovery, settings, configurable cast, scoped relationships/assets, ordered episodes/canon, AI pitches and grounded story answers. Local salted scrypt passwords and opaque HttpOnly cookie sessions reuse the existing server architecture. Account recovery and hosted identity hardening remain future work.
+
+`src/server/platform/migration.ts` adds tables transactionally and backfills the official universe while preserving legacy tables and IDs. `scripts/migrate-universes.ts` verifies a SQLite backup before applying to live data. Universe characters use a composite universe/slug key. Asset access and draft retrieval use the same visibility/ownership checks. Archival is recoverable. Characters referenced by production snapshots remain retained.
+
+`src/server/platform/store.ts` owns profile/world/cast/asset access. `src/server/platform/ai.ts` owns pitch inference and pre-inference spoiler-scoped retrieval. `src/ai/providers/stage-contracts.ts` shares live adapter contracts, bounded context, instructions and deterministic manifest assembly. Provider-specific transport stays in Ollama/OpenAI adapters. All stages still validate against the shared production domain.
+
+Closing a round freezes world, cast, approved history, winner, model and explicit story order. Script validation persists the outline. Manifest validation persists a playable version before Critic execution. Compatible retries reuse validated stages and retain the last preview. Publication validates corrected canon and atomically commits the episode, memories, relationships and ordered source events. Repeated publication preserves one result. Public job status omits scripts and private previews.
+
+Story retrieval first filters visibility, universe, optional character and explicit story order. Episode scope excludes later events before inference. Model citations must name supplied source IDs. Definite answers require a citation. This validates source references while semantic grounding still benefits from human review.
+
+### Implemented additional routes
+
+- `/account`, `/universes`, `/universes/[id]`
+- `/universes/[id]/episodes`, `/universes/[id]/episodes/[episodeId]`
+- `/universes/[id]/characters`, `/universes/[id]/characters/[slug]`
+- `/studio/worlds/[id]`, generic `/live/[id]` and scoped historical `?round=` results
+- `GET/POST /api/account`, `GET/POST /api/admin`
+- `GET/POST /api/universes`, `GET/PATCH/DELETE /api/universes/[id]`
+- `POST /api/universes/[id]/{characters,relationships,assets,ask}`, `DELETE .../characters`
+- `GET /api/assets/[id]`, `GET /api/models`, `POST /api/pitches`
+- Existing live/session/production APIs accept scoped universe identifiers and preserve official defaults.
+
+Private worlds start unpublished. Owners/admins can edit and archive them. Admins grant creator access, and only admins manage official canon. BYOK remains request-only and HTTPS. Hosted models come from a server allowlist, require server enablement and per-operation consent, including explicit paid retries. No provider/model fallback occurs.
+
+Creator-supplied reference images can be stored through the protected image API and linked from character profiles. Custom artwork rendering, audio, forks and team collaboration remain follow-on work. Browser compositions use reusable pictograms and approved CSS backgrounds, including neutral settings.
+
 ## 1. Product boundaries
 
 AIRL is the platform. AIRL Live owns audience participation and community decisions. CinemAI owns episodic storytelling and presentation. PersonaAI owns shared character definitions. The provider gateway supplies creative intelligence to these features. The media engine translates validated manifests into playable compositions.
@@ -13,7 +41,7 @@ The primary demonstration connects participation, creative workflow, review and 
 - Keep one Next.js App Router repository and a shared TypeScript domain.
 - Reuse the existing components, session system, voting implementation, character records and agent schemas.
 - Use SQLite as the current local persistence adapter. It requires a persistent writable filesystem. Hosted Vercel execution requires migration to a hosted database.
-- Use a server-side provider registry. Demo is the default room-production mode. Operators may select Ollama or explicitly authorize enabled Hosted OpenAI jobs. Paid inference stays behind explicit request consent and server configuration.
+- Use a server-side provider registry. Ollama qwen3:4b-instruct is the default room-production mode. Operators may select Ollama or explicitly authorize enabled Hosted OpenAI jobs. Paid inference stays behind explicit request consent and server configuration.
 - Persist room jobs before executing them. Associate one job with each closed round through a unique constraint.
 - Execute sequential creative stages and serialize room jobs locally. Separate publication from generation so operators can review drafts.
 - Use the same validated media manifest for preview and later export. Store approved asset IDs and animation enums rather than executable model output.
@@ -162,7 +190,7 @@ MP4 output, FFmpeg encoding, voice tracks, audio mixing, expression sprites and 
 | `/watch/[roomId]` | Compatibility | Existing audience route |
 | `/universe/[slug]` | Compatibility | Existing universe route |
 
-Only Barangay 2099 is currently supported by dynamic room and universe wrappers. IDs are validated and unknown values return 404. A public studio shell does not grant operator privileges.
+Registered accessible universes are supported by dynamic wrappers. Unknown and inaccessible private identifiers return 404. Studio actions enforce account roles and universe ownership. Official canon publication requires an admin. Legacy operator codes grant narrow official-room controls and draft inspection.
 
 ### Current API routes
 
@@ -192,13 +220,13 @@ These are proposed designs, not implementation claims.
 | `/cinemai/series/[seriesId]` | Series archive and branches | Introduce series identity separate from room identity |
 | `/cinemai/episodes/[episodeId]` | Stable published episode URL | Public ownership and episode routing model |
 | `/cinemai/universe/[worldId]/timeline` | Canon and branch history | Versioned story bible and branch rules |
-| `/studio/rooms/new` | Create rooms | Hosted creator identities and room ownership |
+| `/studio/rooms/new` | Possible standalone room editor | Worlds already create scoped rooms through `/studio` |
 | `/studio/[roomId]/production/[jobId]` | Detailed job inspection | Cross-room authorization and job pagination |
 | `/studio/[roomId]/moderation` | Review community suggestions | Submission consent and moderation policy |
 | `/studio/assets` | Approved media library | Storage ownership, licenses and upload validation |
 | `/studio/usage` | Usage and budget administration | Durable creator identity and provider-specific pricing |
 | `/settings/ai` | Possible replacement for `/studio/ai` | Choose creator settings versus operator workspace ownership |
-| `/profile` | Participant account and preferences | Supabase Auth, privacy and deletion behavior |
+| `/profile` | Possible alias for implemented `/account` | Decide whether another URL is useful |
 | `/persona/[characterId]/chat` | Dedicated conversation | Consent, private memory and retention policy |
 | `/quest`, `/remix`, `/worldforge`, `/memories` | Future modules | Separate bounded feature specifications |
 
