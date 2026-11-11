@@ -17,7 +17,9 @@
     "test:providers": "tsx --test tests/providers.test.ts",
     "production:worker": "tsx scripts/production-worker.ts --watch",
     "production:drain": "tsx scripts/production-worker.ts",
-    "test:room-production": "tsx --test tests/room-production.test.ts"
+    "test:room-production": "tsx --test tests/room-production.test.ts",
+    "test:sprint": "tsx --test tests/sprint.test.ts",
+    "test:browser": "playwright test"
   },
   "dependencies": {
     "@next/env": "16.4.6",
@@ -36,6 +38,7 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.0",
     "@tailwindcss/postcss": "4.3.5",
     "@types/node": "26.6.6",
     "@types/react": "19.3.0",

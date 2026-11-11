@@ -1,3 +1,4 @@
+import { RoomProviderSelection } from '@/features/live/production-selection';
 import { after } from 'next/server';
 import { drainRoomJobs } from '@/server/production/room-jobs';
 import { RoomSnapshot, VoteInput, RoundInput } from '@/features/live/types';
@@ -5,6 +6,7 @@ import { DEMO_ROOM } from '@/lib/fixtures';
 import { LiveError, LiveStore } from '@/server/live/store';
 import { body, checkRequest, errorResponse, sessionToken, withStore } from '@/server/live/http';
 export const runtime = 'nodejs';
+export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
 type Context = { params: Promise<{ roomId: string; action: string }> };
 export async function GET(request: Request, context: Context) {
@@ -58,12 +60,11 @@ export async function POST(request: Request, context: Context) {
       const vote = VoteInput.parse(input);
       store.vote(token, vote.roundId, vote.optionId);
     } else if (action === 'close' || action === 'next') {
-      const { roundId } = RoundInput.parse(input);
       if (action === 'close') {
-        store.closeRound(token, roundId);
+        const parsed = RoundInput.extend({ provider: RoomProviderSelection.optional() }).parse(input);
+        store.closeRound(token, parsed.roundId, parsed.provider);
         after(async () => { await drainRoomJobs(); });
-      }
-      else store.nextRound(token, roundId);
+      } else store.nextRound(token, RoundInput.parse(input).roundId);
     } else throw new LiveError(404, 'Room action not found.');
     return { room: store.snapshot(), session: store.personal(token) };
   });

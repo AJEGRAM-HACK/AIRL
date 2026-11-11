@@ -4,6 +4,7 @@ import { RoomJobs, drainRoomJobs } from '@/server/production/room-jobs';
 import { LiveStore, LiveError } from '@/server/live/store';
 import { checkRequest, sessionToken, errorResponse, body } from '@/server/live/http';
 export const runtime = 'nodejs';
+export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   const live = new LiveStore();

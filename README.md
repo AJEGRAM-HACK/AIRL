@@ -4,7 +4,7 @@
 
 AIRL combines community participation, fictional characters and creative production in one Next.js application. AIRL Live owns voting, CinemAI owns episodes, and PersonaAI supplies the shared characters of Barangay 2099.
 
-The current local milestone connects real votes to a persisted deterministic production job, operator review and a portrait Remotion preview. Existing hosted OpenAI, request-scoped BYOK and local Ollama adapters remain available through creator settings and the CLI.
+The current local milestone connects real votes to a persisted provider-selected production job, operator review and a portrait Remotion preview. Existing hosted OpenAI, request-scoped BYOK and local Ollama adapters remain available through creator settings and the CLI.
 
 For system design, data ownership, migration options and candidate routes, read [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Actual test outcomes and verification limits are recorded in [VERIFICATION.md](VERIFICATION.md).
 
@@ -30,7 +30,7 @@ Install Node 24 normally for ongoing work because files under `/tmp` can disappe
 1. Open `/live/barangay-2099` in a normal window and a separate browser profile or private window.
 2. Join the room and cast a vote from each session. Aggregated results stream through the local server.
 3. Open `/studio/barangay-2099`, join and unlock operator access. Generate a one-time code in your own terminal with `npm run live:operator` and enter it in the studio.
-4. Choose Close voting & produce. The winner is frozen and one Demo job is persisted for the round. The response schedules local execution using Next.js `after`.
+4. Select Demo or Ollama, then choose Close voting & produce. The winner is frozen and one provider-tagged job is persisted for the round. The response schedules local execution using Next.js `after`.
 5. Inspect the production panel for actual stage timestamps, attempts and critic feedback. A successful draft enters review.
 6. Choose Approve & publish. The audience's Community episodes panel receives the published manifest and can play the new composition. Rejected drafts remain private.
 7. Start next round when ready. Existing votes and published episodes remain in storage.
@@ -39,7 +39,7 @@ Anonymous identities belong to sessions. Clearing cookies can create another ide
 
 ## Worker and recovery
 
-Room jobs use the existing local Live database. The default runner explicitly selects Demo and requires no AI credits. Job states are queued, running, review, failed, published and rejected. Stage-level schema retries and one critic revision are bounded. Operators can retry failed room jobs up to three production attempts.
+Room jobs use the existing local Live database. Room production defaults to Demo. Operators can select installed Ollama inference, or explicitly consent to Hosted OpenAI when server credentials are enabled. No creator key enters a job. Job states are queued, running, review, failed, published and rejected. Stage-level schema retries and one critic revision are bounded. Operators can retry failed room jobs up to three production attempts.
 
 If a process stops before an `after` callback completes, recover persisted work with:
 
@@ -83,7 +83,7 @@ Legacy `/watch/barangay-2099` and `/universe/barangay-2099` routes remain availa
 | `hosted_openai` | Server key, configured model and explicit consent | Awaiting application credentials and authorized live test |
 | `creator_byok` | Creator's OpenAI key in page/request memory | Mocked key-isolation and security rejection tests passed. Real HTTPS inference pending |
 
-`AI_PROVIDER=demo` is the safe CLI default. The legacy `openai` identifier maps to `hosted_openai`. Automatic room production currently uses Demo independently of provider preview selection. It does not use creator keys or automatically make paid requests.
+`AI_PROVIDER=demo` is the safe CLI default. The legacy `openai` identifier maps to `hosted_openai`. Room production has its own explicit provider selector. The selected mode/model is frozen on the round job. Hosted runs require per-round paid consent and server enablement. Creator BYOK remains request-only.
 
 ```sh
 npm run production -- "Ban Monday meetings"
@@ -99,7 +99,7 @@ Creator settings currently reuse the local operator role. Join and unlock the ro
 
 BYOK requires HTTPS, same-origin requests, authenticated creator access and explicit paid-request consent. Plain HTTP localhost rejects BYOK. Keys stay in page/request memory, clear when disconnected or the provider changes, and never enter cookies, web storage, URLs, logs, usage records or background jobs. Hosted OpenAI additionally requires server environment enablement. Providers never silently fall back.
 
-Gateway previews use request-local memory and do not publish canon. CLI production and room production persist artifacts according to their separate review/publication paths. Usage records contain creator-scoped metadata, timestamps, reported tokens, sanitized failures and optional estimates rather than prompts or keys. Cloud trace export is disabled by default.
+Gateway previews use request-local memory and do not publish canon. CLI production and room production persist artifacts according to their separate review/publication paths. Approved room memory updates now commit atomically with publication, and PersonaAI prompts and profile pages read this canonical memory. Settings previews receive current approved profiles without changing public canon. Usage records contain creator-scoped metadata, timestamps, reported tokens, sanitized failures and optional estimates rather than prompts or keys. Cloud trace export is disabled by default.
 
 ## Configuration and storage
 
@@ -119,11 +119,11 @@ SQLite uses Node 24's built-in implementation and needs a persistent writable fi
 
 New manifests play through Remotion at 720 × 1280 and 30 FPS. The default Demo composition lasts 18 seconds across three scenes. It uses approved CSS backgrounds, reusable Lucide character pictograms, camera/entrance presets, timed captions, transcript access and reduced-motion handling. Asset IDs and animations are validated enums. Model output cannot execute code or choose filesystem paths.
 
-Legacy storyboard fixtures remain labeled and available. MP4 export, audio, voice synthesis and higher-resolution artwork remain later milestones.
+Generated episodes and labeled reference fixtures share one audience episode selector. Studio shows genuine job modes, model IDs, attempts, events and critic results. Legacy disconnected agent cards and seeded dashboard counters have been removed. MP4 export, audio, voice synthesis and higher-resolution artwork remain later milestones.
 
 Remotion packages are pinned to matching versions for this local evaluation. Confirm license eligibility before commercial hosting. Its documented free-license criteria include noncommercial evaluation. [Remotion license FAQ](https://www.remotion.dev/docs/license/faq)
 
-The Color theme selector supports System, Light and Dark, preserves preference locally and responds to system changes. Browser visual QA remains pending if the computer-use host is unavailable.
+The Color theme selector supports System, Light and Dark, preserves preference locally and responds to system changes. Chrome acceptance is available through Playwright using the locally installed browser.
 
 ## Tests and production build
 
@@ -132,6 +132,8 @@ npm run test:production
 npm run test:live
 npm run test:providers
 npm run test:room-production
+npm run test:sprint
+npm run test:browser
 npm run typecheck
 npm run build
 npm run start
@@ -148,3 +150,12 @@ Queue tests cover one job per round, private review drafts, idempotent publicati
 5. Extend approved art and implement bounded MP4/audio export after license and performance verification.
 
 QuestAI, RemixAI, WorldForge and AIRL Memories remain discoverable Coming Soon entries. The architecture plan records possible routes and the prerequisites for each.
+
+
+## Integration sprint acceptance
+
+The browser suite starts an isolated production server on port 3100 and a temporary SQLite database. It runs Demo and real Ollama scenarios with two independent mobile audience contexts plus an operator. Tests use real voting controls, provider selection, review, approval, advancing Remotion frames, scene seeking, captions, unified episode selection and published PersonaAI memory. Chrome must be installed. Ollama must serve `qwen3:4b-instruct` for the real-model scenario. No OpenAI test is executed automatically.
+
+Review rejection now uses a conditional SQL transition, while publication reads and commits under an immediate transaction. Racing decisions cannot overwrite a finalized state. Concurrent-worker regression tests exercise this behavior. Provider jobs retain mode/model/consent metadata and creator attribution, but no credential. Usage quota and estimated budget checks also apply to room inference.
+
+Local inference uses compact story/review context and bounded per-stage output limits within the configured total timeout. A timed-out or critic-rejected run remains failed or in review as appropriate. Retrying never switches providers. Actor memories and history become canonical only through approval. Demo replies and real-model prompts use the same approved memory reader.

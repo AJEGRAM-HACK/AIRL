@@ -1,3 +1,4 @@
+import { canonicalCharacters } from '@/ai/memory/canonical';
 import { ReplyInput, ReplyOutput, type CharacterReplyInput, type Mode } from '@/ai/schemas/gateway';
 import { scriptedResponse } from '@/features/persona/scenarios';
 import { z } from 'zod';
@@ -21,7 +22,8 @@ export class DemoCreativeProvider implements CreativeAIProvider {
   readonly mode = 'demo';
   async generateCharacterReply(input: CharacterReplyInput) {
     ReplyInput.parse(input);
-    return ReplyOutput.parse({ text: scriptedResponse(input.characterId, /karaoke/i.test(input.message) ? 'decision' : 'greeting') });
+    const character = canonicalCharacters().find(item => item.id === input.characterId)!;
+    return ReplyOutput.parse({ text: /remember|memory|recall|tandaan/i.test(input.message) ? character.memories.slice(-4).join(' ') : scriptedResponse(input.characterId, /karaoke/i.test(input.message) ? 'decision' : 'greeting') });
   }
   async generateStory(input: StoryInput) {
     Input.parse(input);

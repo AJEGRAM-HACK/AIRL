@@ -8,6 +8,7 @@ export interface Executor {
 }
 // Persist safe classifications, never raw SDK error messages or request bodies.
 export function safeFailure(error: unknown) {
+  if (error instanceof Error && ['AbortError','TimeoutError'].includes(error.name)) return { code: 'request_timeout_or_cancelled' };
   const status = typeof error === 'object' && error !== null && 'status' in error ? Number(error.status) : undefined;
   return { code: status === 401 ? 'authentication_failed' : status === 403 || status === 404 ? 'model_access_failed' : status === 429 ? 'rate_limit_or_quota' : error instanceof z.ZodError ? 'schema_validation_failed' : 'execution_failed', ...(Number.isFinite(status) ? { httpStatus: status } : {}) };
 }
@@ -19,7 +20,7 @@ export async function produce(store: ProductionStore, executor: Executor, rawInp
     store.event(id, 'Connection', 1, 'started');
     await executor.preflight();
     store.event(id, 'Connection', 1, 'succeeded', { model, executionMode: executor.executionMode || 'openai' });
-    const context = store.context(input.roomId, executor.executionMode || 'openai');
+    const context = store.context(input.roomId, executor.executionMode || 'openai', deferPublication);
     const base = JSON.stringify({ input, context });
     async function stage<T extends z.ZodType>(name: Stage, schema: T, prompt: string, validate?: (value: z.infer<T>) => void): Promise<z.infer<T>> {
       for (let attempt = 1; attempt <= 2; attempt++) {

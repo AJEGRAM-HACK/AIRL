@@ -1,3 +1,4 @@
+import type { RoomProvider } from './production-selection';
 'use client';
 import { RoomProduction } from '@/features/production/room-production';
 import { useEffect, useState } from 'react';
@@ -12,6 +13,7 @@ export function CommunityPanel({ operatorView = false }: { operatorView?: boolea
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
+  const [provider, setProvider] = useState<RoomProvider>({ mode: 'demo', consent: false });
   const [connected, setConnected] = useState(false);
   useEffect(() => {
     let active = true;
@@ -56,7 +58,7 @@ export function CommunityPanel({ operatorView = false }: { operatorView?: boolea
   return <section className="vote-panel community-panel" aria-label={operatorView ? 'Room voting controls' : 'Community vote'}>
     <div className="eyebrow mint"><Radio size={15}/>{connected ? 'CONNECTED TO ROOM' : 'CONNECTING · RETRYING AUTOMATICALLY'}</div>
     <h2>{operatorView ? 'Community control' : 'What should Captain Bot do next?'}</h2>
-    <p>Real local votes · Demo creative experience</p>
+    <p>Real local votes · Operator-selected production</p>
     {error && <div className="form-error" role="alert">{error}</div>}
     {!room ? <p role="status">Loading room…</p> : <>
       <div className="community-stats"><span><b>{room.participantCount}</b> joined sessions</span><span><b>{room.totalVotes}</b> votes this round</span></div>
@@ -69,13 +71,13 @@ export function CommunityPanel({ operatorView = false }: { operatorView?: boolea
         </label>;
       })}</fieldset>
       {!session.joined ? <Button disabled={pending} onClick={() => action('/api/live/session', {})}>Join room to vote <Vote size={16}/></Button> : <Button disabled={pending || !!session.vote || !selection || room.status !== 'open'} onClick={() => action(`${base}/vote`, { roundId: room.roundId, optionId: selection })}>{session.vote ? <><Check size={16}/> Vote recorded</> : pending ? 'Saving…' : 'Cast my vote'}</Button>}
-      {winner && <div className="winner-callout" role="status"><b>Winning direction</b><p>{winner.title}</p><small>Ties use the displayed option order. Demo production is queued from this finalized direction. An operator reviews the result before publication.</small></div>}
+      {winner && <div className="winner-callout" role="status"><b>Winning direction</b><p>{winner.title}</p><small>Ties use the displayed option order. Production is queued from this finalized direction. An operator reviews the result before publication.</small></div>}
       <p className="fine-print">One vote per anonymous session per round. Clearing cookies creates a new identity. Counts update across sessions through the local server.</p>
       {operatorView && <div className="operator-controls"><h3>Operator controls</h3>{!session.operator ? <>
         <p>Run <code>npm run live:operator</code> in the project terminal, then enter the one-time code.</p>
         <form onSubmit={event => { event.preventDefault(); void action('/api/live/operator', { code }); }}><label htmlFor="operator-code">One-time operator code</label><input id="operator-code" type="password" autoComplete="off" value={code} onChange={event => setCode(event.target.value)} required/><Button variant="outline" disabled={!session.joined || pending || !code}>Unlock controls</Button></form><small>Join the room before unlocking controls.</small>
-      </> : <><Button variant="outline" disabled={pending || room.status !== 'open'} onClick={() => action(`${base}/close`, { roundId: room.roundId })}>Close voting & produce</Button><Button variant="outline" disabled={pending || room.status !== 'closed'} onClick={() => action(`${base}/next`, { roundId: room.roundId })}>Start next round</Button></>}</div>}
+      </> : <><label className="job-picker">Production provider<select aria-label="Production provider" disabled={pending || room.status !== 'open'} value={provider.mode} onChange={event => setProvider({mode:event.target.value as RoomProvider['mode'],consent:false})}><option value="demo">Demo · deterministic</option><option value="ollama">Ollama · local inference</option><option value="hosted_openai">Hosted OpenAI · paid</option></select></label>{provider.mode !== 'demo' && <label className="job-picker">Model identifier (optional for local discovery)<input aria-label="Production model" value={provider.model || ''} onChange={event => setProvider({...provider,model:event.target.value || undefined})}/></label>}{provider.mode === 'hosted_openai' && <label><input type="checkbox" checked={provider.consent} onChange={event=>setProvider({...provider,consent:event.target.checked})}/> I authorize this round's paid hosted production.</label>}<Button variant="outline" disabled={pending || room.status !== 'open' || (provider.mode === 'hosted_openai' && !provider.consent)} onClick={() => action(`${base}/close`, { roundId: room.roundId, provider })}>Close voting & produce</Button><Button variant="outline" disabled={pending || room.status !== 'closed'} onClick={() => action(`${base}/next`, { roundId: room.roundId })}>Start next round</Button></>}</div>}
     </>}
-    <RoomProduction operator={operatorView && session.operator}/>
+    {operatorView && <RoomProduction operator={session.operator}/>}
   </section>;
 }

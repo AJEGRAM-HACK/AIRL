@@ -1,3 +1,4 @@
+import { RoomProviderSelection, type RoomProvider } from '@/features/live/production-selection';
 import { DatabaseSync } from 'node:sqlite';
 import { randomBytes, randomUUID, createHash } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
@@ -25,6 +26,10 @@ export class LiveStore {
       CREATE TABLE IF NOT EXISTS ai_leases(resource TEXT PRIMARY KEY,lease_id TEXT NOT NULL,expires INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS room_jobs(id TEXT PRIMARY KEY,round_id TEXT NOT NULL UNIQUE,room_id TEXT NOT NULL,choice TEXT NOT NULL,status TEXT NOT NULL,attempts INTEGER NOT NULL DEFAULT 0,run_id TEXT,lease_until INTEGER,created INTEGER NOT NULL,updated INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS live_limits(identity TEXT PRIMARY KEY,count INTEGER NOT NULL,reset_at INTEGER NOT NULL);`);
+    const jobColumns = this.db.prepare('PRAGMA table_info(room_jobs)').all();
+    for (const [name, definition] of [['mode',"TEXT NOT NULL DEFAULT 'demo'"],['model','TEXT'],['paid_consent','INTEGER NOT NULL DEFAULT 0'],['requested_by','TEXT']]) {
+      if (!jobColumns.some(column => column.name === name)) this.db.exec(`ALTER TABLE room_jobs ADD COLUMN ${name} ${definition}`);
+    }
     if (!this.db.prepare('SELECT id FROM live_rounds WHERE room_id=? LIMIT 1').get(DEMO_ROOM)) {
       this.db.exec('BEGIN IMMEDIATE');
       try {
@@ -120,8 +125,10 @@ export class LiveStore {
       this.db.exec('COMMIT');
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
-  closeRound(token: string | undefined, roundId: string) {
-    this.requireSession(token, true);
+  closeRound(token: string | undefined, roundId: string, requested: Partial<RoomProvider> = {}) {
+    const owner = this.requireSession(token, true);
+    const provider = RoomProviderSelection.parse(requested);
+    if (provider.mode === 'hosted_openai' && (!provider.consent || process.env.AIRL_ALLOW_LIVE_REQUESTS !== 'true' || !process.env.OPENAI_API_KEY || !process.env.OPENAI_MODEL)) throw new LiveError(403,'Hosted production requires explicit consent and enabled server credentials.');
     this.db.exec('BEGIN IMMEDIATE');
     try {
       const round = this.db.prepare('SELECT * FROM live_rounds WHERE id=? AND room_id=?').get(roundId, DEMO_ROOM);
@@ -132,7 +139,7 @@ export class LiveStore {
       }
       const closed = this.db.prepare('SELECT winner FROM live_rounds WHERE id=?').get(roundId)!;
       const option = this.db.prepare('SELECT title FROM live_options WHERE round_id=? AND id=?').get(roundId,String(closed.winner))!;
-      this.db.prepare("INSERT OR IGNORE INTO room_jobs(id,round_id,room_id,choice,status,created,updated) VALUES(?,?,?,?,?,?,?)").run(randomUUID(),roundId,DEMO_ROOM,String(option.title),'queued',Date.now(),Date.now());
+      this.db.prepare("INSERT OR IGNORE INTO room_jobs(id,round_id,room_id,choice,status,created,updated,mode,model,paid_consent,requested_by) VALUES(?,?,?,?,?,?,?,?,?,?,?)").run(randomUUID(),roundId,DEMO_ROOM,String(option.title),'queued',Date.now(),Date.now(),provider.mode,provider.model || null,provider.consent ? 1 : 0,owner);
       this.db.exec('COMMIT');
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }

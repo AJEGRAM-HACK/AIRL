@@ -8,7 +8,7 @@ import type { Character } from '../../lib/domain';
 import type { ProductionInput, Stage } from './schemas';
 export class ProductionStore {
   private db: DatabaseSync;
-  constructor(path: string) {
+  constructor(path: string, initialCharacters = characters) {
     mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path);
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
@@ -24,11 +24,20 @@ export class ProductionStore {
       this.db.exec("ALTER TABLE productions ADD COLUMN execution_mode TEXT NOT NULL DEFAULT 'openai'");
     }
     const seed = this.db.prepare('INSERT OR IGNORE INTO characters VALUES (?, ?)');
-    for (const c of characters) seed.run(c.id, JSON.stringify(c));
+    for (const c of initialCharacters) seed.run(c.id, JSON.stringify(c));
   }
-  context(roomId: string, executionMode: import('@/ai/schemas/gateway').Mode | 'openai' = 'openai') {
+  private applyMemories(updates: { characterId: string; memory: string }[]) {
+    for (const update of updates) {
+      const row = this.db.prepare('SELECT profile FROM characters WHERE id=?').get(update.characterId);
+      if (!row) throw new Error('Unknown character');
+      const profile = JSON.parse(String(row.profile)) as Character;
+      if (!profile.memories.includes(update.memory)) profile.memories.push(update.memory);
+      this.db.prepare('UPDATE characters SET profile=? WHERE id=?').run(JSON.stringify(profile),update.characterId);
+    }
+  }
+  context(roomId: string, executionMode: import('@/ai/schemas/gateway').Mode | 'openai' = 'openai', sharedCanon = false) {
     const profiles = this.db.prepare('SELECT profile FROM characters ORDER BY id').all().map(row => ({ ...characters.find(character => character.id === String(JSON.parse(String(row.profile)).id)), ...JSON.parse(String(row.profile)) }) as Character);
-    const history = this.db.prepare("SELECT e.artifact FROM episodes e JOIN productions p ON p.id=e.run_id WHERE e.room_id=? AND (p.execution_mode=? OR (?='hosted_openai' AND p.execution_mode='openai')) ORDER BY e.created_at DESC LIMIT 5").all(roomId, executionMode, executionMode).reverse().map(row => JSON.parse(String(row.artifact)));
+    const history = this.db.prepare("SELECT e.artifact FROM episodes e JOIN productions p ON p.id=e.run_id WHERE e.room_id=? AND (?=1 OR p.execution_mode=? OR (?='hosted_openai' AND p.execution_mode='openai')) ORDER BY e.created_at DESC LIMIT 5").all(roomId, sharedCanon ? 1 : 0, executionMode, executionMode).reverse().map(row => JSON.parse(String(row.artifact)));
     return { characters: profiles, seededHistory: episodes, approvedHistory: history };
   }
   create(input: ProductionInput, model: string, executionMode: import('@/ai/schemas/gateway').Mode | 'openai' = 'openai') {
@@ -44,13 +53,7 @@ export class ProductionStore {
     this.db.exec('BEGIN IMMEDIATE');
     try {
       this.db.prepare('INSERT INTO episodes VALUES (?, ?, ?, ?)').run(id, roomId, JSON.stringify(artifact), new Date().toISOString());
-      for (const update of updates) {
-        const row = this.db.prepare('SELECT profile FROM characters WHERE id=?').get(update.characterId);
-        if (!row) throw new Error('Unknown character');
-        const profile = ({ ...characters.find(character => character.id === String(JSON.parse(String(row.profile)).id)), ...JSON.parse(String(row.profile)) }) as Character;
-        if (!profile.memories.includes(update.memory)) profile.memories.push(update.memory);
-        this.db.prepare('UPDATE characters SET profile=? WHERE id=?').run(JSON.stringify(profile), update.characterId);
-      }
+      this.applyMemories(updates);
       this.finish(id, 'complete');
       this.db.exec('COMMIT');
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
@@ -75,12 +78,14 @@ export class ProductionStore {
       if (job.status === 'published') { this.db.exec('COMMIT'); return; }
       if (job.status !== 'review' || !job.run_id) throw new Error('Job is not ready for review');
       const artifact = this.draft(String(job.run_id));
-      if (!artifact?.critique?.approved || artifact.executionMode !== 'demo') throw new Error('Critic approval and demo mode are required');
+      if (!artifact?.critique?.approved || !['demo','ollama','hosted_openai','openai'].includes(artifact.executionMode)) throw new Error('Critic approval and supported execution mode are required');
+      const production = this.db.prepare('SELECT status,execution_mode FROM productions WHERE id=?').get(String(job.run_id));
+      if (production?.status !== 'review' || production.execution_mode !== artifact.executionMode || artifact.executionMode !== job.mode) throw new Error('Artifact does not match this reviewed production');
       const script = Script.parse(artifact.script);
       validateScript(script);
       validateManifest(Manifest.parse(artifact.manifest),script);
       this.db.prepare('INSERT INTO episodes VALUES(?,?,?,?)').run(String(job.run_id),String(job.room_id),JSON.stringify(artifact),new Date().toISOString());
-      // Room jobs currently use demo templates, which do not add canonical memory updates.
+      this.applyMemories(script.memoryUpdates);
       this.finish(String(job.run_id), 'complete');
       this.db.prepare("UPDATE room_jobs SET status='published',updated=? WHERE id=?").run(Date.now(),jobId);
       this.db.exec('COMMIT');

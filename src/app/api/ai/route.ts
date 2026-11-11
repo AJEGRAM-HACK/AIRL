@@ -1,3 +1,4 @@
+import { canonicalCharacters } from '@/ai/memory/canonical';
 import { inferenceLimits } from '@/ai/config/limits';
 import { GatewayRequest, type Usage } from '@/ai/schemas/gateway';
 import { selectProvider, ProviderError } from '@/ai/providers/registry';
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
       result = { connection: 'tested', reply: reply.text };
     } else if (input.operation === 'reply') result = await selected.provider.generateCharacterReply(input.reply!);
     else {
-      const memory = new ProductionStore(':memory:');
+      const memory = new ProductionStore(':memory:',canonicalCharacters());
       try {
         const job = await produce(memory, selected.executor, { roomId: 'barangay-2099', winningChoice: input.choice! }, selected.model);
         result = { ...job, events: memory.inspect(job.id).events.map(event => ({ stage: event.stage, status: event.status, attempt: event.attempt, timestamp: event.created_at })) };

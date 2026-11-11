@@ -21,7 +21,7 @@ export class OllamaCreativeProvider implements CreativeAIProvider {
   async preflight() {
     if (!(await ollamaModels(this.signal)).includes(this.model)) throw new Error('The selected Ollama model is not installed.');
   }
-  private async infer<T extends z.ZodType>(schema: T, instruction: string, input: unknown): Promise<z.infer<T>> {
+  private async infer<T extends z.ZodType>(schema: T, instruction: string, input: unknown, outputLimit = inferenceLimits().outputTokens): Promise<z.infer<T>> {
     if (active) throw new Error('Local inference is busy. Retry when the current request finishes.');
     active = true;
     let lockStore: LiveStore | undefined;
@@ -33,7 +33,7 @@ export class OllamaCreativeProvider implements CreativeAIProvider {
       const response = await fetch(`${endpoint}/api/chat`, {
         method: 'POST', redirect: 'error', signal: this.signal,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: this.model, stream: false, think: false, keep_alive: '5m', format: z.toJSONSchema(schema), options: { num_ctx: inferenceLimits().contextWindow, num_predict: inferenceLimits().outputTokens, temperature: 0 }, messages: [{ role: 'system', content: `${instruction} Return compact JSON matching the supplied schema. Exactly three scenes when requested. Use concise dialogue and no markdown.` }, { role: 'user', content: JSON.stringify(input) }] }),
+        body: JSON.stringify({ model: this.model, stream: false, think: false, keep_alive: '5m', format: z.toJSONSchema(schema), options: { num_ctx: inferenceLimits().contextWindow, num_predict: Math.min(inferenceLimits().outputTokens,outputLimit), temperature: 0 }, messages: [{ role: 'system', content: `${instruction} Return compact JSON matching the supplied schema. Exactly three scenes when requested. Use concise dialogue and no markdown.` }, { role: 'user', content: JSON.stringify(input) }] }),
       });
       if (!response.ok) throw new Error('Local inference failed.');
       const result = z.object({ message: z.object({ content: z.string() }), prompt_eval_count: z.number().optional(), eval_count: z.number().optional() }).parse(await response.json());
@@ -45,13 +45,19 @@ export class OllamaCreativeProvider implements CreativeAIProvider {
       active = false;
     }
   }
-  async generateStory(input: StoryInput & { context?: unknown }) { return this.infer(Concept, instructions['Story Director'], input); }
-  async generateScript(input: ScriptInput) { return this.infer(Script, instructions.Screenwriter, input); }
+  async generateStory(input: StoryInput & { context?: unknown }) { return this.infer(Concept, instructions['Story Director'] + ' Keep each field under 40 words.', input, 650); }
+  async generateScript(input: ScriptInput) { return this.infer(Script, instructions.Screenwriter + ' Use exactly one dialogue line of at most 20 words per scene. Give each of the three characters one scene and a brief grounded memory update. Keep the summary under 40 words.', input, 1400); }
   async generateScenes(input: ScriptOutput) {
     const visualPlan = Manifest.omit({ scenes: true }).extend({ scenes: z.array(Manifest.shape.scenes.element.omit({ id: true, dialogue: true })).length(3) });
-    const plan = await this.infer(visualPlan, instructions['Visual Producer'] + ' Choose visual properties only, in script order. Each scene should last 6 seconds. The application preserves original dialogue and scene IDs.', input);
+    const plan = await this.infer(visualPlan, instructions['Visual Producer'] + ' Choose visual properties only, in script order. Each scene should last 6 seconds. The application preserves original dialogue and scene IDs.', input, 800);
     return Manifest.parse({ title: plan.title, scenes: plan.scenes.map((scene, index) => ({ ...scene, id: input.scenes[index].id, dialogue: input.scenes[index].dialogue, characters: [...new Set([...scene.characters, ...input.scenes[index].dialogue.map(line => line.characterId)])] })) });
   }
-  async reviewContent(input: ReviewInput) { return this.infer(Critique, instructions['Creative Critic'], input); }
-  async generateCharacterReply(input: CharacterReplyInput) { return this.infer(ReplyOutput, 'Respond as the fictional character using only supplied canon and at most 80 words.', characterPrompt(input)); }
+  async reviewContent(input: ReviewInput) {
+    const extended = input as ReviewInput & { base?: string; concept?: unknown };
+    const base = extended.base ? JSON.parse(extended.base) : {};
+    const context = base.context || {};
+    const compact = { input: base.input, concept: extended.concept, characters: context.characters, history: (context.approvedHistory || []).map((episode: { script?: { summary?: string } }) => episode.script?.summary), script: input.script, manifest: input.manifest };
+    return this.infer(Critique, instructions['Creative Critic'] + ' Be concise. Each assessment must be under 30 words. Give at most three brief actionable feedback items. Do not retell the story or rewrite dialogue.', compact, 600);
+  }
+  async generateCharacterReply(input: CharacterReplyInput) { return this.infer(ReplyOutput, 'Respond as the fictional character using only supplied canon and at most 80 words.', characterPrompt(input), 256); }
 }

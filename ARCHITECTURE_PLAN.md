@@ -1,6 +1,6 @@
 # AIRL architecture and delivery plan
 
-_Last updated November 11, 2026._
+_Last updated November 12, 2026._
 
 ## 1. Product boundaries
 
@@ -13,7 +13,7 @@ The primary demonstration connects participation, creative workflow, review and 
 - Keep one Next.js App Router repository and a shared TypeScript domain.
 - Reuse the existing components, session system, voting implementation, character records and agent schemas.
 - Use SQLite as the current local persistence adapter. It requires a persistent writable filesystem. Hosted Vercel execution requires migration to a hosted database.
-- Use a server-side provider registry. Demo is the automatic room-production mode for this milestone. Paid inference stays behind explicit request consent and server configuration.
+- Use a server-side provider registry. Demo is the default room-production mode. Operators may select Ollama or explicitly authorize enabled Hosted OpenAI jobs. Paid inference stays behind explicit request consent and server configuration.
 - Persist room jobs before executing them. Associate one job with each closed round through a unique constraint.
 - Execute sequential creative stages and serialize room jobs locally. Separate publication from generation so operators can review drafts.
 - Use the same validated media manifest for preview and later export. Store approved asset IDs and animation enums rather than executable model output.
@@ -58,7 +58,7 @@ flowchart TD
   Persona[Shared character library] --> Runner
 ```
 
-The registry supports four modes. Automatic room jobs currently select Demo explicitly. Ollama and OpenAI remain available through creator-request previews and the production CLI according to their authorization boundaries. BYOK credentials never enter room jobs.
+The registry supports four modes. Room jobs persist Demo, Ollama or Hosted OpenAI selection together with explicit paid consent where required. BYOK remains limited to creator requests. BYOK credentials never enter room jobs.
 
 ## 5. Data model
 
@@ -116,7 +116,7 @@ stateDiagram-v2
 
 Unique round/job and run/episode references prevent duplicate publication. Closure and publication tolerate repeated requests. Job claims are serialized and bounded by a lease. A recovered job reuses a completed draft when available. An interrupted run is marked failed before starting a replacement. Each job has at most three production attempts, in addition to bounded per-stage validation retries.
 
-Execution may be attempted again after interruption. Do not promise exactly-once inference. Publication is transactional and idempotent. The local runner currently executes deterministic Demo jobs, which have no external side effects. Before enabling slower or paid workers, introduce renewable leases, fencing tokens, an outbox and provider-aware idempotency policy.
+Execution may be attempted again after interruption. Do not promise exactly-once inference. Publication is transactional and idempotent. Room workers execute the persisted provider selection. Hosted inference is gated by server configuration and recorded explicit consent. Before enabling slower or paid workers, introduce renewable leases, fencing tokens, an outbox and provider-aware idempotency policy.
 
 `after` improves local responsiveness but is limited by process and hosting lifetime. The database is the recovery source. The worker command is required to recover persisted work after a process crash. Trigger.dev should replace local scheduling for hosted durable execution while retaining application-owned job/event records.
 
@@ -207,7 +207,7 @@ Candidate APIs include `/api/rooms`, `/api/episodes/[episodeId]`, `/api/jobs/[jo
 
 ### Current local demonstration
 
-Run Next.js on Node 24 with SQLite on a persistent Mac filesystem. Ollama stays on loopback. Browser media previews avoid heavy export processes. Next.js `after` starts Demo work and the optional worker handles recovery.
+Run Next.js on Node 24 with SQLite on a persistent Mac filesystem. Ollama stays on loopback. Browser media previews avoid heavy export processes. Next.js `after` starts the explicitly selected provider job and the optional worker handles recovery.
 
 ### Preferred hosted architecture
 
@@ -233,7 +233,7 @@ A compatible persistent Node host can keep SQLite and local scheduling for a sma
 
 Verify duplicate submissions, vote/closure races, one job per round, no draft exposure, idempotent approval, replay-safe retries, claim expiry, missing assets, manifest timing and changes based on the winning choice. Verify that old provider IDs and stored episodes remain readable.
 
-Browser playback, keyboard focus, captions, mobile layouts and reduced-motion behavior need visual interaction QA. HTTP rendering and frame calculations do not prove playback in a real browser. OpenAI tests remain unverified until credentials and explicit approval are supplied.
+Playwright acceptance verifies browser playback, scene seeking, captions and the mobile audience flow for Demo and Ollama. Wider keyboard, reduced-motion and device coverage remain follow-up QA. OpenAI tests remain unverified until credentials and explicit approval are supplied.
 
 Known limits include one predefined room, anonymous identities that users can recreate, local session-based creator roles, no hosted RLS, no MP4/audio export and no full content moderation system. Generated quality and cultural consistency still require human review, including on successful local-model runs.
 
@@ -244,3 +244,16 @@ Known limits include one predefined room, anonymous identities that users can re
 - Remotion eligibility and evaluation provisions must be checked before commercial deployment. [License FAQ](https://www.remotion.dev/docs/license/faq)
 - Ollama structured JSON and local inference follow the official chat API. [Ollama chat API](https://docs.ollama.com/api/chat)
 - OpenAI agents retain SDK structured output contracts. [Agent definitions](https://developers.openai.com/api/docs/guides/agents/define-agents)
+
+
+## Integration sprint revisions
+
+The sprint connects local model inference to the same community job, review and publication path as Demo. A non-destructive migration adds provider mode, selected model, paid consent and requester identity to room jobs. Creator keys remain outside the queue. The worker verifies provider/model access using the existing registry and never substitutes another provider.
+
+Publication checks the artifact's execution mode against both the job and production record. Validated memory updates and the episode commit in the same transaction. Rejection uses a compare-and-set condition on review status, preventing races from reversing publication. Retry transitions are conditional as well.
+
+PersonaAI prompt construction reads approved canonical profiles through src/ai/memory/canonical.ts. Public character details read the same source. Drafts and rejected artifacts are excluded. Room production context includes approved episode history across providers, while standalone CLI compatibility keeps its existing mode-specific history behavior.
+
+The audience episode gallery combines generated and reference episodes. Studio's production surface derives state from real records and displays mode/model, retries and recorded stage transitions. Playwright acceptance uses an isolated production build and database, independent browser contexts and the actual Remotion player.
+
+Automatic hosted inference and any OpenAI smoke test continue to require explicit approval. Local deployment still requires a writable persistent filesystem, and paid billing, long-running cloud jobs and organizational license eligibility remain deployment concerns.

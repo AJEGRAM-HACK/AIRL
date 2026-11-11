@@ -128,3 +128,46 @@ Settings previews use request-local memory and return actual stage events to the
 - NOT TESTED — hosted durable execution, Supabase/RLS, MP4/audio export and commercial Remotion license eligibility.
 
 Automatic room jobs select Demo explicitly and make no paid inference requests. Existing CLI provider adapters and database files were preserved. No services were provisioned and no external push or deployment occurred. The local queue and Next.js after callback are not substitutes for hosted durable scheduling. The documented recovery worker is required after process interruptions when callbacks cannot finish.
+
+# Critical integration and Demo readiness sprint — November 12, 2026
+
+## Actual completed browser acceptance
+
+Playwright was added as a development dependency and used the installed Google Chrome browser. Acceptance runs start a production build on port 3100 with a separate temporary SQLite database. Tests use two independent mobile audience contexts and a separate operator context. The application still uses the existing SQLite, SSE, provider registry and Remotion composition.
+
+- PASS — initial Demo UI flow created real votes, selected the winner, executed all stages, published the episode and displayed it in the audience page.
+- PASS — actual Remotion frames advanced in Chrome. Seeking entered second and third scenes, captions toggled, and reference/generated episodes switched in one selector.
+- PASS — final Demo scenario passed in 10.6 seconds.
+- PASS — final real Ollama scenario used installed qwen3:4b-instruct. A new winning karaoke decision produced an AI-generated story and validated manifest through all four stages, operator approval, audience playback and published PersonaAI memory. The browser scenario passed in 49.3 seconds, including a 40.9-second production run.
+- PASS — a preceding real Ollama scenario also completed in 36 seconds with maximum sampled audience API latency of 56 ms. The final karaoke scenario's maximum sampled audience API latency was 157 ms.
+- PASS — no page JavaScript errors were recorded in the successful scenarios. The mobile audience document had no horizontal overflow.
+- PASS — the browser test confirmed exactly one resident Ollama model, 8192-token context and 3,806,582,538 reported model-residency bytes, approximately 3.55 GiB.
+- PASS — hardware inspection reported Apple M2 Pro and 17,179,869,184 bytes of unified memory.
+
+Screenshots of the successful final audience views were saved at /tmp/airl-demo-audience.png and /tmp/airl-ollama-audience.png. They are local QA artifacts and are not committed. Temporary browser databases preserve their independent test runs without changing the normal demonstration database.
+
+## Failures encountered and resolved
+
+- Initial acceptance locators matched duplicate character names and an identically named region/select. The tests now scope controls by their actual roles and use manifest-derived scene text.
+- Added an accessible explicit seek control and frame observation to validate the actual Player through UI interactions.
+- One integrated local-model run reached the Critic and exceeded the 110-second total timeout. Its state remained failed. Compact canonical review context, concise scene instructions and per-stage generation limits brought subsequent complete runs within the configured bound. Model validation and Critic approval remain required.
+- Development-server recompilation produced transient manifest-loading errors during a test run. Acceptance now uses a production build and server, with source edits kept outside active builds.
+- The hardware process sampler did not capture useful Ollama RSS/CPU values. No zero-memory or zero-CPU performance conclusion is drawn. System swap use was approximately 5.75 GiB during inspection and cannot be attributed solely to AIRL. Long-session stress testing remains pending.
+
+## Automated and security results
+
+- PASS — all 26 unit/regression tests.
+- PASS — TypeScript checks and production build.
+- PASS — two final production-browser scenarios, Demo and genuine Ollama.
+- PASS — two independent workers raced approval and rejection against the same SQLite job. Exactly one final decision succeeded and a later decision could not reverse it.
+- PASS — canonical-memory tests covered all three characters, subsequent production context and exclusion of unpublished/rejected artifacts. Provider prompts and PersonaAI detail pages now use the approved memory boundary.
+- PASS — existing mocked invalid-key and BYOK-isolation tests, hosted consent checks, rejection of background BYOK configuration, schema tests, bounded Critic revision tests, voting persistence, duplicate protection and queue recovery tests.
+- NOT TESTED — a real Critic rejection/revision conversation in this sprint. Rejection and revision control flow is verified using deterministic test doubles. Actual local Critic approval completed in browser runs.
+- BLOCKED — Hosted OpenAI live smoke testing. OPENAI_API_KEY, OPENAI_MODEL and hosted enablement remain absent from the application environment, with only .env.example present. No paid request was made.
+- NOT TESTED — real Creator BYOK over HTTPS, physical phones/LAN/QR joins, MP4/audio export, commercial license eligibility and hosted deployment.
+
+## Implementation boundaries
+
+Non-destructive room-job migrations add provider/model selection, explicit paid consent and requester attribution. Jobs may select Demo, Ollama or enabled and explicitly authorized Hosted OpenAI. Creator keys remain request-scoped and outside workers. Background inference uses the registry and usage/budget checks. Publication validates artifact/job/provider consistency and updates episode, status and canonical memories in one transaction. Rejection and retry use conditional state transitions.
+
+Legacy fixture counts, static disconnected agents and obsolete Studio messages were removed. The audience has one library for reference and generated episodes. Genuine modes, model IDs, attempts, stage events, sanitized failures and review feedback are displayed. No Supabase/Trigger.dev migration, expensive media integration, deployment or external push was performed.
