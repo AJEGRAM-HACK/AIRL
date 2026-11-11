@@ -23,8 +23,8 @@ function Scene({ scene, captions, reducedMotion, cast }: { cast?:EpisodeManifest
   const index = Math.min(scene.dialogue.length-1,Math.floor(frame / duration * scene.dialogue.length));
   const line = scene.dialogue[index];
   const zoom = !reducedMotion && scene.style === 'dramatic-reveal' ? 1 + frame / duration * .1 : 1;
-  return <AbsoluteFill style={{ background: palette.sky, color:'#f5f3ff',opacity,fontFamily:'Arial, sans-serif' }}>
-    <AbsoluteFill style={{ background:`radial-gradient(ellipse at 70% 25%,${palette.glow},transparent 65%)`,transform:`scale(${zoom})` }}>
+  return <AbsoluteFill data-scene-id={scene.id} style={{ background: palette.sky, color:'#f5f3ff',fontFamily:'Arial, sans-serif' }}>
+    <AbsoluteFill style={{ opacity, background:`radial-gradient(ellipse at 70% 25%,${palette.glow},transparent 65%)`,transform:`scale(${zoom})` }}>
       <div style={{ position:'absolute',top:100,right:85,width:140,height:140,borderRadius:'50%',background:'#f5d4ff',opacity:.55 }}/>
       {[0,1,2,3,4].map(item => <div key={item} style={{position:'absolute',bottom:320,left:item*160-20,width:130,height:220+item%3*90,background:palette.floor,border:'2px solid #a78bfa44'}}><div style={{margin:20,height:90,background:'repeating-linear-gradient(90deg,#bfa7df33 0 15px,transparent 15px 25px)'}}/></div>)}
       <div style={{position:'absolute',bottom:0,height:330,width:'100%',background:palette.floor}}/>

@@ -67,6 +67,16 @@ for (const mode of ['demo','ollama'] as const) test(`${mode} audience votes beco
     await expect(preview.getByText(job.manifest.scenes[2].dialogue[0].text,{exact:true}).first()).not.toBeVisible();
     await preview.getByLabel('Captions',{exact:true}).check();
     await expect(preview.getByText(job.manifest.scenes[2].dialogue[0].text,{exact:true}).first()).toBeVisible();
+    // Seeking to zero or an exact scene boundary must keep the canvas painted,
+    // and playback must advance again after each rewind.
+    for(const target of [0,job.manifest.scenes[0].durationSeconds*30,0]){
+      await preview.getByRole('slider',{name:'Seek episode'}).fill(String(target));
+      await expect(preview).toHaveAttribute('data-frame',String(target));
+      await expect(preview.locator('[data-scene-id]').first()).toHaveCSS('opacity','1');
+      await preview.getByRole('button',{name:'Play video',exact:true}).click();
+      await expect.poll(async()=>Number(await preview.getAttribute('data-frame'))).toBeGreaterThan(target+10);
+      await preview.getByRole('button',{name:'Pause video',exact:true}).click();
+    }
     await a.screenshot({path:`/tmp/airl-${mode}-audience.png`,fullPage:true});
     await a.getByRole('combobox',{name:'Episode library',exact:true}).selectOption('ep-01');
     await expect(a.locator('.episode-meta .eyebrow')).toHaveText('SEEDED REFERENCE EPISODE');
