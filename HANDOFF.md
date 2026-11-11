@@ -16,9 +16,9 @@ Read `AGENTS.md` before development, `ARCHITECTURE_PLAN.md` for current/proposed
 
 ## Current status and verified commit
 
-Latest verified application commit is `e0c0155` — `Make audience voting accessible and preserve joined session state`. LAN/recovery fixes are in `1e34cbb`; the preceding baseline was `318b2f0`.
+Latest verified application commit is `cc5f690` — `Target Safari 16 to restore iPhone client startup`. The audience/session checkpoint is `e0c0155`. LAN/recovery fixes are in `1e34cbb`; the preceding baseline was `318b2f0`.
 
-Full application commit ID is `e0c015568a2ba0e0265bc2bc98c6e36c3a7359bf`. Later documentation commits may follow it. Check Git status when resuming. Verification records include the integration sprint and LAN rehearsal.
+Full application commit ID is `cc5f690a738157ccab7a496051653adbfc763a1d`. Later documentation commits may follow it. Check Git status when resuming. Verification records include the integration sprint and LAN rehearsal.
 
 The complete local workflow passed production-browser acceptance using both Demo and genuine Ollama inference.
 
@@ -128,13 +128,13 @@ An actual HTTPS app kill during Story Director inference recovered through the n
 
 Browser acceptance builds and serves on port 3100 using temporary SQLite storage. It requires installed Chrome and Ollama serving `qwen3:4b-instruct`, and performs real local inference without OpenAI calls. Temporary screenshots/databases may disappear. These checks were rerun during the reliability rehearsal.
 
-For physical phones, export the assigned private IPv4 address as `AIRL_DEMO_HOST`, run `npm run demo:setup`, build, then run `npm run demo:lan`. README.md has exact commands and iPhone trust instructions. Studio displays a same-origin QR code. Keep `npm run production:worker` running with the same database for crash recovery. The iPhone CA trust is user-confirmed. Screenshots show the HTTPS room page opened from Camera but stuck at Loading room / Connecting, including after the Vote shortcut appeared. Participant joining, voting and physical playback remain blocked. Direct API JSON and Play-button checks are pending user feedback. WebKit automation crashed at launch and native Safari automation was unavailable.
+For physical phones, export the assigned private IPv4 address as `AIRL_DEMO_HOST`, run `npm run demo:setup`, build, then run `npm run demo:lan`. README.md has exact commands and iPhone trust instructions. Studio displays a same-origin QR code. Keep `npm run production:worker` running with the same database for crash recovery. The Safari 16.0 startup failure was traced to a class static block in the default Next client bundle. An explicit Browserslist Safari 16 target plus a clean generated build fixed joining and voting on the physical iPhone. The real taho winning decision then produced and published an 18-second episode in 28.3 seconds through all four Ollama stages. The user sees the generated episode but reports playback or captions fail; exact playback diagnostics remain pending. Temporary /demo-check diagnostics are active only through ignored Node preload files. Disable them after diagnosis. WebKit automation crashed at launch and native Safari automation was unavailable.
 
 ## Known issues and limitations
 
 - One earlier real Critic run exceeded the 110-second deadline. Context/output compaction enabled subsequent passes. Long-session load, resource use and repeated-run durability still need measurement.
 - Real Critic approval is verified. Rejection/revision control flow currently has deterministic-double coverage.
-- HTTPS LAN transport and QR decoding are verified locally. The iPhone page opens but its room panel remains Loading room / Connecting. Direct API and JavaScript-execution checks are pending. Physical participant joining, voting and playback remain unverified. Default scripts bind to loopback; the dedicated demo launcher binds the configured private address. Broader accessibility QA and hosting remain pending.
+- HTTPS LAN transport and QR decoding are verified locally. Physical iPhone joining and voting now pass after targeting Safari 16 and clean rebuilding. The generated episode appears but the user reports playback/caption failure. That device check remains unresolved. Default scripts bind to loopback; the dedicated demo launcher binds the configured private address. Broader accessibility QA and hosting remain pending.
 - Clearing cookies creates another anonymous identity. Multi-room management, moderation and hardened hosted identity remain future work.
 - Local scheduling depends on process lifetime and recovery workers. Supabase and Trigger.dev adapters remain pending.
 - Video is a portrait browser composition using reusable pictograms and CSS scenes. MP4 rendering, generated artwork, audio and voice synthesis remain pending. Confirm Remotion commercial license eligibility before commercial hosting.
@@ -142,10 +142,10 @@ For physical phones, export the assigned private IPv4 address as `AIRL_DEMO_HOST
 
 ## Next priorities
 
-1. Diagnose the reported physical-iPhone voting failure, then verify camera QR joining, publication and playback. HTTPS transport and actual restart recovery have passed.
+1. Diagnose the reported physical-iPhone generated-episode playback/caption failure. Joining, voting, real Ollama publication, HTTPS transport and actual restart recovery have passed.
 2. Run repeated local productions and measure failures, latency and memory under presentation conditions.
 3. Perform a minimal Hosted OpenAI smoke test once credentials/model and explicit paid-call authorization are supplied. Verify real BYOK separately over HTTPS.
 4. Complete keyboard, theme, caption and reduced-motion QA across mobile and desktop.
 5. Choose hosted persistence/scheduling and media-export milestones according to demo needs and available resources.
 
-Recommended next task is diagnosing the physical-iPhone room-loading failure, then finishing voting and device playback. Keep application changes scoped to rehearsal findings.
+Recommended next task is capturing and resolving the remaining physical-iPhone playback/caption failure. Keep application changes scoped to rehearsal findings.
