@@ -75,3 +75,43 @@ test('hosted mode preserves production history from the legacy openai identifier
     assert.equal(store.context('barangay-2099', 'ollama').approvedHistory.length, 0);
   } finally { store.close(); }
 });
+
+test('Ollama script context preserves approved canon without escaped base and incomplete JSON is retryable', async () => {
+  const { OllamaCreativeProvider } = await import('../src/ai/providers/ollama');
+  const { DemoCreativeProvider } = await import('../src/ai/providers/creative');
+  const { z } = await import('zod');
+  const { mkdtempSync, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const directory = mkdtempSync(join(tmpdir(), 'airl-ollama-script-'));
+  const original = globalThis.fetch;
+  const oldPath = process.env.AIRL_LIVE_DB_PATH;
+  process.env.AIRL_LIVE_DB_PATH = join(directory, 'usage.sqlite');
+  const demo = new DemoCreativeProvider();
+  const input = { roomId: 'barangay-2099' as const, winningChoice: 'Karaoke night' };
+  const concept = await demo.generateStory(input);
+  const expected = await demo.generateScript({input, concept});
+  let calls = 0;
+  globalThis.fetch = async (_url, options) => {
+    const body = JSON.parse(String(options?.body));
+    const payload = JSON.parse(body.messages[1].content);
+    assert.equal(payload.base, undefined);
+    assert.deepEqual(payload.context.characters, [{ id: 'captain-bot', memories: ['Approved memory'] }]);
+    assert.deepEqual(payload.context.history, ['Approved history']);
+    assert.deepEqual(payload.feedback, { feedback: ['Keep continuity'] });
+    assert.equal(body.format.properties.scenes.maxItems, 3);
+    calls++;
+    return Response.json({ message: { content: calls === 1 ? '{"title":' : JSON.stringify(expected) } });
+  };
+  try {
+    const provider = new OllamaCreativeProvider('test-local-model');
+    const extended = { input, concept, feedback: { feedback: ['Keep continuity'] }, base: JSON.stringify({context:{characters:[{id:'captain-bot',memories:['Approved memory']}],approvedHistory:[{script:{summary:'Approved history'}}]}}) };
+    await assert.rejects(provider.generateScript(extended), z.ZodError);
+    assert.deepEqual(await provider.generateScript(extended), expected);
+    assert.equal(calls, 2);
+  } finally {
+    globalThis.fetch = original;
+    if(oldPath === undefined) delete process.env.AIRL_LIVE_DB_PATH; else process.env.AIRL_LIVE_DB_PATH = oldPath;
+    rmSync(directory, {recursive:true, force:true});
+  }
+});

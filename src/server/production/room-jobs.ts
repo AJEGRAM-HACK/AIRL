@@ -15,8 +15,7 @@ export class RoomJobs {
   constructor(readonly path = roomDatabasePath()) {
     const live = new LiveStore(path); live.dispose();
     const production = new ProductionStore(path); production.close();
-    this.db = new DatabaseSync(path);
-    this.db.exec('PRAGMA busy_timeout=5000');
+    this.db = new DatabaseSync(path, { timeout: 5000 });
   }
   claim() {
     this.db.exec('BEGIN IMMEDIATE');

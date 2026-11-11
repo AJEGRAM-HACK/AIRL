@@ -7,7 +7,7 @@ import { CharacterSchema } from '@/lib/domain';
 // It never initializes databases or imports draft artifacts.
 export function canonicalCharacters(path = resolve(process.env.AIRL_LIVE_DB_PATH || '.data/airl-live.sqlite')) {
   if (!existsSync(path)) return characters;
-  const db = new DatabaseSync(path,{readOnly:true});
+  const db = new DatabaseSync(path,{readOnly:true,timeout:5000});
   try {
     if (!db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='characters'").get()) return characters;
     return characters.map(seed => {

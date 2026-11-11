@@ -10,8 +10,8 @@ export class ProductionStore {
   private db: DatabaseSync;
   constructor(path: string, initialCharacters = characters) {
     mkdirSync(dirname(path), { recursive: true });
-    this.db = new DatabaseSync(path);
-    this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
+    this.db = new DatabaseSync(path, { timeout: 5000 });
+    this.db.exec(`PRAGMA journal_mode=WAL;
       CREATE TABLE IF NOT EXISTS characters (id TEXT PRIMARY KEY, profile TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS productions (id TEXT PRIMARY KEY, room_id TEXT NOT NULL, status TEXT NOT NULL, model TEXT NOT NULL, input TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
       CREATE UNIQUE INDEX IF NOT EXISTS one_active_run ON productions(room_id) WHERE status='running';

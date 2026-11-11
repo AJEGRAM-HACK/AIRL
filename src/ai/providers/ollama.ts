@@ -1,7 +1,7 @@
 import { inferenceLimits } from '@/ai/config/limits';
 import { LiveStore } from '@/server/live/store';
 import { z } from 'zod';
-import { Concept, Script, Manifest, Critique } from '@/server/production/schemas';
+import { Concept, Script, ScriptScene, Manifest, Critique } from '@/server/production/schemas';
 import { instructions } from '@/server/production/openai';
 import { characterPrompt } from '@/ai/prompts/character';
 import { ReplyOutput, type CharacterReplyInput, type Usage } from '@/ai/schemas/gateway';
@@ -38,7 +38,10 @@ export class OllamaCreativeProvider implements CreativeAIProvider {
       if (!response.ok) throw new Error('Local inference failed.');
       const result = z.object({ message: z.object({ content: z.string() }), prompt_eval_count: z.number().optional(), eval_count: z.number().optional() }).parse(await response.json());
       this.onUsage?.({ inputTokens: result.prompt_eval_count ?? null, outputTokens: result.eval_count ?? null });
-      return schema.parse(JSON.parse(result.message.content));
+      let output: unknown;
+      try { output = JSON.parse(result.message.content); }
+      catch { throw new z.ZodError([{ code: 'custom', path: [], message: 'Local model returned incomplete JSON.' }]); }
+      return schema.parse(output);
     } finally {
       if (lease) lockStore?.releaseAI('ollama-inference', lease);
       lockStore?.dispose();
@@ -46,7 +49,16 @@ export class OllamaCreativeProvider implements CreativeAIProvider {
     }
   }
   async generateStory(input: StoryInput & { context?: unknown }) { return this.infer(Concept, instructions['Story Director'] + ' Keep each field under 40 words.', input, 650); }
-  async generateScript(input: ScriptInput) { return this.infer(Script, instructions.Screenwriter + ' Use exactly one dialogue line of at most 20 words per scene. Give each of the three characters one scene and a brief grounded memory update. Keep the summary under 40 words.', input, 1400); }
+  async generateScript(input: ScriptInput) {
+    const extended = input as ScriptInput & { base?: string; feedback?: unknown };
+    const context = extended.base ? JSON.parse(extended.base).context : undefined;
+    const compact = {
+      input: input.input, concept: input.concept, feedback: extended.feedback,
+      context: context && { characters: context.characters, history: (context.approvedHistory || []).map((episode: { script?: { summary?: string } }) => episode.script?.summary) },
+    };
+    const schema = Script.extend({ scenes: z.array(ScriptScene.extend({ dialogue: ScriptScene.shape.dialogue.length(1) })).length(3) });
+    return this.infer(schema, instructions.Screenwriter + ' Use exactly one dialogue line of at most 20 words per scene. Give each of the three characters one scene and a brief grounded memory update. Keep the summary under 40 words.', compact, 1400);
+  }
   async generateScenes(input: ScriptOutput) {
     const visualPlan = Manifest.omit({ scenes: true }).extend({ scenes: z.array(Manifest.shape.scenes.element.omit({ id: true, dialogue: true })).length(3) });
     const plan = await this.infer(visualPlan, instructions['Visual Producer'] + ' Choose visual properties only, in script order. Each scene should last 6 seconds. The application preserves original dialogue and scene IDs.', input, 800);

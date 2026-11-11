@@ -444,3 +444,7 @@ footer .brand {
 .studio-tabs { display: flex; gap: 12px; margin-bottom: 24px; }
 .episode-gallery { margin-top: 0; border-top: 0; padding-top: 0; }
 .job-picker input { background: var(--panel); border: 1px solid var(--border); color: var(--text); padding: 10px; border-radius: 6px; }
+
+.room-join { margin-bottom: 1.5rem; }
+.room-join img { display: block; max-width: 100%; height: auto; background: white; border-radius: 0.5rem; }
+.room-join a { overflow-wrap: anywhere; }

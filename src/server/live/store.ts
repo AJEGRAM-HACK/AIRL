@@ -13,8 +13,8 @@ export class LiveStore {
   private db: DatabaseSync;
   constructor(path = resolve(process.env.AIRL_LIVE_DB_PATH || '.data/airl-live.sqlite')) {
     mkdirSync(dirname(path), { recursive: true });
-    this.db = new DatabaseSync(path);
-    this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
+    this.db = new DatabaseSync(path, { timeout: 5000 });
+    this.db.exec(`PRAGMA journal_mode=WAL;
       CREATE TABLE IF NOT EXISTS live_sessions(token_hash TEXT PRIMARY KEY, role TEXT NOT NULL, expires INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS live_members(room_id TEXT NOT NULL, token_hash TEXT NOT NULL, PRIMARY KEY(room_id,token_hash));
       CREATE TABLE IF NOT EXISTS live_rounds(id TEXT PRIMARY KEY, room_id TEXT NOT NULL, status TEXT NOT NULL, winner TEXT, created INTEGER NOT NULL);
