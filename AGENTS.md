@@ -1,7 +1,7 @@
 # CinemAI project conventions
 
 ## Scope
-Milestone 1 is the approved scope. Do not implement live voting, persistence, agent execution, production jobs, or deployment until the user approves the corresponding milestone. Fixture interactions must stay labeled. Never fabricate successful jobs or logs.
+The user has authorized a local four-agent production vertical slice with persisted results. Live voting, hosted production jobs and deployment remain out of scope until separately approved. Fixture interactions must stay labeled. Never fabricate successful jobs or logs.
 
 ## Architecture
 - One Next.js App Router repository, TypeScript strict mode, npm, Node.js 24 LTS.
@@ -21,3 +21,6 @@ Run npm run typecheck and npm run build. Start npm run start and check /, /watch
 
 ## Changes
 Preserve existing work. Record checks and limitations honestly. Checkpoint logical milestones if Git is available. Do not commit credentials, dependencies or build artifacts.
+
+## Local production slice
+Server-only code lives in src/server/production and is invoked through the local CLI. SQLite is a local development adapter, not Vercel persistence. Keep its data ignored. Run npm run test:production; doubles prove orchestration only, never actual OpenAI operation. A live run must use configured credentials and model, and complete all four stages before being reported operational.

@@ -6,6 +6,6 @@ export const EpisodeSchema = z.object({ id: z.string(), number: z.number(), titl
 export type Episode = z.infer<typeof EpisodeSchema>;
 export type AgentName = 'Story Director' | 'Screenwriter' | 'Visual Producer' | 'Creative Critic';
 export type ProductionState = 'not-connected' | 'queued' | 'running' | 'review' | 'failed' | 'complete';
-// Ports for future server adapters. No backend or agent execution in milestone 1.
+// UI-facing future integration ports. The local production CLI has separate server schemas.
 export interface ProductionRepository { getStatus(roomId: string): Promise<ProductionState>; }
 export interface AgentRunner { run(input: { roomId: string; winningChoice: string; history: Episode[]; characters: Character[] }): Promise<Episode>; }

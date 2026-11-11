@@ -9,25 +9,31 @@
     "dev": "next dev --webpack --hostname 127.0.0.1",
     "build": "next build --webpack",
     "start": "next start --hostname 127.0.0.1",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "production": "tsx scripts/produce.ts",
+    "test:production": "tsx --test tests/production.test.ts"
   },
   "dependencies": {
-    "next": "16.4.6",
-    "react": "19.3.1",
-    "react-dom": "19.3.1",
-    "lucide-react": "1.72.0",
-    "zod": "4.6.7",
+    "@next/env": "16.4.6",
+    "@openai/agents": "0.21.0",
+    "@radix-ui/react-slot": "1.5.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "lucide-react": "1.72.0",
+    "next": "16.4.6",
+    "openai": "7.55.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "tailwind-merge": "3.7.0",
-    "@radix-ui/react-slot": "1.5.0"
+    "zod": "4.6.7"
   },
   "devDependencies": {
-    "typescript": "7.0.2",
+    "@tailwindcss/postcss": "4.3.5",
     "@types/node": "26.6.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "tailwindcss": "4.3.5",
-    "@tailwindcss/postcss": "4.3.5"
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
   }
 }
