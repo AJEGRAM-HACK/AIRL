@@ -26,7 +26,7 @@ export function EpisodeGallery() {
   const id=selected || generated[0]?.id || episodes[episodes.length-1].id;
   const job=generated.find(item=>item.id===id);
   const reference=episodes.find(item=>item.id===id)||episodes[episodes.length-1];
-  return <section className="room-production episode-gallery" aria-label="Episode library"><label className="job-picker">Episode library<select aria-label="Episode library" value={id} onChange={event=>setSelected(event.target.value)}>{generated.map(item=><option key={item.id} value={item.id}>{item.manifest?.title} · {item.mode}</option>)}{episodes.map(item=><option key={item.id} value={item.id}>{item.title} · Reference fixture</option>)}</select></label>
+  return <section id="episode-library" className="room-production episode-gallery" aria-label="Episode library"><label className="job-picker">Episode library<select aria-label="Episode library" value={id} onChange={event=>setSelected(event.target.value)}>{generated.map(item=><option key={item.id} value={item.id}>{item.manifest?.title} · {item.mode}</option>)}{episodes.map(item=><option key={item.id} value={item.id}>{item.title} · Reference fixture</option>)}</select></label>
     {error&&<p role="alert">{error}</p>}
     <div className="episode-meta"><div className="eyebrow">{job ? `${job.mode} · APPROVED COMMUNITY EPISODE` : 'SEEDED REFERENCE EPISODE'}</div><h2>{job?.manifest?.title || reference.title}</h2></div>
     {job?.manifest?<EpisodePreview manifest={job.manifest}/>:<Player key={reference.id} episode={reference}/>}

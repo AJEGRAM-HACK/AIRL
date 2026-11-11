@@ -12,6 +12,8 @@ for (const mode of ['demo','ollama'] as const) test(`${mode} audience votes beco
   try {
     for(const page of [a,b]){
       await page.goto('/live/barangay-2099');
+      await page.getByRole('link',{name:'Vote on next chapter'}).click();
+      await expect(page.getByRole('button',{name:/Join room to vote/})).toBeInViewport();
       await page.getByRole('button',{name:/Join room to vote/}).click();
     }
     await a.getByRole('radio',{name:mode==='demo'?/Declare taho/:/Launch a mandatory karaoke/}).check();
@@ -22,6 +24,7 @@ for (const mode of ['demo','ollama'] as const) test(`${mode} audience votes beco
     await expect(b.locator('.community-stats')).toContainText('2 votes');
     await operator.goto('/studio/barangay-2099');
     await operator.getByRole('button',{name:/Join room to vote/}).click();
+    await expect(operator.getByRole('button',{name:/Join room to vote/})).toHaveCount(0);
     const store=new LiveStore(process.env.AIRL_LIVE_DB_PATH);
     let code:string;try{code=store.issueOperatorCode();}finally{store.dispose();}
     await operator.getByLabel('One-time operator code').fill(code);
@@ -82,4 +85,21 @@ for (const mode of ['demo','ollama'] as const) test(`${mode} audience votes beco
     await expect(a.locator('a.skip-link')).not.toBeInViewport();
     expect(errors).toEqual([]);
   }finally{await contextA.close();await contextB.close();await operatorContext.close();}
+});
+
+test('a delayed anonymous session read cannot undo a successful room join', async ({ page }) => {
+  let delayed: import('@playwright/test').Route | undefined;
+  await page.route('**/api/live/session', async route => {
+    if (route.request().method() === 'GET' && !delayed) { delayed = route; return; }
+    await route.continue();
+  });
+  await page.goto('/live/barangay-2099');
+  await expect.poll(() => !!delayed).toBe(true);
+  await page.getByRole('button', { name: /Join room to vote/ }).click();
+  await expect(page.getByRole('button', { name: 'Cast my vote', exact: true })).toBeVisible();
+  const response = page.waitForResponse(value => value.url().endsWith('/api/live/session') && value.request().method() === 'GET');
+  await delayed!.fulfill({ json: { joined: false, operator: false, vote: null } });
+  await response;
+  await expect(page.getByRole('button', { name: 'Cast my vote', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Join room to vote/ })).toHaveCount(0);
 });

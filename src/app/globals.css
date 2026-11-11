@@ -448,3 +448,7 @@ footer .brand {
 .room-join { margin-bottom: 1.5rem; }
 .room-join img { display: block; max-width: 100%; height: auto; background: white; border-radius: 0.5rem; }
 .room-join a { overflow-wrap: anywhere; }
+
+.room-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+#community-vote, #episode-library { scroll-margin-top: 1rem; }
+.vote-instruction { margin-block: 1rem; }
