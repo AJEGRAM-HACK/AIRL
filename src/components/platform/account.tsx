@@ -1,4 +1,6 @@
 "use client";
+import { useRouter } from "next/navigation";
+import { useAccess } from "./access";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Account, Interests } from "@/lib/domain";
@@ -60,6 +62,8 @@ export function InterestFields({
   );
 }
 export function AccountPanel() {
+  const router=useRouter();
+  const {clearAccess}=useAccess();
   const [account, setAccount] = useState<Account | null>(null),
     [loaded, setLoaded] = useState(false),
     [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -84,12 +88,13 @@ export function AccountPanel() {
     try {
       const data = await api("/api/account", {
         action,
-        email,
-        name,
-        password,
+        ...(["signin", "signup"].includes(action) ? { email, password } : {}),
+        ...(action === "signup" ? { name } : {}),
         ...(action === "interests" ? { interests } : {}),
       });
       setAccount(data.account);
+      if(action==='signout')clearAccess();
+      if(['signin','signup','signout'].includes(action))router.refresh();
       setPassword("");
       if (data.account) setInterests(Interests.parse(data.account.interests));
     } catch (error) {
@@ -133,9 +138,9 @@ export function AccountPanel() {
               </Link>
             </Button>
           </section>
-          <Button asChild variant="outline">
+          {account.role!=='viewer'&&<Button asChild variant="outline">
             <Link href="/studio">Creator Studio</Link>
-          </Button>
+          </Button>}
         </>
       ) : (
         <section className="panel platform-form">

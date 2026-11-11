@@ -1,5 +1,6 @@
 import type { RoomProvider } from './production-selection';
 'use client';
+import { useAccess } from '@/components/platform/access';
 import { RoomProduction } from '@/features/production/room-production';
 import { useEffect, useRef, useState } from 'react';
 import { Check, Radio, Vote } from 'lucide-react';
@@ -7,12 +8,12 @@ import { Button } from '@/components/ui/button';
 import { RoomSnapshot, type RoomState, type SessionState } from './types';
 import { ProviderPicker } from '@/components/platform/provider-picker';
 export function CommunityPanel({ operatorView = false,roomId='barangay-2099' }: { operatorView?: boolean;roomId?:string }) {
+  const access=useAccess();
   const base=`/api/live/rooms/${roomId}`;
   const sessionRevision = useRef(0);
   const [room, setRoom] = useState<RoomState | null>(null);
   const [session, setSession] = useState<SessionState>({ joined: false, operator: false, vote: null });
   const [selection, setSelection] = useState('');
-  const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   const [provider, setProvider] = useState<RoomProvider>({ mode: 'ollama',model:'qwen3:4b-instruct',consent: false });
@@ -58,9 +59,9 @@ export function CommunityPanel({ operatorView = false,roomId='barangay-2099' }: 
       if (data.room) setRoom(RoomSnapshot.parse(data.room));
       sessionRevision.current++;
       setSession(data.session || data);
-      if (url === '/api/live/operator') setCode('');
     } catch (error) { setError(error instanceof Error ? error.message : 'Please retry.'); } finally { setPending(false);if(url.endsWith('/close'))setProvider(value=>({...value,consent:false})); }
   }
+  const showOperator=operatorView&&session.operator&&(access.managedWorldIds.includes(roomId)||(roomId==='barangay-2099'&&access.legacyOperator));
   const winner = room?.options.find(option => option.id === room.winner);
   return <section id="community-vote" className="vote-panel community-panel" aria-label={operatorView ? 'Room voting controls' : 'Community vote'}>
     <div className="eyebrow mint"><Radio size={15}/>{connected ? 'CONNECTED TO ROOM' : 'CONNECTING · RETRYING AUTOMATICALLY'}</div>
@@ -81,11 +82,8 @@ export function CommunityPanel({ operatorView = false,roomId='barangay-2099' }: 
       {session.joined && <Button disabled={pending || !!session.vote || !selection || room.status !== 'open'} onClick={() => action(`${base}/vote`, { roundId: room.roundId, optionId: selection })}>{session.vote ? <><Check size={16}/> Vote recorded</> : pending ? 'Saving…' : 'Cast my vote'}</Button>}
       {winner && <div className="winner-callout" role="status"><b>Winning direction</b><p>{winner.title}</p><small>Ties use the displayed option order. Production is queued from this finalized direction. An operator reviews the result before publication.</small></div>}
       <p className="fine-print">One vote per anonymous session per round. Clearing cookies creates a new identity. Counts update across sessions through the local server.</p>
-      {operatorView && <div className="operator-controls"><h3>Operator controls</h3>{!session.operator ? <>
-        <p>Run <code>npm run live:operator</code> in the project terminal, then enter the one-time code.</p>
-        <form onSubmit={event => { event.preventDefault(); void action('/api/live/operator', { code }); }}><label htmlFor="operator-code">One-time operator code</label><input id="operator-code" type="password" autoComplete="off" value={code} onChange={event => setCode(event.target.value)} required/><Button variant="outline" disabled={!session.joined || pending || !code}>Unlock controls</Button></form><small>Join the room before unlocking controls.</small>
-      </> : <><ProviderPicker background value={provider} onChange={value=>setProvider({mode:value.mode as RoomProvider["mode"],model:value.model,consent:value.consent})}/><Button variant="outline" disabled={pending || room.status !== 'open' || (provider.mode === 'hosted_openai' && !provider.consent)} onClick={() => action(`${base}/close`, { roundId: room.roundId, provider })}>Close voting & produce</Button><Button variant="outline" disabled={pending || room.status !== 'closed'} onClick={() => action(`${base}/next`, { roundId: room.roundId })}>Start next round</Button></>}</div>}
+      {showOperator && <div className="operator-controls"><h3>Operator controls</h3><ProviderPicker background value={provider} onChange={value=>setProvider({mode:value.mode as RoomProvider["mode"],model:value.model,consent:value.consent})}/><Button variant="outline" disabled={pending || room.status !== 'open' || (provider.mode === 'hosted_openai' && !provider.consent)} onClick={() => action(`${base}/close`, { roundId: room.roundId, provider })}>Close voting & produce</Button><Button variant="outline" disabled={pending || room.status !== 'closed'} onClick={() => action(`${base}/next`, { roundId: room.roundId })}>Start next round</Button></div>}
     </>}
-    {operatorView && <RoomProduction operator={session.operator} roomId={roomId}/>}
+    {showOperator && <RoomProduction operator={session.operator} roomId={roomId}/>}
   </section>;
 }

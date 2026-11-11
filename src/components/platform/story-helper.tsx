@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useAccess } from "./access";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { api } from "./api";
@@ -15,12 +16,14 @@ export function StoryHelper({
   characterId?: string;
   draftRun?: string;
 }) {
+  const {account}=useAccess();
   const [question, setQuestion] = useState("What happened most recently?"),
     [scope, setScope] = useState(episodeId ? "episode" : "latest"),
     [provider, setProvider] = useState(defaultProvider),
     [answer, setAnswer] = useState<any>(null),
     [error, setError] = useState(""),
     [pending, setPending] = useState(false);
+  useEffect(()=>{setProvider(defaultProvider);setAnswer(null);},[account?.id]);
   async function ask() {
     setPending(true);
     setError("");
@@ -42,6 +45,7 @@ export function StoryHelper({
       setProvider((value) => ({ ...value, consent: false }));
     }
   }
+  if(!account)return <section className="panel platform-form story-helper"><h2>Ask about this story</h2><p><Link href="/account">Sign in</Link> to ask about this story.</p></section>;
   return (
     <section className="panel platform-form story-helper">
       <h2>Ask about this story</h2>

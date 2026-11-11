@@ -9,6 +9,7 @@ import {
   WorldSettings,
   Interests,
 } from "@/lib/domain";
+import { CanCreate, CanManage, useAccess } from "./access";
 import { Button } from "@/components/ui/button";
 import { api } from "./api";
 import { InterestFields } from "./account";
@@ -22,7 +23,7 @@ export function UniverseLinks({ id }: { id: string }) {
       <Link href={`/live/${id}`}>Live</Link>
       <Link href={`/universes/${id}/episodes`}>CinemAI</Link>
       <Link href={`/universes/${id}/characters`}>PersonaAI</Link>
-      <Link href={`/studio/worlds/${id}`}>Studio</Link>
+      <CanManage id={id}><Link href={`/studio/worlds/${id}`}>Studio</Link></CanManage>
     </nav>
   );
 }
@@ -62,9 +63,9 @@ function WorldCards({ worlds }: { worlds: World[] }) {
             >
               Characters
             </Link>
-            <Button asChild variant="ghost">
+            <CanManage id={world.id}><Button asChild variant="ghost">
               <Link href={`/studio/worlds/${world.id}`}>Open Studio</Link>
-            </Button>
+            </Button></CanManage>
           </div>
           {world.archived && (
             <Button
@@ -104,9 +105,9 @@ export function ExploreWorlds({
           <h1>{title}</h1>
           <p>Choose a world. Help shape what happens next.</p>
         </div>
-        <Button asChild variant="outline">
+        <CanCreate><Button asChild variant="outline">
           <Link href="/studio">Creator Studio</Link>
-        </Button>
+        </Button></CanCreate>
       </div>
       {error && <p role="alert">{error}</p>}
       <WorldCards worlds={worlds} />
@@ -114,6 +115,7 @@ export function ExploreWorlds({
   );
 }
 export function CreatorStudio() {
+  const access=useAccess();
   const [account, setAccount] = useState<Account | null>(null),
     [worlds, setWorlds] = useState<World[]>([]),
     [accounts, setAccounts] = useState<any[]>([]),
@@ -125,6 +127,7 @@ export function CreatorStudio() {
     [draft, setDraft] = useState<any>(null),
     [draftText, setDraftText] = useState("");
   useEffect(() => {
+    if(!access.canCreate){setAccount(null);setWorlds([]);setAccounts([]);return;}
     api("/api/account")
       .then(async (data) => {
         setAccount(data.account);
@@ -136,7 +139,7 @@ export function CreatorStudio() {
         }
       })
       .catch((error) => setError(error.message));
-  }, []);
+  }, [access.canCreate]);
   async function run(action: () => Promise<void>) {
     setError("");
     setPending(true);
@@ -152,6 +155,7 @@ export function CreatorStudio() {
     const data = await api("/api/universes", value);
     window.location.assign(`/studio/worlds/${data.universe.id}`);
   }
+  if(!access.canCreate)return <p><Link href="/universes">Explore universes</Link></p>;
   return (
     <>
       <div className="platform-heading">
@@ -358,6 +362,7 @@ function SettingsEditor({
   );
 }
 export function WorldEditor({ id }: { id: string }) {
+  const access=useAccess();
   const [data, setData] = useState<any>(null),
     [title, setTitle] = useState(""),
     [settings, setSettings] = useState(WorldSettings.parse({})),
@@ -388,6 +393,7 @@ export function WorldEditor({ id }: { id: string }) {
       setPending(false);
     }
   }
+  if(!access.managedWorldIds.includes(id))return <p><Link href="/universes">Explore universes</Link></p>;
   if (!data) return <p role="status">{error || "Loading Studio…"}</p>;
   if (!data.canManage)
     return (

@@ -1,4 +1,5 @@
 'use client';
+import { useAccess } from '@/components/platform/access';
 import { ProviderPreview } from './provider-preview';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -7,6 +8,7 @@ import { characters } from '@/features/persona/characters';
 import type { Mode } from '@/ai/schemas/gateway';
 const labels: Record<Mode, string> = { demo: 'Demo', ollama: 'Local Ollama', hosted_openai: 'AIRL Hosted OpenAI', creator_byok: 'Creator BYOK · OpenAI' };
 export function ProviderSettings({ initialCharacter }: { initialCharacter?: string }) {
+  const permissions=useAccess();
   const [mode, setMode] = useState<Mode>('demo');
   const [model, setModel] = useState('');
   const [key, setKey] = useState('');
@@ -15,6 +17,7 @@ export function ProviderSettings({ initialCharacter }: { initialCharacter?: stri
   const [message, setMessage] = useState('Introduce yourself.');
   const [choice, setChoice] = useState('Ban Monday meetings');
   const [access, setAccess] = useState(false);
+  const [loaded,setLoaded]=useState(false);
   const [pending, setPending] = useState(false);
   const [status, setStatus] = useState('Connection has not been tested.');
   const [output, setOutput] = useState<unknown>(null);
@@ -25,12 +28,12 @@ export function ProviderSettings({ initialCharacter }: { initialCharacter?: stri
       const response = await fetch('/api/ai', { cache: 'no-store' });
       if (!response.ok) { setAccess(false); return; }
       const data = await response.json(); setAccess(true); setUsage(data.usage);
-    } catch { setStatus('Unable to load provider access.'); }
+    } catch { setAccess(false);setStatus('Unable to load provider access.'); } finally {setLoaded(true);}
   }
   useEffect(() => {
-    void refresh();
+    if(permissions.canCreate)void refresh();
     return () => { controller.current?.abort(); };
-  }, []);
+  }, [permissions.canCreate]);
   function disconnect() {
     controller.current?.abort(); controller.current = null;
     setKey(''); setConsent(false); setOutput(null); setStatus('Disconnected. Credentials cleared from this page.'); setPending(false);
@@ -47,12 +50,15 @@ export function ProviderSettings({ initialCharacter }: { initialCharacter?: stri
       if (!current.signal.aborted) setStatus(error instanceof Error ? error.message : 'Request failed.');
     } finally {
       if (controller.current === current) { setPending(false); controller.current = null; }
-      void refresh();
+      if(permissions.canCreate)void refresh();
     }
   }
   const paid = mode === 'hosted_openai' || mode === 'creator_byok';
+  if(!permissions.canCreate)return null;
+  if(!loaded)return <p role="status">Loading provider settings…</p>;
+  if(!access)return <p><Link href="/account">Sign in</Link> with creator access to open provider settings.</p>;
   return <div className="provider-settings">
-    {!access && <div className="notice">Creator access is required. Join the room and unlock operator access with a one-time terminal code, then return here. <Link className="text-link" href="/studio/barangay-2099">Open room studio →</Link><Button variant="outline" onClick={refresh}>Check access</Button></div>}
+
     <section className="panel provider-form"><h2>Provider settings</h2><p>Provider selections and creator credentials live in this page’s memory. Changing provider clears the credential.</p>
       <fieldset disabled={pending}><label htmlFor="provider-mode">Execution mode</label><select id="provider-mode" value={mode} onChange={event => { disconnect(); setMode(event.target.value as Mode); setModel(''); }}>{Object.entries(labels).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select>
       {mode !== 'demo' && <><label htmlFor="provider-model">Model identifier {mode === 'ollama' ? '(leave empty to use an installed model)' : ''}</label><input id="provider-model" value={model} onChange={event => { setModel(event.target.value); setStatus('Model changed. Test the connection again.'); }} maxLength={100}/></>}

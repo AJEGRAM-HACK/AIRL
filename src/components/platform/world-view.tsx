@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { CanManage } from "./access";
 import { UniverseLinks } from "./worlds";
 import { api } from "./api";
 import { StoryHelper } from "./story-helper";
@@ -55,9 +56,9 @@ export function WorldView({
           </h1>
         </div>
         {data.canManage && (
-          <Button asChild variant="outline">
+          <CanManage id={id}><Button asChild variant="outline">
             <Link href={`/studio/worlds/${id}`}>Manage world</Link>
-          </Button>
+          </Button></CanManage>
         )}
       </div>
       <UniverseLinks id={id} />

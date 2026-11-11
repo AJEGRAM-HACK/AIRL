@@ -1,3 +1,4 @@
+import { StudioNavigation } from './platform/access';
 import { ThemeSwitcher } from './theme-switcher';
 import Link from 'next/link';
 import { ArrowUpRight, Sparkles } from 'lucide-react';
@@ -11,7 +12,7 @@ export function Nav({ active = '', universeId }: { active?: string; universeId?:
       {features.live && <Link aria-current={active === 'live' ? 'page' : undefined} href={universeId?`/live/${universeId}`:"/live"}>Live</Link>}
       {features.cinemai && <Link aria-current={['watch', 'universe', 'cinemai'].includes(active) ? 'page' : undefined} href={universeId?`/universes/${universeId}/episodes`:"/cinemai"}>CinemAI</Link>}
       {features.persona && <Link aria-current={active === 'persona' ? 'page' : undefined} href={universeId?`/universes/${universeId}/characters`:"/persona"}>PersonaAI</Link>}
-      <Link aria-current={active === 'studio' ? 'page' : undefined} href={universeId?`/studio/worlds/${universeId}`:"/studio"}>Studio</Link>
+      <StudioNavigation active={active === 'studio'} universeId={universeId}/>
       <Link href="/account">Account</Link>
     </nav>
     <ThemeSwitcher/>
