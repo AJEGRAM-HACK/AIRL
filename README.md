@@ -45,6 +45,8 @@ Accounts start as viewers. Interests are optional, private and editable. Anonymo
 npm run account:admin -- your-email@example.com
 ```
 
+Studio links, creation tools, provider-gateway links and management controls are visible only with the corresponding server-validated permissions. Viewers keep audience navigation, voting, published playback, their profile and signed-in story questions. Creators see management links for their own worlds. Admins can manage all worlds. Direct unauthorized Studio URLs return 404. Signing out clears privileged navigation immediately.
+
 Creators use `/studio` to start from scratch or generate three editable pitches. Save a private world, edit its settings and cast, join its room, select a provider and close the vote. A validated script appears first, followed by a versioned playable preview while the Critic runs. Review and optionally correct proposed canon JSON before publication. Publish the universe separately to make its episodes and characters visible in Explore.
 
 | Route | Experience |
