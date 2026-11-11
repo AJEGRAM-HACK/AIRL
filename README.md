@@ -6,7 +6,9 @@ AIRL combines community participation, fictional characters and creative product
 
 The current local milestone connects real votes to a persisted provider-selected production job, role-protected human review and a portrait Remotion preview. Profiles, private interests, world settings, character/relationship editing, three AI-generated starting pitches and spoiler-scoped story answers are available. Existing hosted OpenAI, request-scoped BYOK and local Ollama adapters remain available through creator settings and the CLI.
 
-For system design, data ownership, migration options and candidate routes, read [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Actual test outcomes and verification limits are recorded in [VERIFICATION.md](VERIFICATION.md).
+For system design, data ownership, migration options and candidate routes, read [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Actual test outcomes and verification limits are recorded in [VERIFICATION.md](VERIFICATION.md). [CHANGELOG.md](CHANGELOG.md) summarizes implementation checkpoints, and [HANDOFF.md](HANDOFF.md) provides the development handoff.
+
+Latest verified application commit is `7989ccde15933ab6765cd28ceebaa85cd489d535`. Typecheck, production build, 38 unit tests and six production-browser cases passed. Physical iPhone voting, playback, captions and repeated rewind/replay were user-confirmed on the public tunnel. The earlier 35-session simulated rehearsal passed. Full evidence and measurement limits remain in the verification record.
 
 ## Run locally
 
@@ -69,7 +71,7 @@ npm run migrate:universes
 npm run migrate:universes -- --apply
 ```
 
-The script backs up the existing database under ignored `.data/`, applies additive transactional migrations to the copy and checks legacy rows, IDs, memories, foreign keys and integrity. The current local database was migrated after copy verification, retaining its three characters, one published episode and both votes. Retain backups. New installations initialize the same schema automatically.
+The script backs up the existing database under ignored `.data/`, applies additive transactional migrations to the copy and checks legacy rows, IDs, memories, foreign keys and integrity. At the migration checkpoint, copy verification preserved three original characters, one published episode and both original votes. Later account and rehearsal activity adds records to that baseline. Retain backups. New installations initialize the same schema automatically.
 
 ### Verification and benchmark
 
@@ -157,7 +159,7 @@ Copy `.env.example` to ignored `.env.local` only when changing defaults. Never c
 - `CINEMAI_DB_PATH` optionally changes the standalone production CLI database.
 - `AIRL_AI_REQUEST_TIMEOUT_MS`, `AIRL_AI_MAX_OUTPUT_TOKENS` and `OLLAMA_CONTEXT_WINDOW` configure bounded inference limits.
 - `AIRL_AI_DAILY_REQUEST_LIMIT` caps creator requests. Optional model rates and estimated daily spend reservations provide approximate budget gating. Provider-side billing controls remain authoritative.
-- Hosted OpenAI requires `OPENAI_API_KEY`, `OPENAI_MODEL` and `AIRL_ALLOW_LIVE_REQUESTS=true`, plus explicit request consent in the gateway.
+- Hosted OpenAI requires `OPENAI_API_KEY`, `OPENAI_MODEL` and `AIRL_ALLOW_LIVE_REQUESTS=true`, plus explicit operation consent. `OPENAI_ALLOWED_MODELS` optionally overrides the allowlist, which otherwise contains `OPENAI_MODEL`. The public demo launcher disables paid hosted calls.
 
 SQLite uses Node 24's built-in implementation and needs a persistent writable filesystem. Supabase Auth/PostgreSQL/RLS/Realtime/Storage remains the intended hosted integration. Vercel's ephemeral filesystem cannot serve as the shared production database.
 
@@ -189,8 +191,8 @@ Queue tests cover one job per round, private review drafts, idempotent publicati
 
 ## Next development priorities
 
-1. Finish physical-iPhone playback/caption verification.
-2. Rehearse repeated world productions and recovery under presentation load.
+1. Rehearse the owner-admin presentation on the venue network, including QR entry, voting, publication and repeated iPhone playback.
+2. Rehearse repeated world productions and restart recovery under presentation load, monitoring memory pressure and ngrok allowance.
 3. Validate hosted OpenAI and HTTPS BYOK after credentials and paid-call approval.
 4. Extend device, keyboard, reduced-motion and accessibility coverage.
 5. Plan universe forks, creator-supplied art/audio and team collaboration. Hosted storage, scheduling and exports require a separate milestone.
@@ -230,9 +232,9 @@ npm run demo:rehearse
 
 Stop an existing tunnel before rehearsal. The command uses the account's actual public ngrok endpoint and saves results under ignored `.data/rehearsals/<timestamp>/`. It spends some free-plan request/bandwidth allowance. It verifies 35 distinct votes, stream delivery, draft privacy, real four-stage generation, idempotent publication, Secure cookies, origin/Host rejection and Chrome touch playback/captions/seek. It uses HTTP/2 connection reuse to represent browser traffic. Physical-device results remain separately recorded in `VERIFICATION.md`.
 
-The free plan currently includes 20,000 HTTP requests and 1 GB outbound traffic per month, with a 4,000-request/minute limit. Existing account usage, frontend downloads, audience reconnects and rehearsal traffic count toward those allowances. Check the dashboard before judging. [ngrok free-plan limits](https://ngrok.com/docs/pricing-limits/free-plan-limits)
+The free-plan limits recorded during the November 12, 2026 rehearsal include 20,000 HTTP requests and 1 GB outbound traffic per month, with a 4,000-request/minute limit. Existing account usage, frontend downloads, audience reconnects and rehearsal traffic count toward those allowances. Check the dashboard before judging. [ngrok free-plan limits](https://ngrok.com/docs/pricing-limits/free-plan-limits)
 
-## Physical-phone HTTPS demo
+## Local-network HTTPS fallback
 
 Use the Mac and phones on the same trusted Wi-Fi. The dedicated launcher binds only to a private IPv4 address assigned to the Mac, validates the Host header and terminates TLS in the application process. Ollama remains on `127.0.0.1:11434`. Room QR images are generated locally with `qrcode` and contain only the public audience URL.
 

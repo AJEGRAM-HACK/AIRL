@@ -1,6 +1,8 @@
 # AIRL architecture and delivery plan
 
-_Last updated November 12, 2026._
+_Last updated November 12, 2026. Latest verified application commit `7989ccde15933ab6765cd28ceebaa85cd489d535`._
+
+[CHANGELOG.md](CHANGELOG.md) summarizes recent changes. [VERIFICATION.md](VERIFICATION.md) separates current acceptance results from historical checkpoints. The current delivery is Mac-hosted SQLite/Ollama with a public ngrok web tunnel. Supabase, Trigger.dev and cloud media exports remain proposed architecture.
 
 ## Multi-universe implementation
 
@@ -55,13 +57,15 @@ The primary demonstration connects participation, creative workflow, review and 
 | Public routes and metadata | `src/app` | AIRL landing, discovery, module pages and compatible CinemAI URLs |
 | Shared navigation and themes | `src/components` | Light, dark and system preference with local persistence |
 | Module flags | `src/lib/config` | Public build-time availability settings |
-| PersonaAI | `src/features/persona` | Shared character profiles, canonical seed memories and scripted scenarios |
+| Accounts, worlds and canon | `src/server/platform` | Profiles, roles, ownership, scoped cast/assets, canon, pitches and story retrieval |
+| Permission presentation | `src/server/platform/page.ts`, `src/components/platform/access.tsx` | Server-derived navigation permissions, Studio page guards and immediate signout revocation |
+| PersonaAI | `src/features/persona` | Compatible character interfaces backed by approved scoped canon, plus labeled scripted scenarios |
 | Live community UI | `src/features/live` | Session join, voting, SSE totals and operator controls |
-| Live persistence and auth | `src/server/live` | SQLite records, random hashed cookie tokens, local operator redemption |
+| Live persistence and auth | `src/server/live` | Scoped SQLite votes/rounds, opaque sessions, account authorization and narrow legacy operator redemption |
 | Provider gateway | `src/ai` | Demo, local Ollama, hosted OpenAI and request-scoped creator BYOK |
 | Structured workflow | `src/server/production` | Typed stages, bounded revisions, drafts, persistence and room job execution |
 | Media preview | `src/video` | Portrait Remotion composition, approved backgrounds, character pictograms and captions |
-| Local operator utilities | `scripts` | Operator codes, production CLI and recovery worker |
+| Local operator utilities | `scripts` | Admin bootstrap, migration, production CLI, recovery worker, HTTPS/tunnel launchers and load rehearsal |
 | Automated checks | `tests` | Voting, provider isolation, workflow, queue and media invariants |
 
 ## 4. Component flow
@@ -77,7 +81,11 @@ flowchart TD
   Runner --> Registry[Provider registry]
   Registry --> Demo[Deterministic demo]
   Registry --> Local[Local Ollama]
-  Registry --> OpenAI[Hosted or creator OpenAI]
+  Registry --> OpenAI[Hosted OpenAI with consent]
+  Requests[Authenticated request-scoped pitches and answers] --> RequestRegistry[Request provider selection]
+  RequestRegistry --> BYOK[HTTPS BYOK with consent]
+  DB --> Sources[Visibility and spoiler-scoped sources]
+  Sources --> Requests
   Runner --> Draft[Validated draft]
   Draft --> Review[Operator review]
   Review --> Published[Published episode]
@@ -86,7 +94,7 @@ flowchart TD
   Persona[Shared character library] --> Runner
 ```
 
-The registry supports four modes. Room jobs persist Demo, Ollama or Hosted OpenAI selection together with explicit paid consent where required. BYOK remains limited to creator requests. BYOK credentials never enter room jobs.
+The registry supports four modes. Authenticated pitch, answer and gateway requests have a separate request-scoped path. Creation operations require creator/admin access, while viewers may ask about accessible published stories. Room jobs persist Demo, Ollama or Hosted OpenAI selection together with explicit paid consent where required. BYOK remains request-scoped with operation-specific account permissions. BYOK credentials never enter room jobs.
 
 ## 5. Data model
 
@@ -104,7 +112,14 @@ The registry supports four modes. Room jobs persist Demo, Ollama or Hosted OpenA
 | `events` | Real stage start, success/failure, attempts, outputs and timestamps |
 | `production_drafts` | Validated artifact held for review |
 | `episodes` | Approved published artifact with a unique production reference |
-| `characters` | Shared character profile and canonical memories |
+| `characters` | Preserved legacy character records |
+| `accounts`, `account_sessions` | Salted scrypt credentials, viewer/creator/admin roles and opaque session bindings |
+| `universes`, `universe_rooms` | Owner, visibility, settings, archival and scoped room identity |
+| `universe_characters`, `universe_relationships` | Universe/slug composite identity and scoped relationship references |
+| `universe_episodes`, `canon_events` | Explicit story order, source episode/scene and approved canon |
+| `universe_assets` | Protected reference-image bytes and universe ownership |
+| `production_outlines`, `production_previews` | Validated scripts and versioned playable drafts before Critic completion |
+| `job_runs`, `job_failures` | Attempt history and sanitized pre-inference failure records |
 | `ai_usage` | Creator-scoped provider metadata, reported tokens, optional estimate and sanitized failure |
 | `ai_leases` | Bounded local inference or creator-request lease |
 
@@ -121,12 +136,12 @@ Use database transactions or security-definer functions with tightly controlled 
 1. A visitor joins and receives an opaque server-issued session cookie.
 2. The backend validates a vote against the round and permitted options.
 3. SQLite serializes voting and closure with immediate transactions. Repeat identical votes succeed without adding another record.
-4. An authenticated operator closes the round. The highest count wins, with displayed option order breaking ties, including empty rounds.
+4. An authorized world owner/admin or narrow legacy official-room operator closes the round. The highest count wins, with displayed option order breaking ties, including empty rounds.
 5. Closure inserts one queued room job in the same transaction. A frozen option title supplies the creative premise.
 6. A Next.js `after` callback attempts execution after the HTTP response. An optional local worker drains persisted jobs and recovers expired claims.
 7. A claimed job records its real run reference. The existing Director, Screenwriter, Visual Producer and Critic execute with shared schemas.
 8. Critic approval produces a persisted draft. This draft remains outside public episode reads and canonical episode history.
-9. An operator approves or rejects the draft. Approval inserts the episode and changes job/production status atomically.
+9. The creator owner/admin reviews and may correct proposed canon before approval or rejection. Official publication requires admin authority. Approval inserts the episode, approved canon and job/production status atomically.
 10. Public audience views retrieve the published manifest and display it through Remotion. Operators can open the next voting round.
 
 ```mermaid
@@ -165,9 +180,11 @@ Keep raw keys out of cookies, browser storage, URLs, database records, analytics
 
 The browser composition uses 720 × 1280, 30 FPS and three manifest scenes. The default deterministic output lasts 18 seconds. Timings come from the validated manifest. Captions follow the current dialogue segment. Reusable styles include dramatic reveal, dialogue, reaction comedy, news broadcast and cliffhanger.
 
-Approved backgrounds are the plaza, barangay hall and taho stall. Initial character assets reuse licensed Lucide pictograms and existing AIRL styling. Local Draw Things artwork can replace registry entries after authorship, license and visual consistency checks. Model outputs cannot supply arbitrary paths, HTML or code.
+Approved backgrounds include the plaza, barangay hall, taho stall and neutral settings for custom worlds. Initial character assets reuse licensed Lucide pictograms and existing AIRL styling. Local Draw Things artwork can replace registry entries after authorship, license and visual consistency checks. Model outputs cannot supply arbitrary paths, HTML or code.
 
 Remotion is integrated for local evaluation and browser preview. Its documented free license includes noncommercial evaluation. Confirm organization eligibility before commercial hosting. Larger commercial teams may require a paid license. No license purchase is part of this milestone.
+
+Seeking keeps base scene content visible at exact scene boundaries. Silent previews start muted with no shared audio tags, avoiding a dependency on audio-context resume. Physical iPhone voting, playback, captions and repeated rewind/replay were user-confirmed after these fixes. Safari 16 is explicitly included in the build targets.
 
 MP4 output, FFmpeg encoding, voice tracks, audio mixing, expression sprites and a bounded export queue are later work. Use 1080 × 1920 as the target export size. Share the same composition rather than implementing a second timing engine.
 
@@ -179,46 +196,62 @@ MP4 output, FFmpeg encoding, voice tracks, audio mixing, expression sprites and 
 | `/discover` | Public | Available and coming-soon experiences |
 | `/live` | Public | Room directory |
 | `/live/[roomId]` | Public/session | Audience voting, results and approved episodes |
-| `/studio` | Public shell | Studio navigation and access guidance |
-| `/studio/[roomId]` | Public shell, protected actions | Voting operations, production events and review |
-| `/studio/ai` | Public shell, creator-protected API | Provider settings and request previews |
+| `/account` | Public/authenticated | Signup, signin, signout and private interests |
+| `/universes` | Public/authenticated | Public and personalized discovery |
+| `/universes/[id]` | Visibility-scoped | World overview and canon timeline |
+| `/universes/[id]/episodes`, `/universes/[id]/episodes/[episodeId]` | Visibility-scoped | Episode library, playback and story helper |
+| `/universes/[id]/characters`, `/universes/[id]/characters/[slug]` | Visibility-scoped | Cast, relationships and canon |
+| `/studio` | Creator/admin | Owned worlds, creation paths and admin role grants |
+| `/studio/worlds/[id]` | Owner/admin | World settings, cast and management |
+| `/studio/[roomId]` | Owner/admin or narrow official legacy operator | Voting operations, production events and private review |
+| `/studio/ai` | Creator/admin | Provider settings and request previews |
 | `/cinemai` | Public | Series entry |
 | `/cinemai/watch/[id]` | Public/session | Existing room-oriented episode experience |
 | `/cinemai/universe/[id]` | Public | Fictional universe |
 | `/persona` | Public | Character directory |
-| `/persona/[characterId]` | Public | Profile, scripted scenario and provider entry |
+| `/persona/[characterId]` | Public | Profile and labeled scripted scenarios, with authorized creator gateway entry |
 | `/watch/[roomId]` | Compatibility | Existing audience route |
 | `/universe/[slug]` | Compatibility | Existing universe route |
 
-Registered accessible universes are supported by dynamic wrappers. Unknown and inaccessible private identifiers return 404. Studio actions enforce account roles and universe ownership. Official canon publication requires an admin. Legacy operator codes grant narrow official-room controls and draft inspection.
+Registered accessible universes are supported by dynamic wrappers. Unknown and inaccessible private identifiers return 404. Studio pages and actions enforce account roles and universe ownership. Unauthorized direct Studio page requests return 404. Guest/viewer navigation omits management links, creators see their owned-world controls, and admins retain role grants. The server derives layout permissions per request, so the root layout is dynamically rendered. Logout clears privileged UI immediately and authentication refreshes the server permission snapshot. Official canon publication requires an admin. Legacy operator codes grant narrow official-room controls and draft inspection.
 
 ### Current API routes
 
 | Method and route | Authorization | Behavior |
 | --- | --- | --- |
-| GET/POST `/api/live/session` | Public/current session | Read or establish anonymous identity |
+| GET/POST `/api/account` | Public/current account | Signup/signin/signout and private profile interests |
+| GET/POST `/api/admin` | Admin | Account list and viewer/creator grants |
+| GET/POST `/api/universes` | Visibility-scoped read, creator/admin create | Catalog and private world creation |
+| GET/PATCH/DELETE `/api/universes/[id]` | Visibility-scoped read, owner/admin writes | World settings, publication, archive and restore |
+| POST `/api/universes/[id]/{characters,relationships,assets}` | Owner/admin | Cast, relationships and protected reference images |
+| DELETE `/api/universes/[id]/characters` | Owner/admin | Remove unreferenced cast member |
+| POST `/api/universes/[id]/ask` | Signed-in with source access | Spoiler-scoped story answer, manager-only drafts |
+| GET `/api/assets/[id]` | World visibility | Protected image bytes |
+| GET `/api/models` | Account | Installed/allowed model discovery |
+| POST `/api/pitches` | Creator/admin | Three editable world pitches |
+| GET/POST `/api/live/session` | Public/current session | Read or establish scoped anonymous identity |
 | POST `/api/live/operator` | Joined session and one-time code | Redeem local creator/operator role |
-| GET `/api/live/rooms/[roomId]/state` | Public | Aggregate room and current session state |
-| GET `/api/live/rooms/[roomId]/events` | Public | SSE aggregate snapshots |
-| GET `/api/live/rooms/[roomId]/join-qr` | Public | Locally generated QR encoding the same-origin audience room URL |
+| GET `/api/live/rooms/[roomId]/state` | World visibility | Aggregate room and current session state |
+| GET `/api/live/rooms/[roomId]/events` | World visibility, rechecked | SSE snapshots and content-free production-change notices |
+| GET `/api/live/rooms/[roomId]/join-qr` | World visibility | Locally generated QR encoding the same-origin audience room URL |
 | POST `/api/live/rooms/[roomId]/vote` | Session | Record a validated vote |
-| POST `/api/live/rooms/[roomId]/close` | Operator | Freeze winner and enqueue one job |
-| POST `/api/live/rooms/[roomId]/next` | Operator | Start a subsequent round |
-| GET `/api/production` | Public | Public job status and published manifests |
-| GET `/api/production?operator=1` | Operator | Drafts, critic feedback and stage events |
-| POST `/api/production` | Operator | Publish, reject or retry a room job |
-| GET/POST `/api/ai` | Creator/operator | Provider metadata, explicit tests and request-scoped inference |
+| POST `/api/live/rooms/[roomId]/close` | Owner/admin or narrow legacy operator | Freeze winner and enqueue one job |
+| POST `/api/live/rooms/[roomId]/next` | Owner/admin or narrow legacy operator | Start a subsequent round |
+| GET `/api/production` | World visibility | Public job status and published manifests |
+| GET `/api/production?operator=1` | Owner/admin or narrow legacy operator | Drafts, critic feedback and stage events |
+| POST `/api/production` | Owner/admin | Publish, reject or retry, with admin-only official publication |
+| GET/POST `/api/ai` | Creator/admin | Provider metadata, explicit tests and request-scoped inference |
 
 ## 10. Candidate routes under consideration
 
-These are proposed designs, not implementation claims.
+These candidates remain future design options. Canonical episode and character pages already exist under `/universes/[id]`.
 
 | Candidate | Purpose | Decision or prerequisite |
 | --- | --- | --- |
 | `/join/[roomCode]` | Short QR destination | Room slug/code policy and hosted origin |
 | `/live/[roomId]/results` | Presentation-only results | Decide whether a separate projector view is needed |
 | `/cinemai/series/[seriesId]` | Series archive and branches | Introduce series identity separate from room identity |
-| `/cinemai/episodes/[episodeId]` | Stable published episode URL | Public ownership and episode routing model |
+| `/cinemai/episodes/[episodeId]` | Possible episode alias | Stable canonical pages already use `/universes/[id]/episodes/[episodeId]` |
 | `/cinemai/universe/[worldId]/timeline` | Canon and branch history | Versioned story bible and branch rules |
 | `/studio/rooms/new` | Possible standalone room editor | Worlds already create scoped rooms through `/studio` |
 | `/studio/[roomId]/production/[jobId]` | Detailed job inspection | Cross-room authorization and job pagination |
@@ -230,7 +263,7 @@ These are proposed designs, not implementation claims.
 | `/persona/[characterId]/chat` | Dedicated conversation | Consent, private memory and retention policy |
 | `/quest`, `/remix`, `/worldforge`, `/memories` | Future modules | Separate bounded feature specifications |
 
-Candidate APIs include `/api/rooms`, `/api/episodes/[episodeId]`, `/api/jobs/[jobId]/events`, `/api/submissions`, `/api/assets` and `/api/exports`. Introduce them only when their ownership and security contracts are settled. Preserve existing client calls during migration through adapters or compatible handlers.
+Candidate APIs include `/api/rooms`, `/api/episodes/[episodeId]`, `/api/jobs/[jobId]/events`, `/api/submissions`, an asset-library listing API and `/api/exports`. Protected image reads and scoped uploads already use `/api/assets/[id]` and `/api/universes/[id]/assets`. Introduce them only when their ownership and security contracts are settled. Preserve existing client calls during migration through adapters or compatible handlers.
 
 ## 11. Deployment options
 
@@ -258,13 +291,12 @@ A compatible persistent Node host can keep SQLite and local scheduling for a sma
 
 ## 12. Migration sequence
 
-1. Finish the local vote → job → review → composition flow and verify retries, restart recovery and publication privacy.
-2. Stabilize the world/series/episode identity model and version artifact schemas.
-3. Add Supabase migrations and anonymous Auth. Reproduce local transactional constraints and run adversarial RLS tests.
-4. Replace local job scheduling with a durable worker using outbox delivery and application-owned event records.
-5. Add hosted creator ownership, usage budgets and consented private persona memory.
-6. Implement export only after preview correctness, license eligibility and resource profiling are established.
-7. Add QR sharing, room management, moderation and accessibility polish for the final demonstration.
+1. Preserve the completed local vote → job → review → preview → publication loop, additive world migration, QR sharing and server-side roles.
+2. Complete the owner-admin venue rehearsal, repeat crash recovery and monitor repeated-run memory, latency and tunnel allowance.
+3. Validate Hosted OpenAI and request-only HTTPS BYOK after credentials and explicit paid-call authorization.
+4. If always-on hosting is approved, migrate identity/data/storage to Supabase, preserving UUIDs, story order and transactional invariants. Add adversarial RLS verification before enabling writes.
+5. Replace local scheduling with a durable worker and outbox while retaining application-owned job/event records. A Mac-worker bridge needs its own authorization and security design.
+6. Add export only after preview correctness, license eligibility and resource profiling. Moderation, team collaboration and forks need separate scopes.
 
 ## 13. Acceptance and risk tracking
 
@@ -272,7 +304,7 @@ Verify duplicate submissions, vote/closure races, one job per round, no draft ex
 
 Playwright acceptance verifies browser playback, scene seeking, captions and the mobile audience flow for Demo and Ollama. Wider keyboard, reduced-motion and device coverage remain follow-up QA. OpenAI tests remain unverified until credentials and explicit approval are supplied.
 
-Known limits include one predefined room, anonymous identities that users can recreate, local session-based creator roles, no hosted RLS, no MP4/audio export and no full content moderation system. Generated quality and cultural consistency still require human review, including on successful local-model runs.
+Known limits include cookie-recreatable anonymous voting identities, local password accounts without email verification/reset, request-time role snapshots that refresh with navigation/authentication, no hosted RLS, no MP4/audio export and no full content moderation system. Multiple owned universes and scoped rooms are implemented. The Mac, network and ngrok allowance remain demo dependencies. The 35-session result is a short synthetic rehearsal, with one physical iPhone verified separately. Generated quality and cultural consistency still require human review, including on successful local-model runs.
 
 ## 14. References
 

@@ -1,3 +1,33 @@
+# AIRL verification record
+
+## Current verified status — November 12, 2026
+
+Latest verified application commit is `7989ccde15933ab6765cd28ceebaa85cd489d535`. This summary describes recorded checks for the current application and identifies earlier evidence separately. Historical entries below retain the outcomes and limitations that applied at each checkpoint. Their pending items may have been completed in later entries.
+
+| Area | Latest evidence | Limits |
+| --- | --- | --- |
+| Static checks | `npm run typecheck` and `npm run build` passed at `7989ccd` | Documentation refresh adds no application changes |
+| Unit/regression suite | `npm test` passed all 38 tests, zero failures, 3.435 s | Includes identified transport/executor doubles |
+| Production-browser suite | `npm run test:browser` passed six cases in 59.6 s | Installed Chrome, isolated database, real Ollama in its provider case |
+| Real creative workflow | Vote → frozen winner → four Ollama stages → preview → review → publication → audience playback passed | Latest browser production 22.4 s, maximum sampled audience API latency 13 ms |
+| Roles and ownership | Guest/viewer/creator/admin UI, direct page/API protection, owned-world controls and sign-in/sign-out passed | Request-time permission snapshot refreshes with authentication/navigation |
+| Public HTTPS | Guest mobile Chrome smoke passed at `7989ccd`, protected Studio URLs returned 404, playback advanced with zero JS errors | Requires running Mac, internet and tunnel |
+| Physical iPhone | User confirmed public joining/voting, playback, captions and repeated rewind/replay after `8a8903f` | One physical device, subsequent role UI change checked with Chrome |
+| 35-session public rehearsal | Earlier `01e710d` run passed, 23.639 s real production, 157 ms request p95 | Simulated HTTP/2 sessions, one mobile Chrome context, no 35-device claim, not rerun after role UI changes |
+| Restart recovery | Earlier genuine interrupted job recovered after lease expiry in 178.3 s, publication stayed idempotent | Repeat crash/restart on the presentation build remains a priority |
+| Local fixed-input benchmark | Official/private episodes 38.569/27.498 s, pitches 14.370 s, cited answer 4.195 s | Short measurements, model residency/load vary, semantic/style review remains necessary |
+| Paid providers and media export | OpenAI/BYOK contracts and isolation tested with doubles, live paid inference unverified | No paid call made, no MP4/voice/art generation implemented |
+
+See the chronological sections for failed attempts, corrections, source artifacts, measurements and exact test boundaries. [CHANGELOG.md](CHANGELOG.md) provides a concise implementation summary. [HANDOFF.md](HANDOFF.md) provides launch and continuation instructions.
+
+## Documentation reconciliation — November 12, 2026
+
+Reviewed all tracked Markdown documentation against Git history, package scripts, current route files, permission guards, provider configuration and the silent Remotion player. Corrected obsolete single-room claims, public Studio descriptions, pending iPhone playback status and the handoff's active LAN launch instructions. Public ngrok is the approved hackathon path. Local-CA HTTPS remains a fallback. Clarified the optional hosted-model allowlist, API authorization, current versus proposed infrastructure, and historical benchmark scope. Added a consolidated changelog.
+
+This refresh changes documentation only. Application acceptance and inference suites were not rerun. Documentation checks cover whitespace, repository-local Markdown links, referenced Git commits and npm command names. Existing evidence remains attributed to its application checkpoint. No application code, credentials, infrastructure or database records were changed.
+
+---
+
 # Milestone 1 verification
 
 Verified on November 11, 2026 using Node.js 24.22.2 and npm.
