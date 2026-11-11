@@ -1,111 +1,93 @@
-# CinemAI
+# AIRL — Artificial In Real Life
 
-**Stories made by AI. Directed by everyone.**
+**The real world is the prompt.**
 
-CinemAI combines a Milestone 1 interactive UI with a local four-agent production CLI. The web UI remains a fixture prototype; live API execution is only attempted through the CLI and requires separately configured credentials. No successful live agent run has been verified yet.
+AIRL Phase 1 builds on the existing CinemAI prototype. AIRL Live supplies the future shared community layer, CinemAI hosts stories, and PersonaAI owns reusable fictional character definitions. All public experiences currently use labeled sample data or deterministic scripts.
 
-## Run locally
+## Start locally
 
-Install Node.js 24 LTS and npm, then:
+Use Node.js 24 LTS and npm.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. No environment values are required for Milestone 1.
-
-Production verification:
-
-```sh
-npm run typecheck
-npm run build
-npm run start
-```
-
-If using the temporary Node runtime downloaded during implementation in this session:
+Open http://127.0.0.1:3000. No API credentials are required. The current session also has a temporary runtime available with:
 
 ```sh
 export PATH=/tmp/node-v24.22.2-darwin-arm64/bin:$PATH
-npm run dev
 ```
 
-That runtime is temporary; install Node 24 normally for future sessions.
-
-## Routes
-
-| Route | Experience |
-| --- | --- |
-| `/` | CinemAI landing page and original CSS world illustration |
-| `/watch/barangay-2099` | Captioned 15-second storyboard playback, seeking, episode history and local choice preview |
-| `/studio/barangay-2099` | Seeded dashboard, disconnected agent workflow, script, character memory and episode preview |
-| `/universe/barangay-2099` | Fictional world and three detailed character profiles |
-
-Dynamic route parameters are validated; unsupported rooms and universes return 404.
-
-## Prototype behavior
-
-- The storyboard player cycles through three seeded captions. It is a browser illustration, not generated video, Remotion or an MP4. There is no audio.
-- Voting is an explicitly local preview. A choice increments a seeded result only in component memory, locks selection until refresh, and is never sent to a server.
-- Studio statistics are examples. Agents show “Not connected”; no production execution is implied. Operator actions are disabled.
-- Characters include motivations, voice, relationships and initial memories, validated with Zod. They are source fixtures, not persistent database records.
-- Original visual artwork is CSS; character pictograms use ISC-licensed Lucide icons. No external images or fonts are required.
-- Keyboard focus, semantic radio inputs, caption controls, a skip link, responsive layouts and reduced-motion support are included.
-
-## Structure
-
-- `src/app`: route wrappers, metadata, styles, 404 page.
-- `src/components`: responsive views and client interactions.
-- `src/components/ui/button.tsx`: shadcn/ui-style accessible Button primitive using Radix Slot and CVA.
-- `src/lib/domain.ts`: shared Zod schemas, production status types and future integration interfaces.
-- `src/lib/fixtures.ts`: validated story, character, episode and voting fixtures.
-- `.env.example`: empty placeholders for later service integrations. No credentials are needed now.
-
-## Milestone 2 recommendation — requires approval
-
-1. Add Supabase migrations for universes, rooms, episodes, character profiles, voting rounds, options and votes. Seed this fictional world.
-2. Enable Supabase anonymous authentication. Derive participant identity from the verified server session; enforce a unique `(round_id, participant_id)` constraint.
-3. Create transactional vote submission and round closure, validating room membership, option membership and round status server-side.
-4. Apply RLS: public safe reads, participants limited to their own vote, and operator-only round management through server-verified roles. Keep the service-role key server-only.
-5. Subscribe to safe aggregated result updates via Supabase Realtime; re-fetch authoritative totals after reconnect. Avoid exposing individual participant votes.
-6. Add protected operator API routes and test two independent sessions, duplicate submissions, closed rounds, invalid options, unauthorized closure, races and reconnects.
-
-The OpenAI Agents SDK is now installed for the authorized local production slice. Trigger.dev, Supabase and Remotion remain unconnected. No model accessibility or live-service success has been verified. Deployment and pushing are not authorized.
-
-## Verification
-
-See [VERIFICATION.md](VERIFICATION.md) for results and limitations. Production build, strict TypeScript and HTTP checks passed. Browser visual and interaction QA remains unverified because the computer-use browser host was unavailable. Scripts use Next.js Webpack mode because Turbopack encountered an environment port-binding failure.
-
-
-## Local four-agent production slice
-
-This implementation follows the [official OpenAI agent definition guidance](https://developers.openai.com/api/docs/guides/agents/define-agents) using separate typed agent runs orchestrated in code. All four agents share one OpenAI client and API key. No other AI provider or infrastructure service is introduced.
-
-1. Create an ignored `.env.local` with `OPENAI_API_KEY` and `OPENAI_MODEL` set to a model available to your API project. Never paste secrets into chat or commit them. No default model is assumed.
-2. Run:
-
-```sh
-npm run production -- "Launch a mandatory karaoke night"
-```
-
-3. The CLI prints the run ID. Inspect persisted events and outputs with:
-
-```sh
-npm run production -- inspect RUN_ID
-```
-
-The CLI checks model access, then executes Story Director → Screenwriter → Visual Producer → Creative Critic using the Agents SDK and Zod output schemas. The three-scene manifest is checked against script dialogue and an approved visual vocabulary. Those asset IDs are plans, not rendered media. All responses have explicit request timeouts, one SDK turn per agent and a 4,000-token output budget. Raw SDK errors are not printed or stored; safe error classifications are persisted. SDK tracing is disabled; local SQLite events are the audit source.
-
-Schema failures have at most two attempts. A critic rejection allows one script/manifest revision and another critique. A second rejection ends in `review`, without publishing or modifying character memories. Accepted episodes and their memory updates commit in one transaction. A later run loads persistent profiles and the last five approved episodes plus labeled original story history. This bounded history is a starting continuity policy, not long-term retrieval.
-
-Data lives in ignored `.data/cinemai.sqlite` (override with `CINEMAI_DB_PATH`). It survives CLI restarts and records stage starts, successes, outputs and failures. One running production per room prevents concurrent continuity updates. An interrupted process may leave a `running` row: inspect the database and confirm the process has stopped before an operator manually resolves that row. Automatic crash recovery and resumable durable jobs are not implemented.
-
-SQLite uses Node 24's built-in `node:sqlite`; it is a local development persistence adapter, **not suitable for Vercel's ephemeral filesystem**. Migrate to Supabase before hosted execution. The CLI is local operator access and exposes no unauthenticated generation HTTP endpoint. The existing studio and audience pages do not read this database and continue to label all displayed data as fixtures.
+Production and validation commands:
 
 ```sh
 npm run test:production
 npm run typecheck
 npm run build
+npm run start
 ```
 
-Tests use explicit executor doubles to verify orchestration, persistence, revision limits and failure handling. They are not successful OpenAI requests. A credentialed live CLI run must complete all four stages before this slice can be called operational. Current blocker: neither the API key nor the model is configured.
+## Routes and availability
+
+| Route | Experience |
+| --- | --- |
+| `/` | AIRL homepage |
+| `/discover` | Available modules and four coming-soon concepts |
+| `/live` | Sample room directory |
+| `/live/barangay-2099` | Local audience participation preview |
+| `/studio` | Shared studio entry page |
+| `/studio/barangay-2099` | Existing sample room control panel |
+| `/cinemai` | Preserved CinemAI landing experience |
+| `/cinemai/watch/barangay-2099` | Episode player and local choice preview |
+| `/cinemai/universe/barangay-2099` | Fictional universe |
+| `/persona` | Shared character directory |
+| `/persona/captain-bot` | Captain Bot profile and scripted interaction |
+| `/persona/tita-nena` | Tita Nena profile and scripted interaction |
+| `/persona/kuya-taho` | Kuya Taho profile and scripted interaction |
+
+Legacy `/watch/barangay-2099` and `/universe/barangay-2099` URLs remain functional. Unknown room, character and universe identifiers return 404. `/profile` is deferred with participant identity.
+
+The audience player provides captioned 15-second illustrated storyboards with seeking and episode selection. Local choices reset on refresh. Studio counts are labeled seeded examples. Persona interactions use selectable scripted prompts and stay in browser memory. QuestAI, RemixAI, WorldForge and AIRL Memories are discoverable coming-soon concepts.
+
+## Configuration
+
+Copy `.env.example` to `.env.local` if changing defaults. Environment files and local databases are ignored by Git.
+
+- `AI_PROVIDER=demo` is the server-side default. It requires no key and makes no network requests.
+- `NEXT_PUBLIC_ENABLE_CINEMAI`, `NEXT_PUBLIC_ENABLE_PERSONA`, `NEXT_PUBLIC_ENABLE_AIRL_LIVE` default to enabled. Set a value to `false` to disable the corresponding module routes and navigation. Public flags are build-time settings and require a rebuild in production.
+- Future-module flags are declared for later implementation. Their cards stay marked Coming soon.
+- Flags control availability. Future operator authorization must be enforced server-side.
+
+## Deterministic creative provider
+
+```sh
+npm run production -- "Launch a mandatory karaoke night"
+npm run production -- inspect RUN_ID
+```
+
+The CLI prints “Demo-generated content · Simulated agent workflow”. It runs deterministic Director → Screenwriter → Visual Producer → Critic steps with shared Zod schemas. The winning-choice input changes script dialogue and manifest content. The critic validates three-scene structure, approved scene vocabulary and verbatim dialogue. Schema failures have at most two attempts. A critic rejection permits one revision before human review.
+
+Demo jobs persist in `.data/airl-demo.sqlite`. Live jobs retain the existing `.data/cinemai.sqlite` path. `CINEMAI_DB_PATH` overrides the path. A non-destructive migration adds `execution_mode` to existing production records. Mode-specific episode history prevents demo results from entering live continuity. Timestamps, stage events, validation classifications and outputs are persisted. Demo templates add no canonical memories.
+
+The public studio is a foundation shell. CLI jobs are inspected locally, while browser-connected jobs and Remotion output belong to later phases. SQLite is the existing local development adapter. Hosted persistence will require Supabase. There are no Supabase migrations or connections yet.
+
+## Live AI readiness
+
+The installed OpenAI Agents SDK adapter remains unverified against real API calls. To deliberately enable a live run after credits and authorization are available, set server-only `AI_PROVIDER=openai`, `OPENAI_API_KEY`, `OPENAI_MODEL`, and `AIRL_ALLOW_LIVE_REQUESTS=true`. No model identifier is assumed. All four agents share one OpenAI client and key. Model access is checked before inference. Do not expose credentials through public environment variables.
+
+The CLI permits one active run per room. A killed process can leave a running row. Inspect it and confirm the original process has stopped before manual recovery. Durable job recovery is deferred to the Trigger.dev integration.
+
+## Architecture and migration
+
+- `src/lib/config` contains module metadata and public feature flags.
+- `src/features/persona` owns structured profiles and scripted scenarios. `src/lib/fixtures.ts` re-exports the same character library for CinemAI and production compatibility.
+- Shared profiles include world, identity, approved pictogram references, traits, motivations, voice, relationships, seeded canonical memories, character knowledge and conversation rules. Temporary scenario selection stays local. User interaction history is not persisted or merged into canon.
+- `src/ai/providers` defines the typed creative provider interface, demo and OpenAI implementations, and an adapter for the existing workflow engine.
+- `src/server/production` retains orchestration, schema validation and local persistence.
+- `src/components/layout` and `src/components/shared` provide reusable platform presentation.
+- `src/app/globals.css` centralizes platform tokens, responsive layouts and reduced-motion support. Existing original CSS world artwork and ISC-licensed Lucide pictograms are reused.
+
+Phase 1 preserves CinemAI and introduces AIRL routes and provider boundaries. Phase 2 will introduce shared authenticated community participation, transactional voting and realtime totals. Phase 3 will connect closed rounds to persisted production and Remotion previews. Stop after Phase 1 for product-direction verification.
+
+See [VERIFICATION.md](VERIFICATION.md) for actual checks and limitations.

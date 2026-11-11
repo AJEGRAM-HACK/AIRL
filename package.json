@@ -11,7 +11,7 @@
     "start": "next start --hostname 127.0.0.1",
     "typecheck": "tsc --noEmit",
     "production": "tsx scripts/produce.ts",
-    "test:production": "tsx --test tests/production.test.ts"
+    "test:production": "tsx --test tests/production.test.ts tests/demo-provider.test.ts"
   },
   "dependencies": {
     "@next/env": "16.4.6",

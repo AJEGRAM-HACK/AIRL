@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { Concept, Script, Manifest, Critique, Input, validateScript, validateManifest, type Stage, type ProductionInput } from './schemas';
 import { ProductionStore } from './store';
 export interface Executor {
+  executionMode?: 'demo' | 'openai';
   preflight(): Promise<void>;
   execute(stage: Stage, schema: z.ZodType, prompt: string): Promise<unknown>;
 }
@@ -12,13 +13,13 @@ export function safeFailure(error: unknown) {
 }
 export async function produce(store: ProductionStore, executor: Executor, rawInput: ProductionInput, model: string, onRun: (id: string) => void = () => {}) {
   const input = Input.parse(rawInput);
-  const id = store.create(input, model);
+  const id = store.create(input, model, executor.executionMode || 'openai');
   try {
     onRun(id);
     store.event(id, 'Connection', 1, 'started');
     await executor.preflight();
-    store.event(id, 'Connection', 1, 'succeeded', { model });
-    const context = store.context(input.roomId);
+    store.event(id, 'Connection', 1, 'succeeded', { model, executionMode: executor.executionMode || 'openai' });
+    const context = store.context(input.roomId, executor.executionMode || 'openai');
     const base = JSON.stringify({ input, context });
     async function stage<T extends z.ZodType>(name: Stage, schema: T, prompt: string, validate?: (value: z.infer<T>) => void): Promise<z.infer<T>> {
       for (let attempt = 1; attempt <= 2; attempt++) {
@@ -43,7 +44,7 @@ export async function produce(store: ProductionStore, executor: Executor, rawInp
       const manifest = await stage('Visual Producer', Manifest, JSON.stringify({ script }), value => validateManifest(value, script));
       const critique = await stage('Creative Critic', Critique, JSON.stringify({ base, concept, script, manifest }));
       if (critique.approved) {
-        store.approve(id, input.roomId, { concept, script, manifest, critique }, script.memoryUpdates);
+        store.approve(id, input.roomId, { concept, script, manifest, critique, executionMode: executor.executionMode || 'openai' }, script.memoryUpdates);
         return { id, status: 'complete' as const, manifest };
       }
       feedback = critique;

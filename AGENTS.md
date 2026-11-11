@@ -1,7 +1,7 @@
-# CinemAI project conventions
+# AIRL project conventions
 
 ## Scope
-The user has authorized a local four-agent production vertical slice with persisted results. Live voting, hosted production jobs and deployment remain out of scope until separately approved. Fixture interactions must stay labeled. Never fabricate successful jobs or logs.
+The current approved scope is AIRL Phase 1, including rebranding, module routes, PersonaAI, flags and deterministic demo provider integration. Stop before Phase 2 community voting. The local production slice remains available. Fixture interactions must stay labeled. Never fabricate successful jobs or logs.
 
 ## Architecture
 - One Next.js App Router repository, TypeScript strict mode, npm, Node.js 24 LTS.
@@ -24,3 +24,16 @@ Preserve existing work. Record checks and limitations honestly. Checkpoint logic
 
 ## Local production slice
 Server-only code lives in src/server/production and is invoked through the local CLI. SQLite is a local development adapter, not Vercel persistence. Keep its data ignored. Run npm run test:production; doubles prove orchestration only, never actual OpenAI operation. A live run must use configured credentials and model, and complete all four stages before being reported operational.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
+
+## AIRL foundation
+AIRL is the platform. CinemAI is a module. PersonaAI owns shared character definitions in src/features/persona/characters.ts, re-exported from fixtures for compatibility. AI_PROVIDER defaults to demo. Demo uses deterministic templates with accurate labels and zero network calls. Live AI requires credentials, a model and explicit authorization. Keep provider configuration server-only. Feature flags in src/lib/config/features.ts control module availability, never authorization. Preserve legacy CinemAI URLs. New design tokens stay in globals.css.

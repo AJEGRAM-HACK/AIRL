@@ -16,17 +16,22 @@ export class ProductionStore {
       CREATE UNIQUE INDEX IF NOT EXISTS one_active_run ON productions(room_id) WHERE status='running';
       CREATE TABLE IF NOT EXISTS events (sequence INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT NOT NULL, stage TEXT NOT NULL, attempt INTEGER NOT NULL, status TEXT NOT NULL, data TEXT NOT NULL, created_at TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS episodes (run_id TEXT PRIMARY KEY, room_id TEXT NOT NULL, artifact TEXT NOT NULL, created_at TEXT NOT NULL);`);
+    // Additive migration keeps existing local production records readable.
+    const columns = this.db.prepare('PRAGMA table_info(productions)').all();
+    if (!columns.some(column => column.name === 'execution_mode')) {
+      this.db.exec("ALTER TABLE productions ADD COLUMN execution_mode TEXT NOT NULL DEFAULT 'openai'");
+    }
     const seed = this.db.prepare('INSERT OR IGNORE INTO characters VALUES (?, ?)');
     for (const c of characters) seed.run(c.id, JSON.stringify(c));
   }
-  context(roomId: string) {
-    const profiles = this.db.prepare('SELECT profile FROM characters ORDER BY id').all().map(row => JSON.parse(String(row.profile)) as Character);
-    const history = this.db.prepare('SELECT artifact FROM episodes WHERE room_id=? ORDER BY created_at DESC LIMIT 5').all(roomId).reverse().map(row => JSON.parse(String(row.artifact)));
+  context(roomId: string, executionMode: 'demo' | 'openai' = 'openai') {
+    const profiles = this.db.prepare('SELECT profile FROM characters ORDER BY id').all().map(row => ({ ...characters.find(character => character.id === String(JSON.parse(String(row.profile)).id)), ...JSON.parse(String(row.profile)) }) as Character);
+    const history = this.db.prepare('SELECT e.artifact FROM episodes e JOIN productions p ON p.id=e.run_id WHERE e.room_id=? AND p.execution_mode=? ORDER BY e.created_at DESC LIMIT 5').all(roomId, executionMode).reverse().map(row => JSON.parse(String(row.artifact)));
     return { characters: profiles, seededHistory: episodes, approvedHistory: history };
   }
-  create(input: ProductionInput, model: string) {
+  create(input: ProductionInput, model: string, executionMode: 'demo' | 'openai' = 'openai') {
     const id = randomUUID(), now = new Date().toISOString();
-    this.db.prepare('INSERT INTO productions VALUES (?, ?, ?, ?, ?, ?, ?)').run(id, input.roomId, 'running', model, JSON.stringify(input), now, now);
+    this.db.prepare('INSERT INTO productions(id,room_id,status,model,input,created_at,updated_at,execution_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(id, input.roomId, 'running', model, JSON.stringify(input), now, now, executionMode);
     return id;
   }
   event(id: string, stage: Stage | 'Connection' | 'Workflow', attempt: number, status: string, data: unknown = {}) {
@@ -40,7 +45,7 @@ export class ProductionStore {
       for (const update of updates) {
         const row = this.db.prepare('SELECT profile FROM characters WHERE id=?').get(update.characterId);
         if (!row) throw new Error('Unknown character');
-        const profile = JSON.parse(String(row.profile)) as Character;
+        const profile = ({ ...characters.find(character => character.id === String(JSON.parse(String(row.profile)).id)), ...JSON.parse(String(row.profile)) }) as Character;
         if (!profile.memories.includes(update.memory)) profile.memories.push(update.memory);
         this.db.prepare('UPDATE characters SET profile=? WHERE id=?').run(JSON.stringify(profile), update.characterId);
       }
