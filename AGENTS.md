@@ -1,7 +1,7 @@
 # AIRL project conventions
 
 ## Scope
-The current approved scope is AIRL Phase 1, including rebranding, module routes, PersonaAI, flags and deterministic demo provider integration. Stop before Phase 2 community voting. The local production slice remains available. Fixture interactions must stay labeled. Never fabricate successful jobs or logs.
+The user approved continuing with Phase 2 community voting and light/dark themes. Shared local voting uses the existing SQLite adapter until hosted Supabase credentials are available. The local production slice remains available. Fixture interactions must stay labeled. Never fabricate successful jobs or logs.
 
 ## Architecture
 - One Next.js App Router repository, TypeScript strict mode, npm, Node.js 24 LTS.

@@ -6,5 +6,5 @@ import { features } from '@/lib/config/features';
 export default async function LiveRoom({ params }: { params: Promise<{ roomId: string }> }) {
   const { roomId } = await params;
   if (!features.live || !features.cinemai || roomId !== DEMO_ROOM) notFound();
-  return <PublicShell active="live"><div className="notice">AIRL Live · CinemAI sample room · Choices update this page locally.</div><Audience/></PublicShell>;
+  return <PublicShell active="live"><div className="notice">AIRL Live · Shared local room · Results update across participants.</div><Audience/></PublicShell>;
 }

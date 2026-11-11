@@ -2,7 +2,7 @@
 
 **The real world is the prompt.**
 
-AIRL Phase 1 builds on the existing CinemAI prototype. AIRL Live supplies the future shared community layer, CinemAI hosts stories, and PersonaAI owns reusable fictional character definitions. All public experiences currently use labeled sample data or deterministic scripts.
+AIRL builds on the existing CinemAI prototype. Phase 2 adds shared local community voting and persistent color themes. AIRL Live supplies the future shared community layer, CinemAI hosts stories, and PersonaAI owns reusable fictional character definitions. Episode media and character conversations use labeled sample data or deterministic scripts. Community votes are persisted by the local server.
 
 ## Start locally
 
@@ -35,7 +35,7 @@ npm run start
 | `/` | AIRL homepage |
 | `/discover` | Available modules and four coming-soon concepts |
 | `/live` | Sample room directory |
-| `/live/barangay-2099` | Local audience participation preview |
+| `/live/barangay-2099` | Shared audience voting |
 | `/studio` | Shared studio entry page |
 | `/studio/barangay-2099` | Existing sample room control panel |
 | `/cinemai` | Preserved CinemAI landing experience |
@@ -48,7 +48,7 @@ npm run start
 
 Legacy `/watch/barangay-2099` and `/universe/barangay-2099` URLs remain functional. Unknown room, character and universe identifiers return 404. `/profile` is deferred with participant identity.
 
-The audience player provides captioned 15-second illustrated storyboards with seeking and episode selection. Local choices reset on refresh. Studio counts are labeled seeded examples. Persona interactions use selectable scripted prompts and stay in browser memory. QuestAI, RemixAI, WorldForge and AIRL Memories are discoverable coming-soon concepts.
+The audience player provides captioned 15-second illustrated storyboards with seeking and episode selection. Community votes persist across page reloads. The studio shows real room voting alongside labeled production examples. Persona interactions use selectable scripted prompts and stay in browser memory. QuestAI, RemixAI, WorldForge and AIRL Memories are discoverable coming-soon concepts.
 
 ## Configuration
 
@@ -88,6 +88,31 @@ The CLI permits one active run per room. A killed process can leave a running ro
 - `src/components/layout` and `src/components/shared` provide reusable platform presentation.
 - `src/app/globals.css` centralizes platform tokens, responsive layouts and reduced-motion support. Existing original CSS world artwork and ISC-licensed Lucide pictograms are reused.
 
-Phase 1 preserves CinemAI and introduces AIRL routes and provider boundaries. Phase 2 will introduce shared authenticated community participation, transactional voting and realtime totals. Phase 3 will connect closed rounds to persisted production and Remotion previews. Stop after Phase 1 for product-direction verification.
+Phase 1 preserves CinemAI and introduces AIRL routes and provider boundaries. Phase 2 supplies shared local community participation, transactional voting and streamed totals. Phase 3 will connect closed rounds to persisted production and Remotion previews.
 
 See [VERIFICATION.md](VERIFICATION.md) for actual checks and limitations.
+
+
+## Shared local voting and operator access
+
+Open `/live/barangay-2099` in two separate browser profiles or a normal and private window. Each participant chooses Join room, then casts one vote. Totals stream to the audience and room studio through Server-Sent Events. The server snapshots SQLite once per second and reconnects streams periodically. Each session can record one immutable vote per round. Retrying the same vote is idempotent.
+
+Open `/studio/barangay-2099` for the live community panel. Join the room and generate a one-time operator code in your local terminal:
+
+```sh
+npm run live:operator
+```
+
+Enter the code in the studio's operator form. Codes expire after ten minutes and are consumed on use. The server rotates the session token and grants an eight-hour operator session. Close voting & finalize winner selects the option with the most votes. Ties, including an empty round, select the first tied option in displayed order. Start next round preserves prior votes and creates a fresh round. Both operations tolerate retries. Production handoff remains pending Phase 3.
+
+Local data lives in ignored `.data/airl-live.sqlite`. Set server-only `AIRL_LIVE_DB_PATH` to change it. The server and operator CLI must use the same path. This adapter uses the existing Node 24 SQLite dependency and needs a writable persistent filesystem. Hosted Vercel execution requires a Supabase adapter and anonymous-auth integration, which are pending credentials. Current room support is limited to Barangay 2099.
+
+Session tokens are random, hashed in storage, and sent in HttpOnly, SameSite=Strict cookies. Identity and operator roles come from server records. Mutations require same-origin requests. The database enforces a unique participant vote per round and uses immediate transactions to serialize voting, closure and round creation. Session creation, voting and operator login have persisted rate limits. Aggregate streams expose counts without participant tokens or individual votes. Joined-session counts are cumulative for this local room. Anonymous sessions can be recreated by clearing cookies, so they do not establish unique real-world people.
+
+```sh
+npm run test:live
+```
+
+## Light and dark themes
+
+Use Color theme in the navigation to choose System, Light or Dark. The selection persists in local storage, follows system appearance changes when set to System, and synchronizes across tabs. A small pre-paint script applies the selected theme before hydration. Semantic tokens control platform surfaces, typography, borders and accents. Illustrated scene media retains a cinematic palette. No account or credentials are needed.

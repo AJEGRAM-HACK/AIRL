@@ -1,3 +1,4 @@
+import { ThemeSwitcher } from './theme-switcher';
 import Link from 'next/link';
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { features } from '@/lib/config/features';
@@ -12,6 +13,7 @@ export function Nav({ active = '' }: { active?: string }) {
       {features.persona && <Link aria-current={active === 'persona' ? 'page' : undefined} href="/persona">PersonaAI</Link>}
       <Link aria-current={active === 'studio' ? 'page' : undefined} href="/studio">Studio</Link>
     </nav>
+    <ThemeSwitcher/>
     <Button asChild variant="outline" size="sm"><Link href="/discover">Find your experience <ArrowUpRight size={14}/></Link></Button>
   </header>;
 }
