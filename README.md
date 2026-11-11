@@ -202,6 +202,34 @@ Review rejection now uses a conditional SQL transition, while publication reads 
 Local inference uses compact story/review context and bounded per-stage output limits within the configured total timeout. A timed-out or critic-rejected run remains failed or in review as appropriate. Retrying never switches providers. Actor memories and history become canonical only through approval. Demo replies and real-model prompts use the same approved memory reader.
 
 
+## Hackathon public demo for up to 35 viewers
+
+Run AIRL and local Ollama on the Mac, with an ngrok HTTPS endpoint forwarding only the web application. Audience phones open the public URL without enrolling the local demo CA. The recovery worker starts with the launcher. Ollama stays on `127.0.0.1:11434`.
+
+The ngrok CLI is installed on this Mac. Create a free ngrok account and save its authtoken using the dashboard command in your own terminal. Its configuration stays outside the repository. Keep the token out of chat, source and environment examples.
+
+```sh
+export PATH=/tmp/node-v24.22.2-darwin-arm64/bin:$PATH
+npm run build
+npm run demo:tunnel
+```
+
+The launcher prints the public audience and Studio addresses. Open Studio at that public origin for the QR code. Free ngrok visitors first tap **Visit Site** on its browser notice. Keep the Mac plugged in with the lid open, its internet connection available and the launcher terminal running. The launcher prevents idle sleep on macOS. Ctrl+C stops the tunnel, web app and its recovery worker.
+
+The launcher binds its upstream to loopback port 3456, accepts only the assigned ngrok hostname, normalizes its HTTPS identity and replaces visitor-supplied forwarding headers. Agent request inspection is disabled. Paid Hosted OpenAI requests are disabled for the launcher and worker. Existing account roles and private-world boundaries still apply. Sign in on the public origin before operating Studio, since LAN cookies belong to a different origin. Bootstrap an existing account locally with `npm run account:admin -- your-email@example.com` when needed.
+
+Audience production updates use notices over the existing SSE connection, with a 30-second fallback poll and refresh after returning to the page. Studio also has a five-second fallback. Idle SSE connections send heartbeats and reconnect after five minutes. Voting and publication notices remain live without the previous 1.5-second audience polling.
+
+```sh
+# A separate isolated database, 35 simulated public audience sessions,
+# genuine Ollama production and one mobile Chrome playback check
+npm run demo:rehearse
+```
+
+Stop an existing tunnel before rehearsal. The command uses the account's actual public ngrok endpoint and saves results under ignored `.data/rehearsals/<timestamp>/`. It spends some free-plan request/bandwidth allowance. It verifies 35 distinct votes, stream delivery, draft privacy, real four-stage generation, idempotent publication, Secure cookies, origin/Host rejection and Chrome touch playback/captions/seek. It uses HTTP/2 connection reuse to represent browser traffic. Physical-device results remain separately recorded in `VERIFICATION.md`.
+
+The free plan currently includes 20,000 HTTP requests and 1 GB outbound traffic per month, with a 4,000-request/minute limit. Existing account usage, frontend downloads, audience reconnects and rehearsal traffic count toward those allowances. Check the dashboard before judging. [ngrok free-plan limits](https://ngrok.com/docs/pricing-limits/free-plan-limits)
+
 ## Physical-phone HTTPS demo
 
 Use the Mac and phones on the same trusted Wi-Fi. The dedicated launcher binds only to a private IPv4 address assigned to the Mac, validates the Host header and terminates TLS in the application process. Ollama remains on `127.0.0.1:11434`. Room QR images are generated locally with `qrcode` and contain only the public audience URL.
@@ -227,4 +255,4 @@ For crash recovery, restart `npm run demo:lan` with the same database and start 
 For acceptance, run `npm run test:browser` separately from the presentation; it rebuilds `.next` and uses an isolated port/database. Run `node_modules/.bin/tsx --test tests/*.test.ts` for all unit regressions, including the LAN bind restrictions. Browser emulation and local certificate checks supplement the physical-phone rehearsal.
 
 
-The build explicitly targets Safari 16 after the physical iPhone exposed an unsupported class static block in the default Next client bundle. When changing browser targets, use a clean generated build because the existing cache retained older output during verification. Physical iPhone joining and voting now pass. A real winning taho vote completed all four Ollama stages and publication in 28.3 seconds. The episode appears on the phone, while playback/caption failure remains under investigation. See VERIFICATION.md for exact evidence and limits.
+The build explicitly targets Safari 16 after the physical iPhone exposed an unsupported class static block in the default Next client bundle. When changing browser targets, use a clean generated build because the existing cache retained older output during verification. Physical iPhone joining and voting now pass. A real winning taho vote completed all four Ollama stages and publication in 28.3 seconds. On the public ngrok origin, the user confirmed voting, initial playback and caption toggling. A blank frame after rewind was reproduced and fixed by preserving visible episode content at scene boundaries. Chrome repeated replay passes, with the physical rewind retest pending. See VERIFICATION.md for exact evidence and limits.

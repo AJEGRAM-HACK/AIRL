@@ -238,6 +238,14 @@ Candidate APIs include `/api/rooms`, `/api/episodes/[episodeId]`, `/api/jobs/[jo
 
 Run Next.js on Node 24 with SQLite on a persistent Mac filesystem. Ollama stays on loopback. Browser media previews avoid heavy export processes. Next.js `after` starts the explicitly selected provider job and the optional worker handles recovery. For physical phones, `scripts/demo-lan.mjs` serves the production build over HTTPS on one explicitly assigned private IPv4 address, with strict Host validation and locally generated certificates. Phones trust the public demo CA before opening the Studio QR destination. README.md contains certificate enrollment, launch and recovery instructions. SQLite connections configure a five-second busy timeout at construction, including approved-memory readers.
 
+### Approved hackathon tunnel
+
+For up to 35 audience members, the approved demo keeps Next.js, SQLite and Ollama on the Mac and forwards the web app through ngrok. `scripts/demo-tunnel.mjs` discovers the assigned HTTPS origin, starts `scripts/tunnel-server.mjs` on loopback, launches the existing recovery worker and prevents idle sleep on macOS. The upstream accepts the configured hostname, including its equivalent default HTTPS port, canonicalizes Host and replaces forwarded headers. Public HTTPS account cookies remain Secure and strict same-origin mutation checks apply. Agent request inspection and paid hosted calls are disabled. Ollama is excluded from the upstream port selection.
+
+The live stream keeps its database handles for the connection lifetime, revalidates access each second, sends room snapshots only when changed, and sends content-free production invalidation notices. Gallery/review clients fetch authorized content on notices, with slower fallback polling. This reduces request quota usage while preserving real progress and publication updates. Each stream closes and cleans up its handles on abort, cancellation, revocation or the five-minute connection limit.
+
+`scripts/rehearse-audience.ts` uses separate storage and the actual public endpoint to test 35 audience sessions plus mobile Chrome. It measures HTTP latency, request counts, response/event bytes and sampled process RSS while running the real Ollama pipeline. HTTP/2 sessions reuse connections as browsers do. These are synthetic load measurements and do not replace physical-phone or venue-network rehearsal. Free-plan quotas and the browser notice are documented in README.
+
 ### Preferred hosted architecture
 
 Use Next.js/Vercel for web/API, Supabase Auth/PostgreSQL/Realtime/Storage for shared records and Trigger.dev for durable hosted Demo or explicitly authorized server-key jobs. Validate organization eligibility for Remotion. Choose a separate export runtime only when actual rendering requirements justify it.

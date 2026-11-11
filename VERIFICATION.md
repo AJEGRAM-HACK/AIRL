@@ -285,3 +285,52 @@ Application commit `2f37d3602ba2d619f38b8fb2ab07fd04739be5c3` was rebuilt succes
 - PASS — curl verified the local CA and returned HTTP 200 from the room-state API. Listener inspection showed HTTPS bound to `192.168.88.9:3443` and Ollama only `127.0.0.1:11434`.
 
 The normal HTTPS demo and refreshed recovery worker were left running against `.data/airl-live.sqlite`, with paid requests disabled. No new persistent demo account was provisioned. Sign up on the HTTPS origin and use the local admin bootstrap to administer creator access or official publication. Physical iPhone playback remains pending.
+
+# Public ngrok hackathon rehearsal for 35 audience members
+
+The user approved a free ngrok HTTPS endpoint forwarding the existing Mac application for an audience of at most 35 people. The ngrok CLI 3.39.13 was installed, and the user created a free account and saved its authtoken locally. CLI configuration has owner-only permissions and remains outside source control. No paid API or paid tunnel upgrade was used.
+
+## Changes and verification
+
+- Added `npm run demo:tunnel` and its loopback upstream. The launcher starts ngrok with agent request inspection disabled, discovers its assigned HTTPS origin, starts the production application on 127.0.0.1:3456, starts the recovery worker with the same SQLite path and disables paid hosted inference. It also prevents macOS idle sleep while running. Stop with Ctrl+C. The configured public hostname, including equivalent default port 443, is validated and canonicalized before Next.js receives a request. Forwarding headers are overwritten from the configured origin. The Ollama port is excluded.
+- Added content-free production-change notices to the existing room SSE connection. Audience clients fetch production only on those notices, focus/visibility changes and a 30-second fallback. Studio fallback is five seconds. Hidden pages pause production fetches. In-flight refreshes coalesce a subsequent notice instead of dropping it. SSE keeps its database handles for the connection, checks authorization/visibility each second, sends changed room snapshots, sends 15-second heartbeats and cleans up/reconnects after five minutes. Public streams still expose no drafts.
+- PASS — strict typecheck and all 38 unit/regression tests. The two added regressions exercise live-stream vote/production notifications, access revocation/cleanup, invalid tunnel origins and rejection of the Ollama port. The initial stream-test fixture lacked the required cast; adding its guide corrected the fixture. Application validation was retained.
+- PASS — optimized production build and all four existing production-browser scenarios in 59.1 seconds. Demo took 4.9 seconds, real Ollama took 38.5 seconds including 34.1 seconds production, delayed-session protection took 533 ms, and the creator journey took 3.2 seconds. Maximum sampled audience API latency was 22 ms in that real-model case.
+- PASS — the repeatable `npm run demo:rehearse` test against the actual ngrok public endpoint, isolated SQLite, 35 independent simulated audience sessions and one mobile Chrome context. Results are `.data/rehearsals/1794428411206/results.json`; the database and screenshot are in the same ignored directory. The normal app's original episode and votes were preserved.
+
+## Public rehearsal results
+
+- All 35 session cookies were Secure, HttpOnly and SameSite=Strict. Twenty-three karaoke votes and twelve taho votes produced exactly 35 votes. An identical vote retry preserved the count and a conflicting retry returned 409. Every simulated audience stream observed all votes.
+- Four real qwen3:4b-instruct stages completed on attempt one in 23.639 seconds. A playable preview was observed during Critic review. The resulting run was `4a223a5d-0c74-47a6-897a-4020a1adf2ec` in isolated storage. Private draft media remained absent from public production responses. Publication was repeated safely, and every audience session received the published episode through its production-change notice.
+- The 50.697-second rehearsal recorded 401 API/SSE requests, plus the separately recorded browser requests. API response payloads totalled 223947 bytes and event payloads 64540 bytes, excluding protocol overhead. Mobile Chrome resource transfer reported 344465 bytes, which includes its measured resources and has browser caching/cross-origin measurement limits. These figures do not represent the account dashboard's exact billed traffic.
+- HTTP request latency median was 102 ms, p95 was 157 ms and maximum was 279 ms. This sample includes request-body transfer and processing, using the Mac's current internet connection.
+- Sampled per-process RSS peaks were web server 199.6 MiB, recovery worker 83.4 MiB, ngrok 39.2 MiB and model runner 657.2 MiB. One-second sampling and an already resident model limit interpretation. These are process RSS measurements, not total unified-memory allocation or long-duration capacity.
+- Mobile Chrome entered through the normal free-plan Visit Site notice and verified generated episode touch playback, scene seeking and captions off/on. No horizontal overflow or page JavaScript error occurred. An idle 16-second window generated zero production API requests.
+- A foreign-Origin mutation returned 403 and an untrusted Host returned 421. ngrok HTTPS used its normal publicly trusted certificate. No certificate-validation bypass was used in the public browser test.
+
+## Failures found and limits
+
+Two early HTTP/1.1 load-generator attempts recorded public connection resets after voting and real production had succeeded. They remain failed rehearsals under `.data/rehearsals/1794427970305/` and `1794428052663/`. Switching the simulator to reuse one HTTP/2 connection per session produced a successful 35-session run. This is consistent with reducing connection churn, but the exact source of the earlier resets was not established. The successful final run used 37 HTTP/2 connections including admin/public setup clients.
+
+The HTTP/2 test first exposed a legitimate Host with an explicit default port 443. The upstream now accepts and canonicalizes that equivalent hostname while rejecting other ports/hosts. The first browser probe also checked Visit Site before its asynchronous notice was visible. Waiting for either the notice or app heading corrected the test, and a direct probe confirmed normal entry and playback. The final complete rehearsal passed all checks.
+
+The free-plan documentation lists 20,000 requests and 1 GB outbound traffic per month, and 4,000 requests per minute. Current account usage and frontend downloads still matter. Thirty-five idle visible audience pages now use about 70 fallback production requests per minute, plus stream reconnects (about seven/minute averaged over five-minute connections), state refreshes and actual production notices. This is a planning estimate, not a quota or uptime guarantee. [ngrok free-plan limits](https://ngrok.com/docs/pricing-limits/free-plan-limits)
+
+Physical iPhone playback/captions and venue-network reliability remain separate from simulated clients and Chrome touch emulation. The user has been asked to test the public URL and Studio QR. A short load rehearsal cannot establish an entire event's reliability. Keep the Mac plugged in, lid open, internet available and launcher running. No always-on hosted infrastructure migration was performed.
+
+The normal database was restored as the live target after the isolated rehearsal. Its previous published episode remains available. A fresh audience voting round was opened for the phone check, preserving the prior closed round and votes. Current public audience URL is `https://pope-java-fable.ngrok-free.dev/live/barangay-2099`; Studio is the same origin at `/studio/barangay-2099`. Only the web app is forwarded. Listener inspection confirms loopback for the upstream, ngrok inspector and Ollama.
+
+## Physical iPhone public follow-up and rewind fix
+
+Tunnel implementation checkpoint is `01e710d2fe8bcbf5ff249b1c90278108882e6c05`. The user confirmed Vote recorded on the actual iPhone, followed by first playback and captions working through the public HTTPS origin. A current normal-database state check showed one taho vote in the new open round, with the original published episode retained.
+
+The user then reported the entire picture disappearing after dragging the timeline backwards. A public mobile Chrome probe reproduced the blank canvas at frame zero and found the complete scene's inline opacity was zero. The composition faded the entire scene at each scene boundary. Commit `62a389f10bdf3a71999646cdbe6389323e93cf2a` limits that fade to the decorative background, keeping the base canvas, characters and captions painted while paused or seeking.
+
+- PASS — strict typecheck and all 38 unit tests after the change.
+- PASS — optimized build and all four production-browser scenarios, including new repeated rewind/replay checks at zero, the exact second-scene start and zero again. Demo case took 8.2 seconds, Ollama 42.7 seconds including 35.4 seconds generation, delayed-session regression 503 ms, and creator journey 3.3 seconds. Suite output reports 1.1 minutes. Maximum sampled audience API latency was 13 ms.
+- PASS — repeated seek/play/pause cycles against the actual public HTTPS origin in mobile/touch Chrome. Frame-zero canvas opacity remained one, playback advanced each time, and no page JavaScript errors occurred. Before/after screenshots were visually inspected at `/tmp/airl-rewind-before.png` and `/tmp/airl-rewind-after.png`.
+- PASS — native Core Image decoded the current Studio QR to the exact public HTTPS audience URL. The image is `/tmp/airl-public-room-qr.png`.
+- PENDING — physical iPhone repeated rewind/replay confirmation after reloading the fixed version. This remains distinct from the user-confirmed first playback/captions.
+- PENDING — the owner's AIRL profile email for local admin bootstrap. The normal database currently has no account, so publication by the owner still requires that setup. Anonymous audience participation already works.
+
+The public launcher and worker were restarted on the normal database after rebuilding. The user's recorded vote and earlier episode were preserved. The public address remains `https://pope-java-fable.ngrok-free.dev/live/barangay-2099`. No paid call occurred.
