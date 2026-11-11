@@ -172,6 +172,7 @@ Only Barangay 2099 is currently supported by dynamic room and universe wrappers.
 | POST `/api/live/operator` | Joined session and one-time code | Redeem local creator/operator role |
 | GET `/api/live/rooms/[roomId]/state` | Public | Aggregate room and current session state |
 | GET `/api/live/rooms/[roomId]/events` | Public | SSE aggregate snapshots |
+| GET `/api/live/rooms/[roomId]/join-qr` | Public | Locally generated QR encoding the same-origin audience room URL |
 | POST `/api/live/rooms/[roomId]/vote` | Session | Record a validated vote |
 | POST `/api/live/rooms/[roomId]/close` | Operator | Freeze winner and enqueue one job |
 | POST `/api/live/rooms/[roomId]/next` | Operator | Start a subsequent round |
@@ -207,7 +208,7 @@ Candidate APIs include `/api/rooms`, `/api/episodes/[episodeId]`, `/api/jobs/[jo
 
 ### Current local demonstration
 
-Run Next.js on Node 24 with SQLite on a persistent Mac filesystem. Ollama stays on loopback. Browser media previews avoid heavy export processes. Next.js `after` starts the explicitly selected provider job and the optional worker handles recovery.
+Run Next.js on Node 24 with SQLite on a persistent Mac filesystem. Ollama stays on loopback. Browser media previews avoid heavy export processes. Next.js `after` starts the explicitly selected provider job and the optional worker handles recovery. For physical phones, `scripts/demo-lan.mjs` serves the production build over HTTPS on one explicitly assigned private IPv4 address, with strict Host validation and locally generated certificates. Phones trust the public demo CA before opening the Studio QR destination. README.md contains certificate enrollment, launch and recovery instructions. SQLite connections configure a five-second busy timeout at construction, including approved-memory readers.
 
 ### Preferred hosted architecture
 

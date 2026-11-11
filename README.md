@@ -159,3 +159,31 @@ The browser suite starts an isolated production server on port 3100 and a tempor
 Review rejection now uses a conditional SQL transition, while publication reads and commits under an immediate transaction. Racing decisions cannot overwrite a finalized state. Concurrent-worker regression tests exercise this behavior. Provider jobs retain mode/model/consent metadata and creator attribution, but no credential. Usage quota and estimated budget checks also apply to room inference.
 
 Local inference uses compact story/review context and bounded per-stage output limits within the configured total timeout. A timed-out or critic-rejected run remains failed or in review as appropriate. Retrying never switches providers. Actor memories and history become canonical only through approval. Demo replies and real-model prompts use the same approved memory reader.
+
+
+## Physical-phone HTTPS demo
+
+Use the Mac and phones on the same trusted Wi-Fi. The dedicated launcher binds only to a private IPv4 address assigned to the Mac, validates the Host header and terminates TLS in the application process. Ollama remains on `127.0.0.1:11434`. Room QR images are generated locally with `qrcode` and contain only the public audience URL.
+
+```sh
+# Use Node 24. The temporary development runtime may require this PATH.
+export PATH=/tmp/node-v24.22.2-darwin-arm64/bin:$PATH
+export AIRL_DEMO_HOST="$(ipconfig getifaddr en0)"
+export AIRL_LIVE_DB_PATH="$PWD/.data/airl-live.sqlite"
+npm run demo:setup
+npm run build
+npm run demo:lan
+```
+
+If Wi-Fi uses another interface, select its assigned private IPv4 address. Setup creates an ignored local CA and a 30-day server certificate under `.data/demo-tls/`. Rerun setup after the IP changes or the server certificate expires. Preserve the CA for phones already enrolled. Private keys stay on the Mac with restricted permissions. Transfer only `root.crt` to the iPhone through AirDrop or USB, install the profile in Settings, then enable AIRL Local Demo CA under Settings → General → About → Certificate Trust Settings. Remove the demo CA profile after the event. [Apple certificate trust instructions](https://support.apple.com/en-ph/102390)
+
+Open the printed `https://<LAN-IP>:3443/studio/barangay-2099` address on the Mac. Its room-joining panel displays a QR code and clickable audience URL. Scan it using the iPhone camera after trusting the CA. At the top of the audience room, Vote on next chapter jumps directly to joining and choices; Watch episodes returns to playback. The normal loopback Studio instead explains how to get a phone-accessible QR. Port 3443 is configurable using `AIRL_DEMO_PORT`. If access fails, check the IP, Wi-Fi client isolation, certificate trust and macOS incoming-connection prompt. Keep router port forwarding disabled.
+
+In a second terminal using Node 24 and the same `AIRL_LIVE_DB_PATH`, run `npm run live:operator` and redeem the displayed code privately in Studio. Select Ollama and `qwen3:4b-instruct`, collect phone votes, close voting, inspect actual stage events, then approve and play the episode on the phone. Test captions, scene seeking and locking/unlocking Safari. Operator sessions belong to the chosen HTTPS origin; a localhost login does not transfer.
+
+For crash recovery, restart `npm run demo:lan` with the same database and start `npm run production:worker` in another terminal with that database. A killed running job becomes claimable after its 150-second lease expires. The worker polls every two seconds. Recovery can repeat inference, reuses completed drafts when available and preserves publication idempotency. Failed jobs require operator retry and retain the three-attempt limit. Keep the worker running during the presentation.
+
+For acceptance, run `npm run test:browser` separately from the presentation; it rebuilds `.next` and uses an isolated port/database. Run `node_modules/.bin/tsx --test tests/*.test.ts` for all unit regressions, including the LAN bind restrictions. Browser emulation and local certificate checks supplement the physical-phone rehearsal.
+
+
+Physical iPhone testing currently reaches the HTTPS room page but remains at Loading room / Connecting. Voting and playback on that device are pending. For diagnosis, open `/api/live/rooms/barangay-2099/state` directly in Safari and check whether the reference Play button responds. The direct API should show JSON. Confirm JavaScript is enabled in Safari before concluding that controls are missing. The desktop/mobile Chrome workflows and actual crash recovery have passed; see VERIFICATION.md for exact evidence.

@@ -171,3 +171,41 @@ Screenshots of the successful final audience views were saved at /tmp/airl-demo-
 Non-destructive room-job migrations add provider/model selection, explicit paid consent and requester attribution. Jobs may select Demo, Ollama or enabled and explicitly authorized Hosted OpenAI. Creator keys remain request-scoped and outside workers. Background inference uses the registry and usage/budget checks. Publication validates artifact/job/provider consistency and updates episode, status and canonical memories in one transaction. Rejection and retry use conditional state transitions.
 
 Legacy fixture counts, static disconnected agents and obsolete Studio messages were removed. The audience has one library for reference and generated episodes. Genuine modes, model IDs, attempts, stage events, sanitized failures and review feedback are displayed. No Supabase/Trigger.dev migration, expensive media integration, deployment or external push was performed.
+
+
+# LAN demo reliability rehearsal — November 12, 2026
+
+Application checkpoint is `1e34cbb16a49b07441e06919dfd94aac97d3fd4b`, following verified baseline `318b2f0`.
+
+## Changes driven by rehearsal
+
+- Added a dedicated production HTTPS launcher bound to one explicitly assigned private IPv4 address. It rejects wildcard/public/unassigned bind addresses, validates Host and overwrites forwarded headers. Ignored local certificates protect transport. Ollama remains bound to 127.0.0.1:11434.
+- Added locally generated audience QR images and a Studio join panel. Added pinned qrcode 1.5.4 and development types 1.5.6; npm reported zero vulnerabilities. No third-party QR service receives room URLs.
+- Rehearsal reproduced a worker exit, an after-callback failure and a browser-side server error from SQLite locks. The busy timeout previously followed journal-mode initialization, and canonical reads had no timeout. Connections now configure the five-second timeout in their constructors. An independent-process exclusive-lock regression passed for all four storage entry points.
+- Real recovery inference exposed Screenwriter output repeating until the 1400-token limit, leaving invalid JSON. Local script input now carries structured compact continuity, concept and revision feedback. The local output schema constrains three scenes and one dialogue line each. Incomplete JSON is classified as a Zod validation failure and receives the existing bounded retry. Failed rehearsal records remain failed.
+
+## Verified outcomes
+
+- PASS — all 29 unit/regression tests, including the previous 26 and new bind, malformed-output/context and database-lock coverage.
+- PASS — typecheck and optimized production build. Final production Chrome acceptance passed both cases in 46.9 seconds. Demo took 6.7 seconds; genuine Ollama took 29.1 seconds with a 23.5-second production and maximum sampled audience API latency of 20 ms. The final run emitted no SQLite-lock server error.
+- PASS — CA-verified HTTPS requests, expected Host rejection (421), foreign-origin rejection (403), public room state and unknown room/world/QR 404 responses.
+- PASS — native Core Image QR decoding matched the exact HTTPS audience URL. Chrome mobile-viewport checks covered QR image/link, room joining, no horizontal overflow, no page JS errors and a Secure/HttpOnly/SameSite=Strict session cookie. Chrome automation bypassed certificate validation; separate curl checks verified the CA and server identity.
+- PASS — an isolated HTTPS app was killed during an actual Ollama Story Director stage. Restart preserved the vote and closed round. The normal watch worker waited for the original 150-second claim expiry and produced a Critic-approved draft on attempt two. Recovery took 178.298 seconds, with maximum sampled audience API latency of 13 ms. Publication was replayed and survived another app restart. SQLite held exactly one episode and the interrupted run remained failed.
+- PASS — listener inspection confirmed HTTPS on the assigned LAN IP and Ollama solely on loopback. Existing macOS firewall was disabled; its configuration was preserved.
+- USER CONFIRMED — the iPhone installed the demo CA and enabled full trust. The user reported that the page opens but voting fails. Exact error and physical QR/playback verification remain pending investigation.
+
+## Measurement limits and remaining work
+
+The crash rehearsal collected 89 two-second samples. Its HTTPS app instances reached 147.1 and 116.0 MiB sampled RSS; the recovery worker reached 122.6 MiB and its launcher reached 44.6 MiB. The Ollama daemon reached 21.3 MiB RSS. That sampler's case-sensitive filter omitted the llama-server process, so these measurements do not establish inference-server peak memory. A corrected follow-up sampler includes that process. Ollama independently reported one model, 8192-token context and approximately 3.55 GiB residency. Unified-memory model residency and process RSS must not be added as independent allocations. System swap decreased from 6560.88 to 6408.88 MiB during the recovery sample and cannot be attributed solely to AIRL.
+
+Temporary recovery databases, diagnostic scripts, private TLS material and screenshots remain ignored or under /tmp. The public CA certificate was copied to Downloads to help the user install it. No paid calls, public Ollama listener, infrastructure migration, deployment or external push occurred. Real physical-phone voting/playback, broader device coverage and long-duration load remain open. Hosted OpenAI and HTTPS BYOK validation remain pending separate authorization/configuration.
+
+
+A corrected one-second sampler then covered a successful genuine four-stage Ollama CLI run in an isolated temporary database. It completed in 30.45 seconds across 29 samples. llama-server peaked at 1520.1 MiB RSS and 397.4% CPU, the production Node process at 140.3 MiB RSS and 27.8% CPU, and the Ollama daemon at 25.3 MiB RSS and 3.9% CPU. CPU values use macOS per-core percentages. System swap remained 6040.88 MiB. These are sampled peaks from one run, with other applications active, and do not establish long-duration capacity.
+
+The physical iPhone screenshots show a persistent initial Loading room / Connecting state, including after refreshing the new Vote shortcut. The initial discoverability diagnosis was incomplete. Direct API connectivity and JavaScript execution checks were requested. Native Safari automation was unavailable and downloaded Playwright WebKit crashed at launch with a bus error on the Mac's supported frozen build; neither attempt verified Safari behavior. A later Chrome run also exposed operator unlock becoming disabled during a fast join. Session reads now ignore responses superseded by mutations, and joining no longer clears a code entered during that request. Browser regression coverage holds an old anonymous session response until after a successful join.
+
+
+Final application checkpoint is `e0c015568a2ba0e0265bc2bc98c6e36c3a7359bf`. Audience pages now have Vote/Watch anchors, joining precedes the choices, and selection instructions are visible after join. Session mutation revisions protect joined state from late anonymous reads. Operator codes clear only after redemption, preserving a code entered while joining. Final Demo/Ollama browser cases passed in 6.7/36.5 seconds with a 31.5-second genuine production and maximum sampled API latency of 28 ms. The focused delayed-session regression passed separately in 692 ms. Its first assertion incorrectly required enabled radios after the preceding scenario had closed the round; the assertion now verifies retained joined controls directly. Final root typecheck, 29 unit tests and production build passed.
+
+Acceptance during the phone investigation used a disposable source snapshot to keep the live HTTPS build stable. The snapshot was removed after testing. The final HTTPS app and recovery worker were restarted on the normal shared database, with paid requests disabled for the worker. Physical-phone completion remains blocked at initial room loading. A stale page or disabled/failed JavaScript is a hypothesis, awaiting direct API/Play-button results; no cause is yet confirmed. Do not describe the physical vote-to-playback rehearsal as passed.
