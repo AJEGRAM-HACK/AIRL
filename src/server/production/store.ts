@@ -1,3 +1,4 @@
+import { Script, Manifest, validateScript, validateManifest } from './schemas';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -14,6 +15,7 @@ export class ProductionStore {
       CREATE TABLE IF NOT EXISTS characters (id TEXT PRIMARY KEY, profile TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS productions (id TEXT PRIMARY KEY, room_id TEXT NOT NULL, status TEXT NOT NULL, model TEXT NOT NULL, input TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
       CREATE UNIQUE INDEX IF NOT EXISTS one_active_run ON productions(room_id) WHERE status='running';
+      CREATE TABLE IF NOT EXISTS production_drafts(run_id TEXT PRIMARY KEY,artifact TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS events (sequence INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT NOT NULL, stage TEXT NOT NULL, attempt INTEGER NOT NULL, status TEXT NOT NULL, data TEXT NOT NULL, created_at TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS episodes (run_id TEXT PRIMARY KEY, room_id TEXT NOT NULL, artifact TEXT NOT NULL, created_at TEXT NOT NULL);`);
     // Additive migration keeps existing local production records readable.
@@ -50,6 +52,37 @@ export class ProductionStore {
         this.db.prepare('UPDATE characters SET profile=? WHERE id=?').run(JSON.stringify(profile), update.characterId);
       }
       this.finish(id, 'complete');
+      this.db.exec('COMMIT');
+    } catch (error) { this.db.exec('ROLLBACK'); throw error; }
+  }
+  saveDraft(id: string, artifact: unknown) {
+    this.db.exec('BEGIN IMMEDIATE');
+    try {
+      this.db.prepare('INSERT INTO production_drafts VALUES(?,?)').run(id,JSON.stringify(artifact));
+      this.finish(id, 'review');
+      this.db.exec('COMMIT');
+    } catch (error) { this.db.exec('ROLLBACK'); throw error; }
+  }
+  draft(id: string) {
+    const row = this.db.prepare('SELECT artifact FROM production_drafts WHERE run_id=?').get(id);
+    return row ? JSON.parse(String(row.artifact)) : null;
+  }
+  publishRoomJob(jobId: string) {
+    this.db.exec('BEGIN IMMEDIATE');
+    try {
+      const job = this.db.prepare('SELECT * FROM room_jobs WHERE id=?').get(jobId);
+      if (!job) throw new Error('Job not found');
+      if (job.status === 'published') { this.db.exec('COMMIT'); return; }
+      if (job.status !== 'review' || !job.run_id) throw new Error('Job is not ready for review');
+      const artifact = this.draft(String(job.run_id));
+      if (!artifact?.critique?.approved || artifact.executionMode !== 'demo') throw new Error('Critic approval and demo mode are required');
+      const script = Script.parse(artifact.script);
+      validateScript(script);
+      validateManifest(Manifest.parse(artifact.manifest),script);
+      this.db.prepare('INSERT INTO episodes VALUES(?,?,?,?)').run(String(job.run_id),String(job.room_id),JSON.stringify(artifact),new Date().toISOString());
+      // Room jobs currently use demo templates, which do not add canonical memory updates.
+      this.finish(String(job.run_id), 'complete');
+      this.db.prepare("UPDATE room_jobs SET status='published',updated=? WHERE id=?").run(Date.now(),jobId);
       this.db.exec('COMMIT');
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }

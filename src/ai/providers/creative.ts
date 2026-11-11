@@ -39,7 +39,7 @@ export class DemoCreativeProvider implements CreativeAIProvider {
   async generateScenes(script: ScriptOutput) {
     Script.parse(script);
     validateScript(script);
-    return Manifest.parse({ title: script.title, scenes: script.scenes.map((scene, index) => ({ id: scene.id, style: index === 0 ? 'dramatic-reveal' : index === 1 ? 'reaction-comedy' : 'cliffhanger', background: index === 2 ? 'taho-stall' : 'barangay-plaza', characters: [...new Set(scene.dialogue.map(line => line.characterId))], animation: 'fade-in', durationSeconds: 10, dialogue: scene.dialogue })) });
+    return Manifest.parse({ title: script.title, scenes: script.scenes.map((scene, index) => ({ id: scene.id, style: index === 0 ? 'dramatic-reveal' : index === 1 ? 'reaction-comedy' : 'cliffhanger', background: index === 2 ? 'taho-stall' : 'barangay-plaza', characters: [...new Set(scene.dialogue.map(line => line.characterId))], animation: 'fade-in', durationSeconds: 6, dialogue: scene.dialogue })) });
   }
   async reviewContent({ script, manifest }: ReviewInput) {
     validateScript(Script.parse(script));

@@ -1,3 +1,5 @@
+import { after } from 'next/server';
+import { drainRoomJobs } from '@/server/production/room-jobs';
 import { RoomSnapshot, VoteInput, RoundInput } from '@/features/live/types';
 import { DEMO_ROOM } from '@/lib/fixtures';
 import { LiveError, LiveStore } from '@/server/live/store';
@@ -57,7 +59,10 @@ export async function POST(request: Request, context: Context) {
       store.vote(token, vote.roundId, vote.optionId);
     } else if (action === 'close' || action === 'next') {
       const { roundId } = RoundInput.parse(input);
-      if (action === 'close') store.closeRound(token, roundId);
+      if (action === 'close') {
+        store.closeRound(token, roundId);
+        after(async () => { await drainRoomJobs(); });
+      }
       else store.nextRound(token, roundId);
     } else throw new LiveError(404, 'Room action not found.');
     return { room: store.snapshot(), session: store.personal(token) };

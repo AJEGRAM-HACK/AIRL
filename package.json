@@ -14,12 +14,16 @@
     "test:production": "tsx --test tests/production.test.ts tests/demo-provider.test.ts",
     "live:operator": "tsx scripts/live-operator.ts",
     "test:live": "tsx --test tests/live.test.ts",
-    "test:providers": "tsx --test tests/providers.test.ts"
+    "test:providers": "tsx --test tests/providers.test.ts",
+    "production:worker": "tsx scripts/production-worker.ts --watch",
+    "production:drain": "tsx scripts/production-worker.ts",
+    "test:room-production": "tsx --test tests/room-production.test.ts"
   },
   "dependencies": {
     "@next/env": "16.4.6",
     "@openai/agents": "0.21.0",
     "@radix-ui/react-slot": "1.5.0",
+    "@remotion/player": "4.0.542",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "lucide-react": "1.72.0",
@@ -27,6 +31,7 @@
     "openai": "7.55.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "remotion": "4.0.542",
     "tailwind-merge": "3.7.0",
     "zod": "4.6.7"
   },

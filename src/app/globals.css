@@ -430,3 +430,12 @@ footer .brand {
 .provider-timeline { list-style: none; padding: 0; margin-top: 22px; }
 .provider-timeline li { border-bottom: 1px solid var(--border); padding: 12px 0; font-size: 12px; }
 .provider-timeline small { display: block; color: var(--muted); }
+.room-production { border-top: 1px solid var(--border); margin-top: 26px; padding-top: 24px; }
+.room-production h3 { margin-top: 10px; font-size: 22px; }
+.remotion-preview { max-width: 360px; margin: 20px auto; border-radius: 9px; overflow: hidden; }
+.caption-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-top: 12px; }
+.job-picker { display: grid; gap: 8px; margin: 20px 0; font-size: 11px; }
+.job-picker select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--border); background: var(--panel); color: var(--text); border-radius: 6px; }
+.job-status { font-size: 12px; color: var(--accent); }
+.room-production .provider-actions { margin-top: 20px; }
+.room-production .button { white-space: normal; }

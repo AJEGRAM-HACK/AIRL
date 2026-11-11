@@ -11,7 +11,7 @@ export function safeFailure(error: unknown) {
   const status = typeof error === 'object' && error !== null && 'status' in error ? Number(error.status) : undefined;
   return { code: status === 401 ? 'authentication_failed' : status === 403 || status === 404 ? 'model_access_failed' : status === 429 ? 'rate_limit_or_quota' : error instanceof z.ZodError ? 'schema_validation_failed' : 'execution_failed', ...(Number.isFinite(status) ? { httpStatus: status } : {}) };
 }
-export async function produce(store: ProductionStore, executor: Executor, rawInput: ProductionInput, model: string, onRun: (id: string) => void = () => {}) {
+export async function produce(store: ProductionStore, executor: Executor, rawInput: ProductionInput, model: string, onRun: (id: string) => void = () => {}, deferPublication = false) {
   const input = Input.parse(rawInput);
   const id = store.create(input, model, executor.executionMode || 'openai');
   try {
@@ -44,6 +44,10 @@ export async function produce(store: ProductionStore, executor: Executor, rawInp
       const manifest = await stage('Visual Producer', Manifest, JSON.stringify({ script }), value => validateManifest(value, script));
       const critique = await stage('Creative Critic', Critique, JSON.stringify({ base, concept, script, manifest }));
       if (critique.approved) {
+        if (deferPublication) {
+          store.saveDraft(id, { concept, script, manifest, critique, executionMode: executor.executionMode || 'openai' });
+          return { id, status: 'review' as const, manifest };
+        }
         store.approve(id, input.roomId, { concept, script, manifest, critique, executionMode: executor.executionMode || 'openai' }, script.memoryUpdates);
         return { id, status: 'complete' as const, manifest };
       }

@@ -104,3 +104,27 @@ Implemented the shared provider registry, installed-model Ollama adapter, reques
 Settings previews use request-local memory and return actual stage events to the initiating creator. CLI production remains persisted. Public winning-vote production handoff, durable job recovery, Supabase/RLS, Remotion, QR joins, submissions/moderation, deadlines and MP4 export remain pending. Paid providers require explicit per-request consent and hosted environment enablement. Session-only BYOK has no background execution or permanent credential storage. Creator access currently reuses the local operator role. Token usage is measured when available; cost figures require configured rates and are estimates.
 
 - PASS — regression test confirms hosted_openai reads existing openai production history while Ollama history remains separate.
+
+# Integrated room production and architecture documentation — November 11, 2026
+
+## Deliverables
+
+- Updated README.md with current setup, operator demonstration, worker recovery, provider boundaries, media behavior and next milestones.
+- Added ARCHITECTURE_PLAN.md covering product boundaries, component flow, local and hosted data models, state transitions, idempotency, privacy, provider isolation, media, current routes, candidate routes, deployment options, migration sequence and risks.
+- Added atomic round-to-job enqueueing and persisted Demo job execution. A private draft is saved after Critic approval. Operator publication validates the artifact again and commits the public episode and status transition transactionally.
+- Added recovery commands and bounded claims/attempts. A saved draft can be reused after interrupted job finalization. Public reads exclude draft manifests and internal stage events.
+- Added Remotion 4.0.542 and @remotion/player 4.0.542. npm reported zero vulnerabilities. Packages are used for local evaluation and browser preview. Commercial license eligibility remains a deployment prerequisite.
+- Added a portrait 720 × 1280, 30 FPS composition using existing licensed character pictograms and approved CSS backgrounds. Default Demo scenes total 18 seconds. Captions, transcript and reduced-motion behavior are implemented. No MP4 export or audio was produced.
+
+## Actual results
+
+- PASS — all 23 automated tests across production, providers, voting and integrated room production.
+- PASS — four new integrated tests cover unique enqueueing, winning-choice propagation, private drafts, recorded stage events, idempotent publication, rejection, expired claims, saved-draft recovery, bounded retries, invalid artifact rejection, scene timing and approved asset IDs.
+- PASS — TypeScript and optimized Next.js production build.
+- PASS — production HTTP flow on an isolated test database completed vote → closure/enqueue → automatic Demo workflow → private review → protected publication → public 18-second manifest → next round. Replayed closure and publication created no duplicates. Unauthorized draft and publication access was rejected.
+- PASS — six main route HTTP responses returned 200 during the integrated check.
+- PASS — Remotion Player server-rendered with a real generated manifest, caption control and transcript.
+- BLOCKED — browser visual/playback inspection could not run because the browser access host was unavailable. Frame calculations, SSR and HTTP outcomes do not establish successful interactive playback in a browser.
+- NOT TESTED — hosted durable execution, Supabase/RLS, MP4/audio export and commercial Remotion license eligibility.
+
+Automatic room jobs select Demo explicitly and make no paid inference requests. Existing CLI provider adapters and database files were preserved. No services were provisioned and no external push or deployment occurred. The local queue and Next.js after callback are not substitutes for hosted durable scheduling. The documented recovery worker is required after process interruptions when callbacks cannot finish.

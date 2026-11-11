@@ -40,3 +40,6 @@ AIRL is the platform. CinemAI is a module. PersonaAI owns shared character defin
 
 ## Provider gateway
 Use src/ai/providers/registry.ts for provider selection. Preserve legacy AI_PROVIDER=openai as a hosted_openai alias. Never fall back between providers. BYOK keys exist only in page/request memory, require HTTPS and operator/creator authentication, and never enter jobs, usage tables, logs or storage. Paid model tests require explicit consent. Ollama is server-side loopback only, rejects Vercel, and uses the installed model list. Keep all cloud tracing disabled by default.
+
+## Integrated room production
+The approved next milestone connects closed rounds to persisted Demo room jobs, review, publication and Remotion previews. Room jobs share AIRL_LIVE_DB_PATH with voting so enqueue and publication remain transactional. Automatic jobs must stay Demo until provider-specific background authorization is designed. BYOK keys never enter jobs. Preserve ARCHITECTURE_PLAN.md as the current/proposed architecture and route inventory, and update README.md when runnable behavior changes.

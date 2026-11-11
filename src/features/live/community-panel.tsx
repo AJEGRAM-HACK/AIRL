@@ -1,4 +1,5 @@
 'use client';
+import { RoomProduction } from '@/features/production/room-production';
 import { useEffect, useState } from 'react';
 import { Check, Radio, Vote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -68,12 +69,13 @@ export function CommunityPanel({ operatorView = false }: { operatorView?: boolea
         </label>;
       })}</fieldset>
       {!session.joined ? <Button disabled={pending} onClick={() => action('/api/live/session', {})}>Join room to vote <Vote size={16}/></Button> : <Button disabled={pending || !!session.vote || !selection || room.status !== 'open'} onClick={() => action(`${base}/vote`, { roundId: room.roundId, optionId: selection })}>{session.vote ? <><Check size={16}/> Vote recorded</> : pending ? 'Saving…' : 'Cast my vote'}</Button>}
-      {winner && <div className="winner-callout" role="status"><b>Winning direction</b><p>{winner.title}</p><small>Ties use the displayed option order. Production handoff is planned for the next phase.</small></div>}
+      {winner && <div className="winner-callout" role="status"><b>Winning direction</b><p>{winner.title}</p><small>Ties use the displayed option order. Demo production is queued from this finalized direction. An operator reviews the result before publication.</small></div>}
       <p className="fine-print">One vote per anonymous session per round. Clearing cookies creates a new identity. Counts update across sessions through the local server.</p>
       {operatorView && <div className="operator-controls"><h3>Operator controls</h3>{!session.operator ? <>
         <p>Run <code>npm run live:operator</code> in the project terminal, then enter the one-time code.</p>
         <form onSubmit={event => { event.preventDefault(); void action('/api/live/operator', { code }); }}><label htmlFor="operator-code">One-time operator code</label><input id="operator-code" type="password" autoComplete="off" value={code} onChange={event => setCode(event.target.value)} required/><Button variant="outline" disabled={!session.joined || pending || !code}>Unlock controls</Button></form><small>Join the room before unlocking controls.</small>
-      </> : <><Button variant="outline" disabled={pending || room.status !== 'open'} onClick={() => action(`${base}/close`, { roundId: room.roundId })}>Close voting & finalize winner</Button><Button variant="outline" disabled={pending || room.status !== 'closed'} onClick={() => action(`${base}/next`, { roundId: room.roundId })}>Start next round</Button></>}</div>}
+      </> : <><Button variant="outline" disabled={pending || room.status !== 'open'} onClick={() => action(`${base}/close`, { roundId: room.roundId })}>Close voting & produce</Button><Button variant="outline" disabled={pending || room.status !== 'closed'} onClick={() => action(`${base}/next`, { roundId: room.roundId })}>Start next round</Button></>}</div>}
     </>}
+    <RoomProduction operator={operatorView && session.operator}/>
   </section>;
 }

@@ -23,6 +23,7 @@ export class LiveStore {
       CREATE TABLE IF NOT EXISTS live_operator_codes(code_hash TEXT PRIMARY KEY,expires INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS ai_usage(id TEXT PRIMARY KEY,owner TEXT NOT NULL,mode TEXT NOT NULL,model TEXT NOT NULL,operation TEXT NOT NULL,status TEXT NOT NULL,started INTEGER NOT NULL,finished INTEGER,input_tokens INTEGER,output_tokens INTEGER,estimated_usd REAL,error_code TEXT);
       CREATE TABLE IF NOT EXISTS ai_leases(resource TEXT PRIMARY KEY,lease_id TEXT NOT NULL,expires INTEGER NOT NULL);
+      CREATE TABLE IF NOT EXISTS room_jobs(id TEXT PRIMARY KEY,round_id TEXT NOT NULL UNIQUE,room_id TEXT NOT NULL,choice TEXT NOT NULL,status TEXT NOT NULL,attempts INTEGER NOT NULL DEFAULT 0,run_id TEXT,lease_until INTEGER,created INTEGER NOT NULL,updated INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS live_limits(identity TEXT PRIMARY KEY,count INTEGER NOT NULL,reset_at INTEGER NOT NULL);`);
     if (!this.db.prepare('SELECT id FROM live_rounds WHERE room_id=? LIMIT 1').get(DEMO_ROOM)) {
       this.db.exec('BEGIN IMMEDIATE');
@@ -129,6 +130,9 @@ export class LiveStore {
         const winner = this.db.prepare('SELECT o.id FROM live_options o LEFT JOIN live_votes v ON v.round_id=o.round_id AND v.option_id=o.id WHERE o.round_id=? GROUP BY o.id ORDER BY COUNT(v.token_hash) DESC,o.position ASC LIMIT 1').get(roundId);
         this.db.prepare("UPDATE live_rounds SET status='closed',winner=? WHERE id=?").run(String(winner!.id), roundId);
       }
+      const closed = this.db.prepare('SELECT winner FROM live_rounds WHERE id=?').get(roundId)!;
+      const option = this.db.prepare('SELECT title FROM live_options WHERE round_id=? AND id=?').get(roundId,String(closed.winner))!;
+      this.db.prepare("INSERT OR IGNORE INTO room_jobs(id,round_id,room_id,choice,status,created,updated) VALUES(?,?,?,?,?,?,?)").run(randomUUID(),roundId,DEMO_ROOM,String(option.title),'queued',Date.now(),Date.now());
       this.db.exec('COMMIT');
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
