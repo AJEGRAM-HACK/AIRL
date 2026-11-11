@@ -334,3 +334,20 @@ The user then reported the entire picture disappearing after dragging the timeli
 - PENDING — the owner's AIRL profile email for local admin bootstrap. The normal database currently has no account, so publication by the owner still requires that setup. Anonymous audience participation already works.
 
 The public launcher and worker were restarted on the normal database after rebuilding. The user's recorded vote and earlier episode were preserved. The public address remains `https://pope-java-fable.ngrok-free.dev/live/barangay-2099`. No paid call occurred.
+
+## Physical iPhone replay and owner admin setup completed
+
+Latest verified application checkpoint is `8a8903fea7f216d4725304a814d93c0633162484`.
+
+After the visible-frame fix, the user confirmed the picture remained present but playback still failed to restart. Inspection of the installed Remotion playback loop showed it waits for audio-context resume while unmuted. A controlled public Chrome probe let initial playback run, then made the next AudioContext.resume promise stay pending after rewind. This reproduced the stalled frame-zero state with one attempted audio resume. The physical phone's internal audio state was not directly inspected.
+
+The episode composition currently contains no audio. Its Player now starts muted, uses zero shared audio tags and hides volume controls. This lets the animation clock run without waiting for unused Web Audio resumption. Remotion documents the initial mute setting and shared audio-tag behavior in its Player API. [Remotion Player documentation](https://www.remotion.dev/docs/player/player)
+
+- PASS — strict typecheck, optimized production build and all 38 unit tests, zero failures. The final unit run completed in 3.445 seconds.
+- PASS — all five production-browser scenarios in 1.2 minutes. Demo case 7.8 seconds, real Ollama 43.7 seconds including 36.4 seconds production, delayed-session regression 552 ms, creator journey 3.3 seconds and the new silent-playback regression 4.2 seconds. Maximum sampled audience API latency was 29 ms.
+- PASS — the added regression makes audio resume stay unresolved after first playback, then seeks/replays at zero, the second-scene boundary and zero again. Frames advance each time without requesting another audio resume. This is an explicit browser API test double.
+- PASS — the same controlled test against the actual public HTTPS origin in mobile/touch Chrome. All three replays advanced, with zero blocked audio-resume calls after the change.
+- USER CONFIRMED — repeated rewind and replay now work on the physical iPhone after loading the silent-replay version. This completes the previously pending phone replay check, alongside user-confirmed voting, first playback and captions.
+- PASS — the owner's registered AIRL profile was granted admin through the trusted local CLI. A read-only role-count check confirmed one admin account. The account email and password are omitted from this report. Refresh Studio on the public origin to use the updated permissions.
+
+The public launcher and recovery worker are running against the normal database with paid hosted calls disabled. The original episode and phone vote were preserved. The public audience URL remains `https://pope-java-fable.ngrok-free.dev/live/barangay-2099`. No paid API call or tunnel upgrade occurred. The 35-session rehearsal remains synthetic load evidence; the physical confirmation is one iPhone. A venue-network/full-presentation rehearsal and long-duration reliability remain follow-up work.
