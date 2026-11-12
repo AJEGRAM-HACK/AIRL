@@ -19,6 +19,8 @@ import { NextEpisodeSuggestions } from '@/features/production/next-episode-sugge
 import { Job, RoomProduction } from '@/features/production/room-production';
 import { RoomSnapshot, type RoomState, type SessionState } from '@/features/live/types';
 import { Manifest, Script, Stages } from '@/server/production/schemas';
+import { FirstProductionPlayer } from '@/components/first-production';
+import { firstProduction, isFirstProduction } from '@/lib/first-production';
 import { EpisodePreview } from '@/video/episode-preview';
 import { type World, WorldCharacter } from '@/lib/domain';
 import { experienceUrl, journeySteps, type JourneyStep } from '@/lib/journey';
@@ -146,7 +148,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound, ha
   const selectedEpisode = episodes.find(item => item.episode_id === query.get('episode')) ||
     (!query.get('episode') ? liveEpisode : undefined);
   const saved = query.get('saved') === '1';
-  const film = hasDemoFilm && query.get('film') === 'veo' ? 'veo' : undefined;
+  const film = hasDemoFilm && (query.get('film') === 'veo' || isFirstProduction(world.id, selectedEpisode?.episode_id)) ? 'veo' : undefined;
   const explicitStep = query.get('step');
   const step: JourneyStep = journeySteps.includes(explicitStep as JourneyStep) ? explicitStep as JourneyStep : 'world';
   const stepIndex = journeySteps.indexOf(step);
@@ -329,12 +331,9 @@ export default function JourneyDemo({ world, characters, rooms, initialRound, ha
           </div>}
           {step === 'premiere' && <div className="journey-premiere">
             {film ? <>
-              <div className="journey-film-heading"><p className="journey-kicker">First production · 4 shots · 32 seconds</p><h1>Taho Tender</h1><p>Captain Bot declares taho the barangay’s official currency.</p></div>
+              <div className="journey-film-heading"><p className="journey-kicker">{firstProduction.details}</p><h1>{firstProduction.title}</h1><p>{firstProduction.synopsis}</p></div>
               <div className="journey-film journey-demo-film" aria-label="First production player">
-                <video controls playsInline preload="metadata" poster="/demo-media/Taho-Tender.jpg" aria-label="Taho Tender — First production">
-                  <source src="/demo-media/Taho-Tender.mp4" type="video/mp4" />
-                  <a href="/demo-media/Taho-Tender.mp4">Download Taho Tender</a>
-                </video>
+                <FirstProductionPlayer />
               </div>
               <div className="journey-film-links"><a href="/demo-media/Taho-Tender.mp4" download>Download video <ArrowRight size={16} /></a></div>
             </> : selectedEpisode ? <>
@@ -344,9 +343,8 @@ export default function JourneyDemo({ world, characters, rooms, initialRound, ha
             </> : <div className="journey-premiere-wait"><p className="journey-kicker">{job?.status === 'review' ? 'A chapter ready for approval' : 'The premiere'}</p><h1>{job?.status === 'review' ? 'Ready for review.' : 'A story worth waiting for.'}</h1><p>{selectedId ? 'This approved episode is unavailable in the selected universe.' : 'Review the live production or play an approved saved episode.'}</p></div>}
           </div>}
           {step === 'ask' && <div className="journey-question">
-            {film && <p className="journey-kicker">Questions use the published episode’s stored canon.</p>}
             <p className="journey-kicker">{selectedEpisode?.artifact.manifest.title || 'The story so far'}</p><h1>Ask what happened.</h1>
-            {selectedEpisode ? <StoryHelper key={selectedEpisode.episode_id} universeId={world.id} episodeId={selectedEpisode.episode_id} characterId={featured?.id} suggestedQuestion={featured ? `How did ${featured.name} react to the audience’s decision in this episode?` : 'What happened in this episode?'} /> : <p>Choose an approved episode in the premiere chapter to ask about it.</p>}
+            {film ? <><p>{firstProduction.synopsis}</p><p>Kuya Taho spots a business opportunity. Tita Nena questions how the new currency will work.</p><Button onClick={() => go('premiere')}>Watch first production <ArrowRight size={18} /></Button></> : selectedEpisode ? <StoryHelper key={selectedEpisode.episode_id} universeId={world.id} episodeId={selectedEpisode.episode_id} characterId={featured?.id} suggestedQuestion={featured ? `How did ${featured.name} react to the audience’s decision in this episode?` : 'What happened in this episode?'} /> : <p>Choose an approved episode in the premiere chapter to ask about it.</p>}
           </div>}
         </section>
       </main>
@@ -361,7 +359,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound, ha
         {sheet === 'transcript' && transcript && <div className="journey-transcript"><h3>{transcript.title}</h3>{transcript.scenes.map(scene => <article key={scene.id}><p className="journey-kicker">{scene.id}</p>{scene.dialogue.map((line, index) => <p key={index}><b>{characters.find(character => character.id === line.characterId)?.name || line.characterId}</b> {line.text}</p>)}</article>)}</div>}
         {sheet === 'review' && canInspect && job && <RoomProduction key={job.id} operator roomId={world.id} jobId={job.id} presentation />}
         {sheet === 'settings' && canManage && <div className="journey-settings"><label>Presentation universe<select aria-label="Presentation universe" value={world.id} onChange={event => router.push(experienceUrl('journey', { universe: event.target.value }))}>{rooms.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><fieldset disabled={pending}><ProviderPicker value={provider} onChange={chooseProvider} background /></fieldset><p>{provider.mode === 'hosted_openai' ? 'OpenAI production is paid. Authorize each round before closing voting.' : provider.mode === 'demo' ? 'Demo uses deterministic templates without inference.' : 'Live production uses the selected local Ollama model.'} Saved playback uses no inference.</p>{room.status === 'closed' && <NextEpisodeSuggestions roomId={world.id} roundId={room.roundId} pending={pending} onStarted={data => { sessionRevision.current++; setRoom(data.room); setSession(data.session); setSheet(null); router.push(experienceUrl('journey', { universe: world.id, round: data.room.roundId, step: 'vote' })); }} />}<Link href={`/studio/worlds/${world.id}`}>Open world Studio <ArrowRight size={16} /></Link></div>}
-        {sheet === 'saved' && <div className="journey-settings"><label>Approved saved episode<select aria-label="Approved saved episode" value={fallback?.episode_id || ''} onChange={event => router.replace(experienceUrl('journey', { ...context, episode: event.target.value }), { scroll: false })}>{episodes.map(item => <option key={item.episode_id} value={item.episode_id}>{item.artifact.manifest.title}</option>)}</select></label><p>Approved episodes from {world.title} play immediately from storage.</p><Button disabled={!fallback} onClick={() => fallback && go('premiere', fallback.episode_id, true)}>Use this episode <ArrowRight size={18} /></Button></div>}
+        {sheet === 'saved' && <div className="journey-settings"><label>Approved saved episode<select aria-label="Approved saved episode" value={fallback?.episode_id || ''} onChange={event => router.replace(experienceUrl('journey', { ...context, episode: event.target.value }), { scroll: false })}>{episodes.map(item => <option key={item.episode_id} value={item.episode_id}>{hasDemoFilm && isFirstProduction(world.id, item.episode_id) ? `${firstProduction.title} · ${firstProduction.label}` : item.artifact.manifest.title}</option>)}</select></label><p>Approved episodes from {world.title} play immediately from storage.</p><Button disabled={!fallback} onClick={() => fallback && go('premiere', fallback.episode_id, true)}>Use this episode <ArrowRight size={18} /></Button></div>}
       </JourneySheet>
     </div>
   );

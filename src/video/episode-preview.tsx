@@ -1,6 +1,7 @@
 'use client';
 import { Player, type PlayerRef } from '@remotion/player';
 import { useEffect, useRef, useState } from 'react';
+import { FirstProductionPlayer, useFirstProduction } from '@/components/first-production';
 import { Manifest } from '@/server/production/schemas';
 import { Button } from '@/components/ui/button';
 import { EpisodeComposition, compositionFrames, FPS, type EpisodeManifest } from './composition';
@@ -15,6 +16,8 @@ type PreviewProps = {
 };
 
 export function EpisodePreview(props: PreviewProps) {
+  const film = useFirstProduction(props.universeId, props.episodeId, props.jobId);
+  if (film) return <FirstProductionPlayer seekFrame={props.seekFrame} />;
   const parsed = Manifest.safeParse(props.manifest);
   if (!parsed.success || parsed.data.scenes.length !== 3 || parsed.data.scenes.some(scene =>
     scene.durationSeconds < 3 || scene.durationSeconds > 30 || !Number.isInteger(scene.durationSeconds) || !scene.dialogue.length)) {

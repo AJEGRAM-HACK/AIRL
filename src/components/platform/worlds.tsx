@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, Search } from "lucide-react";
+import { useFirstProduction } from '@/components/first-production';
+import { firstProductionUrl, firstProduction } from '@/lib/first-production';
 import { UniverseArt } from "@/components/universe-art";
 import {
   Account,
@@ -32,6 +34,7 @@ export function UniverseLinks({ id }: { id: string }) {
   );
 }
 function WorldCards({ worlds, discovery = false, live = false }: { worlds: World[]; discovery?: boolean; live?: boolean }) {
+  const demoAvailable = useFirstProduction(firstProduction.universeId);
   return (
     <div className={`platform-grid${discovery ? ' discovery-grid' : ''}`}>
       {worlds.map((world) => (
@@ -56,6 +59,7 @@ function WorldCards({ worlds, discovery = false, live = false }: { worlds: World
               .join(" · ")}
           </p>
           <div className="provider-actions">
+            {discovery && demoAvailable && world.id === firstProduction.universeId && <Link className="text-link" href={firstProductionUrl}>Watch first production <ArrowUpRight size={16} aria-hidden="true" /></Link>}
             {discovery ? <Link className="text-link" href={live ? `/live/${world.id}` : `/universes/${world.id}`}>{live ? "Enter live room" : "Enter universe"} <ArrowUpRight size={16} aria-hidden="true"/></Link> : <>
               <Link className="text-link" href={`/studio/${world.id}`}>Episodes & live</Link>
               <Link className="text-link" href={`/studio/worlds/${world.id}#world-cast`}>Characters</Link>

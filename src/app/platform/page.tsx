@@ -1,3 +1,4 @@
+import { FirstProductionSpotlight } from '@/components/first-production';
 import { CanCreate } from '@/components/platform/access';
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight, Play, Radio } from 'lucide-react';
@@ -34,6 +35,7 @@ export default async function PlatformPage({ searchParams }: {
           <div className="landing-feature-copy"><p className="eyebrow">{world.official ? 'THE OFFICIAL AIRL UNIVERSE' : world.settings.genre}</p><h2><Link href={`/universes/${world.id}`}>{world.title}</Link></h2><p>{world.settings.premise}</p><Link className="feature-enter" href={`/universes/${world.id}`}>Enter universe <ArrowUpRight size={19} aria-hidden="true"/></Link></div>
         </article>
       </section>
+      <FirstProductionSpotlight universeId={world.id} />
       <section className="landing-how" aria-label="How AIRL works"><div className="landing-how-intro"><p className="eyebrow">A STORY WE MAKE TOGETHER</p><h2>Every world starts<br/>with a possibility.</h2></div><ol><li><span>01</span><div><h3>Discover a universe.</h3><p>Meet the characters. Find your world.</p></div></li><li><span>02</span><div><h3>Shape the story.</h3><p>Choose what happens next, together.</p></div></li><li><span>03</span><div><h3>Watch it come alive.</h3><p>AI creates. People review. The story continues.</p></div></li></ol></section>
     </main>
     <Footer universeId={world.id} roundId={query.round}/>

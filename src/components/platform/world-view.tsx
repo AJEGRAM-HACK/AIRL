@@ -7,6 +7,8 @@ import { UniverseLinks } from "./worlds";
 import { UniverseArt } from "@/components/universe-art";
 import { api } from "./api";
 import { StoryHelper } from "./story-helper";
+import { useFirstProduction } from '@/components/first-production';
+import { firstProduction, isFirstProduction } from '@/lib/first-production';
 import { EpisodePreview } from "@/video/episode-preview";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +19,8 @@ function CharacterMark({ symbol }: { symbol?: string }) {
 export function WorldView({ id, mode = "world", characterId, episodeId, initialSeconds = 0 }: {
   id: string; mode?: "world" | "characters" | "episodes"; characterId?: string; episodeId?: string; initialSeconds?: number;
 }) {
+  const demoAvailable = useFirstProduction(id);
+  const film = demoAvailable && isFirstProduction(id, episodeId);
   const [data, setData] = useState<any>(null), [error, setError] = useState(""), [seek, setSeek] = useState(initialSeconds * 30);
   const [sceneNotesOpen, setSceneNotesOpen] = useState(initialSeconds > 0);
   useEffect(() => { api(`/api/universes/${id}`).then(setData).catch(error => setError(error.message)); }, [id]);
@@ -40,7 +44,7 @@ export function WorldView({ id, mode = "world", characterId, episodeId, initialS
     {episode ? <>
       <div className="episode-reveal-grid">
         <div className="episode-stage"><EpisodePreview manifest={episode.artifact.manifest} seekFrame={seek} universeId={id} episodeId={episode.episode_id} /></div>
-        <aside className="episode-story"><p className="eyebrow">CHAPTER {episode.story_order} · APPROVED EPISODE</p><h2>{episode.artifact.manifest.title}</h2>{episode.artifact.script?.summary && <p className="episode-synopsis">{episode.artifact.script.summary}</p>}<p className="episode-choice"><span>THE AUDIENCE CHOSE</span>{episode.choice || "Standalone production"}</p>
+        <aside className="episode-story"><p className="eyebrow">{film ? firstProduction.details : `CHAPTER ${episode.story_order} · APPROVED EPISODE`}</p><h2>{episode.artifact.manifest.title}</h2>{(film || episode.artifact.script?.summary) && <p className="episode-synopsis">{film ? firstProduction.synopsis : episode.artifact.script.summary}</p>}<p className="episode-choice"><span>THE AUDIENCE CHOSE</span>{episode.choice || "Standalone production"}</p>
           {episode.round_id && <Link className="text-link" href={`/live/${id}?round=${episode.round_id}#source-round`}>See the audience decision <ArrowRight size={15} aria-hidden="true" /></Link>}
           <div className="episode-cast"><span>IN THIS CHAPTER</span>{episode.artifact.manifest.cast?.map((item: any) => <Link key={item.id} href={`/universes/${id}/characters/${item.id}`}>{item.name}</Link>)}</div>
           <Button asChild><Link href={`/live/${id}#community-vote`}>Shape the next chapter <ArrowRight size={16} aria-hidden="true" /></Link></Button>
@@ -51,15 +55,15 @@ export function WorldView({ id, mode = "world", characterId, episodeId, initialS
         const next = data.episodes[position + 1] || data.episodes[position - 1];
         return next ? <Link className="text-link" href={`/universes/${id}/episodes/${next.episode_id}`}>{position + 1 < data.episodes.length ? 'Next episode' : 'Previous episode'}: {next.artifact.manifest.title}<ArrowRight size={16} aria-hidden="true"/></Link> : null;
       })()}</nav>
-      <details className="scene-transcript" open={sceneNotesOpen} onToggle={event => setSceneNotesOpen(event.currentTarget.open)}><summary>Scenes and characters</summary><section className="panel platform-form scene-notes">
+      {!film && <details className="scene-transcript" open={sceneNotesOpen} onToggle={event => setSceneNotesOpen(event.currentTarget.open)}><summary>Scenes and characters</summary><section className="panel platform-form scene-notes">
         {episode.artifact.manifest.scenes.map((scene: any, index: number) => {
           const seconds = episode.artifact.manifest.scenes.slice(0, index).reduce((sum: number, item: any) => sum + item.durationSeconds, 0);
           return <article key={scene.id} id={`scene-${scene.id}`}><Button variant="outline" onClick={() => setSeek(seconds * 30)}>{scene.id} · {seconds}s</Button>
             {scene.dialogue.map((line: any, position: number) => <p key={position}><Link href={`/universes/${id}/characters/${line.characterId}`}>{episode.artifact.manifest.cast?.find((item: any) => item.id === line.characterId)?.name || line.characterId}</Link> — {line.text}</p>)}
           </article>;
         })}
-      </section></details>
-      <StoryHelper universeId={id} episodeId={episodeId} />
+      </section></details>}
+      {!film && <StoryHelper universeId={id} episodeId={episodeId} />}
     </> : character ? <>
       <section className="panel platform-form character-profile"><CharacterMark symbol={character.symbol} /><p className="eyebrow">{character.role}</p><p>{character.backstory}</p>
         <dl><dt>Personality</dt><dd>{character.personality.join(", ")}</dd><dt>Voice</dt><dd>{character.voice}</dd><dt>Speaking style</dt><dd>{character.speakingStyle}</dd><dt>Motivations</dt><dd>{character.motivations.join(", ")}</dd><dt>Appearance</dt><dd>{character.appearance}</dd></dl>
@@ -77,7 +81,7 @@ export function WorldView({ id, mode = "world", characterId, episodeId, initialS
       </section>}
       {mode !== "characters" && <section className="story-section"><div className="story-section-heading"><div><p className="eyebrow">THE STORY SO FAR</p><h2>Episodes in story order</h2></div><Link className="text-link" href={`/live/${id}`}>Join the next chapter <ArrowRight size={15} aria-hidden="true" /></Link></div>
         {!data.episodes.length && <p className="empty-state">The first episode is waiting for its audience decision.</p>}
-        <div className="platform-grid story-cards">{data.episodes.map((item: any) => <article className="panel story-card" key={item.episode_id}><small>CHAPTER {String(item.story_order).padStart(2, '0')}</small><h3><Link href={`/universes/${id}/episodes/${item.episode_id}`}>{item.artifact.manifest.title}</Link></h3><p>{item.choice}</p><Link className="text-link" href={`/universes/${id}/episodes/${item.episode_id}`}>Watch episode <ArrowRight size={15} aria-hidden="true" /></Link></article>)}</div>
+        <div className="platform-grid story-cards">{data.episodes.map((item: any) => <article className="panel story-card" key={item.episode_id}>{demoAvailable && isFirstProduction(id, item.episode_id) && <Link href={`/universes/${id}/episodes/${item.episode_id}`}><img className="first-production-cover" src={firstProduction.poster} alt="" /></Link>}<small>{demoAvailable && isFirstProduction(id, item.episode_id) ? firstProduction.details : `CHAPTER ${String(item.story_order).padStart(2, '0')}`}</small><h3><Link href={`/universes/${id}/episodes/${item.episode_id}`}>{item.artifact.manifest.title}</Link></h3><p>{demoAvailable && isFirstProduction(id, item.episode_id) ? firstProduction.synopsis : item.choice}</p><Link className="text-link" href={`/universes/${id}/episodes/${item.episode_id}`}>Watch episode <ArrowRight size={15} aria-hidden="true" /></Link></article>)}</div>
       </section>}
       {mode !== "episodes" && <section className="story-section"><div className="story-section-heading"><div><p className="eyebrow">PERSISTENT CHARACTERS. SHARED HISTORY.</p><h2>Characters</h2></div></div>
         {!data.characters.length && <p className="empty-state">This universe’s cast is still taking shape.</p>}

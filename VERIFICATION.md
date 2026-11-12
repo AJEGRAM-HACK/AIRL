@@ -1,5 +1,17 @@
 # AIRL verification record
 
+## First production across all demo surfaces — November 12, 2026
+
+Implemented from `3b33293`. Shared metadata binds the installed external Taho Tender film to the existing published demo episode `efbdba79-9564-4de1-8ca0-984c26d284f5` and job `a74e1393-1260-4a13-a8a7-ffa3c13335bd`. Explore features the native film. Discovery, universe overview and episode library link to its canonical detail page. Live, legacy watch routes, episode detail, Journey's regular premiere/saved selection and published Studio previews use the same native player. Displayed metadata consistently reads First production, four shots and approximately 32 seconds. Film-specific views use the four-shot synopsis and summary. The public media directory links only the playback MP4 and poster into ignored local media.
+
+- PASS — strict typecheck, production build and all 43 unit tests. All 24 production Chrome browser cases passed in 3.5 minutes on fresh `/tmp/airl-first-production-all-browser-20261112.sqlite`, with paid requests disabled and the OpenAI key empty. Existing voting, account/ownership, private-world, publication, local Ollama, canon, captions and playback coverage passed.
+- PASS — final typecheck/build and 43 unit tests after the narrow Explore margin adjustment. The complete browser suite above precedes that CSS adjustment. Final focused checks use SQLite's backup API snapshot at `/tmp/airl-first-production-surfaces-20261112.sqlite`, paid requests disabled and an empty OpenAI key. Desktop 1440 × 1000 and phone 390 × 844 checks each confirm native playback and seeking on Explore, Platform, Live, both legacy watch routes, episode detail and Journey's normal premiere. Three discovery/library links per viewport resolve the canonical episode. Guest Studio returns 404, and isolated test admins see its native film preview. No page errors or horizontal overflow occurred. Captures in `.data/flow-demo/surfaces` were inspected. The first focused harness attempt had an ambiguous Episode library locator, corrected to the named combobox before the successful runs.
+- PASS — restored the local presentation server and ngrok launcher against the same paid-showcase database. Public Chrome checks confirm the new film actually advances in Explore, Live, canonical episode detail and regular Journey premiere. No paid inference was performed for this change.
+
+The exported film has no separately supplied caption track. Physical iPhone/Safari and venue sound/projector checks remain open. Playback is linked through local metadata to the existing demo IDs. External-film transcript/canonical-memory ingestion is outside this frontend change.
+
+---
+
 ## User-supplied first-production film — November 12, 2026
 
 Implemented from `978e7d8` with the user's four-shot Flow/Veo export from Downloads. The display label is **First production**, with **Taho Tender**, four shots, approximately 32 seconds and a matching premise synopsis. The original copy has SHA-256 `a0c2af40de8b8c882d6063ae9e83720f6b59fd979e009fd425f06872e2c83213`, matching Downloads. The browser copy is H.264/AAC, 1920 × 1080, 31.741 seconds, with MP4 fast-start metadata. Media and QA captures remain ignored in `.data/flow-demo`, exposed through the ignored local `public/demo-media` symlink.

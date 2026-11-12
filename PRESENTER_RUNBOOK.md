@@ -2,7 +2,7 @@
 
 ## First production film
 
-Open `/journey?universe=barangay-2099&step=premiere&film=veo&saved=1`, or choose **Play first production** in Journey. The reveal is labeled **First production** and plays the user’s four-shot **Taho Tender** export, approximately 32 seconds at 1920 × 1080. Press Play for sound. Native controls support pause, volume, seeking, replay and full screen. The original remains in Downloads and `.data/flow-demo/DEMO B2099.mp4`. The browser copy is `.data/flow-demo/Taho-Tender.mp4`, served through the ignored `public/demo-media` symlink. The film is externally generated Flow/Veo media. Story questions use the published episode’s stored canon.
+The same **First production** film plays from Explore, Live, the episode library/detail, Journey and the published Studio preview. The canonical episode is `/universes/barangay-2099/episodes/efbdba79-9564-4de1-8ca0-984c26d284f5`. Journey's normal premiere and saved selection use this film for Taho Tender. The direct `/journey?universe=barangay-2099&step=premiere&film=veo&saved=1` shortcut is also available. The four-shot **Taho Tender** export runs approximately 32 seconds at 1920 × 1080. Press Play for sound. Native controls support pause, volume, seeking, replay and full screen. The original remains in Downloads and `.data/flow-demo/DEMO B2099.mp4`. The browser copy is `.data/flow-demo/Taho-Tender.mp4`, served through the ignored `public/demo-media` media links. The film is externally generated Flow/Veo media. The film's episode page and Journey summary display its four-shot synopsis.
 
 ## Dialogue and the next episode
 

@@ -7,9 +7,12 @@ import { z } from 'zod';
 import { Manifest } from '@/server/production/schemas';
 import { episodes } from '@/lib/fixtures';
 import { Player } from '@/components/player';
+import { useFirstProduction } from '@/components/first-production';
+import { firstProduction, isFirstProduction } from '@/lib/first-production';
 import { EpisodePreview } from '@/video/episode-preview';
 const Published = z.object({id:z.string(),run_id:z.string().nullable().optional(),status:z.string(),mode:z.string(),choice:z.string().optional(),manifest:Manifest.nullable(),progress:z.object({stage:z.string(),status:z.string()}).nullable().optional()});
 export function EpisodeGallery({roomId="barangay-2099"}:{roomId?:string}) {
+  const demoAvailable = useFirstProduction(roomId);
   const [generated,setGenerated]=useState<z.infer<typeof Published>[]>([]);
   const [latest,setLatest]=useState<z.infer<typeof Published> | null>(null);
   const [loading,setLoading]=useState(true);
@@ -42,11 +45,12 @@ export function EpisodeGallery({roomId="barangay-2099"}:{roomId?:string}) {
   const available=[...generated,...references];
   const id=available.some(item=>item.id===selected)?selected:generated[0]?.id || references[references.length-1].id;
   const job=generated.find(item=>item.id===id);
+  const film = demoAvailable && isFirstProduction(roomId, job?.run_id || undefined, job?.id);
   const reference=episodes.find(item=>item.id===id)||episodes[episodes.length-1];
-  return <section id="episode-library" className="room-production episode-gallery" aria-label="Episode library"><label className="job-picker">Episode library<select aria-label="Episode library" value={id} onChange={event=>setSelected(event.target.value)}>{generated.map(item=><option key={item.id} value={item.id}>{item.manifest?.title} · {item.mode}</option>)}{references.map(item=><option key={item.id} value={item.id}>{item.title} · Reference fixture</option>)}</select></label>
+  return <section id="episode-library" className="room-production episode-gallery" aria-label="Episode library"><label className="job-picker">Episode library<select aria-label="Episode library" value={id} onChange={event=>setSelected(event.target.value)}>{generated.map(item=><option key={item.id} value={item.id}>{demoAvailable && isFirstProduction(roomId, item.run_id || undefined, item.id) ? `${firstProduction.title} · ${firstProduction.label}` : `${item.manifest?.title} · ${item.mode}`}</option>)}{references.map(item=><option key={item.id} value={item.id}>{item.title} · Reference fixture</option>)}</select></label>
     {latest && latest.status !== 'published' && <ProductionTimeline job={latest}/>}{error&&<p role="alert">{error}</p>}
-    <div className="episode-meta"><div className="eyebrow">{job ? `${job.mode} · APPROVED COMMUNITY EPISODE` : 'SEEDED REFERENCE EPISODE'}</div><h2>{job?.manifest?.title || reference.title}</h2></div>
+    <div className="episode-meta"><div className="eyebrow">{film ? firstProduction.details : job ? `${job.mode} · APPROVED COMMUNITY EPISODE` : 'SEEDED REFERENCE EPISODE'}</div><h2>{job?.manifest?.title || reference.title}</h2>{film && <p>{firstProduction.synopsis}</p>}</div>
     {generated[0] && selected && selected !== generated[0].id && <Button variant="outline" onClick={() => setSelected(generated[0].id)}>Watch the latest community episode</Button>}
-    {job?.manifest?<>{job.choice && <p className="episode-choice"><span>THE AUDIENCE CHOSE</span>{job.choice}</p>}<EpisodePreview manifest={job.manifest} universeId={roomId} jobId={job.id}/><div className="episode-cast"><span>IN THIS CHAPTER</span>{job.manifest.cast?.map(character => <Link key={character.id} href={`/universes/${roomId}/characters/${character.id}`}>{character.name}</Link>)}</div><Link className="text-link" href={`/universes/${roomId}/episodes/${job.run_id}`}>Episode details and story questions →</Link></>:roomId==='barangay-2099'?<Player key={reference.id} episode={reference}/>:<p>The first published episode will appear here.</p>}
+    {job?.manifest?<>{job.choice && <p className="episode-choice"><span>THE AUDIENCE CHOSE</span>{job.choice}</p>}<EpisodePreview manifest={job.manifest} universeId={roomId} jobId={job.id}/><div className="episode-cast"><span>IN THIS CHAPTER</span>{job.manifest.cast?.map(character => <Link key={character.id} href={`/universes/${roomId}/characters/${character.id}`}>{character.name}</Link>)}</div><Link className="text-link" href={`/universes/${roomId}/episodes/${job.run_id}`}>{film ? 'Open first production →' : 'Episode details and story questions →'}</Link></>:roomId==='barangay-2099'?<Player key={reference.id} episode={reference}/>:<p>The first published episode will appear here.</p>}
   </section>;
 }
