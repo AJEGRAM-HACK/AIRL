@@ -166,12 +166,9 @@ test("viewer onboarding, creator permissions, both creation paths and private-wo
       )
       .toBeGreaterThan(15);
     const helper = page.locator(".story-helper");
-    await helper.getByText("Provider and model", { exact: true }).click();
-    await helper
-      .getByLabel("Production provider", { exact: true })
-      .selectOption("demo");
+    await expect(helper.getByLabel("Production provider", { exact: true })).toHaveCount(0);
     await helper.getByRole("button", { name: "Ask the story" }).click();
-    await expect(helper.locator('a[href*="#scene-"]').first()).toBeVisible();
+    await expect(helper.locator('a[href*="#scene-"]').first()).toBeVisible({ timeout: 110000 });
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,

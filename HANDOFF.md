@@ -2,6 +2,12 @@
 
 Updated November 12, 2026. Repository `/Users/ajegram/CinemAI`. Continue in this conversation. Read `AGENTS.md`, this file, `ARCHITECTURE_PLAN.md` and `VERIFICATION.md` before editing.
 
+## Unified frontend continuation — November 12, 2026
+
+The full restructure brief is implemented on `ui/unified-airl`, starting at `aeb8492`. Public AIRL now has minimal navigation, rebuilt landing, simplified discovery, unified universe/vote/production/playback presentation and dark-first preferences. Existing `/studio` routes share a responsive Dashboard; mobile workspace navigation collapses behind a keyboard-accessible Menu. Manila Journey and all server/API/schema/provider/video source remain preserved. [UNIFIED_FRONTEND_REPORT.md](docs/UNIFIED_FRONTEND_REPORT.md) owns the full feature mapping, files, actual screenshots, acceptance and rollback instructions. See the newest VERIFICATION entry for evidence and final-polish test boundaries.
+
+Fourteen pre-existing route/community modifications and untracked `tests/browser/rehearsal.spec.ts` were preserved and excluded from the redesign commit. Keep them in place. Immediate pre-redesign HEAD is retained at `checkpoint/pre-unified-ui-2026-11-12`; main and original preservation references are unchanged. Acceptance uses explicit `/tmp` databases with paid requests disabled. The old loopback preview was stopped before building; owned preview/test servers are stopped at completion. Port 3000 is unrelated and was not touched. Physical-device, venue and screen-reader checks remain open.
+
 ## Active Hackathon UI/UX Optimization
 
 The expanded user brief authorized all existing frontend surfaces on November 12, 2026. Latest UI commit is `da763cfa502cc1570397133439ec1bb271151e7a` on local branch `ui/hackathon-experience`, starting from clean `a19d82f` after the first public-shell increment. Original source checkpoint remains pinned to `fc48254`; documentation tag and `main` remain at `81e975e`.

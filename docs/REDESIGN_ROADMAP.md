@@ -2,6 +2,10 @@
 
 Phase 0 is complete at documentation checkpoint `81e975e`. The user authorized Phase 1 on November 12, 2026, including universe discovery and responsive refinement. The subsequent expanded brief also authorized presentation-only refinements of existing live voting, production progress, episode reveal and creator workflows, recorded in [HACKATHON_UI_REPORT.md](HACKATHON_UI_REPORT.md). Later identity, schema, provider and infrastructure proposals still require separate review. The existing code already implements substantial parts of phases 2–6. Each phase starts by checking its actual remaining gaps. Reuse boundaries are defined by [ARCHITECTURE_PLAN.md](../ARCHITECTURE_PLAN.md), model extensions by [UNIVERSE_MODEL.md](UNIVERSE_MODEL.md), and UI goals by [UI_UX_PIVOT.md](UI_UX_PIVOT.md).
 
+## Complete frontend restructure
+
+The user's subsequent full frontend replacement brief expands the authorized presentation work across the same existing features. It is implemented on `ui/unified-airl`, including a shared protected Dashboard shell without changing existing Studio URLs or authorization. [UNIFIED_FRONTEND_REPORT.md](UNIFIED_FRONTEND_REPORT.md) owns the current screen/feature mapping, screenshots and rollback. [VERIFICATION.md](../VERIFICATION.md) separates the complete 16-case acceptance from focused final-polish checks. No identity, schema, provider or infrastructure proposal is implemented by this frontend phase. Original checkpoints and other working-tree edits remain preserved.
+
 ## Phase 0 — Preservation and documentation
 
 Record the clean `main` baseline at `fc48254`, retain application acceptance at `1a7baf3`, create the checkpoint branch, inventory ignored data, audit conflicting claims and prepare this plan. Validate source/data/dependency preservation and document the backup procedure. Commit intended documentation separately. Stop for user review after reporting the result.

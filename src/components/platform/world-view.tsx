@@ -18,7 +18,14 @@ export function WorldView({ id, mode = "world", characterId, episodeId, initialS
   id: string; mode?: "world" | "characters" | "episodes"; characterId?: string; episodeId?: string; initialSeconds?: number;
 }) {
   const [data, setData] = useState<any>(null), [error, setError] = useState(""), [seek, setSeek] = useState(initialSeconds * 30);
+  const [sceneNotesOpen, setSceneNotesOpen] = useState(initialSeconds > 0);
   useEffect(() => { api(`/api/universes/${id}`).then(setData).catch(error => setError(error.message)); }, [id]);
+  useEffect(() => {
+    const revealSource = () => { if (window.location.hash.startsWith('#scene-')) setSceneNotesOpen(true); };
+    revealSource();
+    window.addEventListener('hashchange', revealSource);
+    return () => window.removeEventListener('hashchange', revealSource);
+  }, [data, episodeId]);
   if (!data) return <p className="empty-state" role={error ? 'alert' : 'status'}>{error || "Opening the universe…"}</p>;
   const character = characterId ? data.characters.find((item: any) => item.id === characterId) : null;
   const episode = episodeId ? data.episodes.find((item: any) => item.episode_id === episodeId) : null;
@@ -33,20 +40,25 @@ export function WorldView({ id, mode = "world", characterId, episodeId, initialS
     {episode ? <>
       <div className="episode-reveal-grid">
         <div className="episode-stage"><EpisodePreview manifest={episode.artifact.manifest} seekFrame={seek} /></div>
-        <aside className="episode-story"><p className="eyebrow">CHAPTER {episode.story_order} · APPROVED EPISODE</p><h2>The choice that changed the story.</h2><p className="episode-choice">{episode.choice || "Standalone production"}</p>
+        <aside className="episode-story"><p className="eyebrow">CHAPTER {episode.story_order} · APPROVED EPISODE</p><h2>{episode.artifact.manifest.title}</h2>{episode.artifact.script?.summary && <p className="episode-synopsis">{episode.artifact.script.summary}</p>}<p className="episode-choice"><span>THE AUDIENCE CHOSE</span>{episode.choice || "Standalone production"}</p>
           {episode.round_id && <Link className="text-link" href={`/live/${id}?round=${episode.round_id}#source-round`}>See the audience decision <ArrowRight size={15} aria-hidden="true" /></Link>}
           <div className="episode-cast"><span>IN THIS CHAPTER</span>{episode.artifact.manifest.cast?.map((item: any) => <Link key={item.id} href={`/universes/${id}/characters/${item.id}`}>{item.name}</Link>)}</div>
           <Button asChild><Link href={`/live/${id}#community-vote`}>Shape the next chapter <ArrowRight size={16} aria-hidden="true" /></Link></Button>
         </aside>
       </div>
-      <section className="panel platform-form scene-notes"><h2>Scenes and characters</h2>
+      <nav className="episode-next" aria-label="More episodes"><Link className="text-link" href={`/universes/${id}/episodes`}>All episodes in {data.universe.title}</Link>{(() => {
+        const position = data.episodes.findIndex((item: any) => item.episode_id === episodeId);
+        const next = data.episodes[position + 1] || data.episodes[position - 1];
+        return next ? <Link className="text-link" href={`/universes/${id}/episodes/${next.episode_id}`}>{position + 1 < data.episodes.length ? 'Next episode' : 'Previous episode'}: {next.artifact.manifest.title}<ArrowRight size={16} aria-hidden="true"/></Link> : null;
+      })()}</nav>
+      <details className="scene-transcript" open={sceneNotesOpen} onToggle={event => setSceneNotesOpen(event.currentTarget.open)}><summary>Scenes and characters</summary><section className="panel platform-form scene-notes">
         {episode.artifact.manifest.scenes.map((scene: any, index: number) => {
           const seconds = episode.artifact.manifest.scenes.slice(0, index).reduce((sum: number, item: any) => sum + item.durationSeconds, 0);
           return <article key={scene.id} id={`scene-${scene.id}`}><Button variant="outline" onClick={() => setSeek(seconds * 30)}>{scene.id} · {seconds}s</Button>
             {scene.dialogue.map((line: any, position: number) => <p key={position}><Link href={`/universes/${id}/characters/${line.characterId}`}>{episode.artifact.manifest.cast?.find((item: any) => item.id === line.characterId)?.name || line.characterId}</Link> — {line.text}</p>)}
           </article>;
         })}
-      </section>
+      </section></details>
       <StoryHelper universeId={id} episodeId={episodeId} />
     </> : character ? <>
       <section className="panel platform-form character-profile"><CharacterMark symbol={character.symbol} /><p className="eyebrow">{character.role}</p><p>{character.backstory}</p>
@@ -72,6 +84,6 @@ export function WorldView({ id, mode = "world", characterId, episodeId, initialS
         <div className="platform-grid story-cards">{data.characters.map((item: any) => <article className="panel story-card" key={item.id}><CharacterMark symbol={item.symbol} /><h3><Link href={`/universes/${id}/characters/${item.id}`}>{item.name}</Link></h3><small>{item.role}</small><p>{item.backstory}</p><Link className="text-link" href={`/universes/${id}/characters/${item.id}`}>Meet {item.name} <ArrowRight size={15} aria-hidden="true" /></Link></article>)}</div>
       </section>}
     </>}
-    {!episode && <section className="panel platform-form canon-timeline"><p className="eyebrow">WHAT THE CHARACTERS REMEMBER</p><h2>Approved story timeline</h2>{!timeline.length && <p>The first approved chapter will begin this universe’s shared history.</p>}<ol>{timeline.map((event: any) => <li key={event.id}><p>{event.content}</p><small>Story order {event.story_order}</small>{event.episode_id && <Link href={`/universes/${id}/episodes/${event.episode_id}${event.scene_id ? `#scene-${event.scene_id}` : ''}`}> · Source episode{event.scene_id ? ` / ${event.scene_id}` : ''}</Link>}</li>)}</ol></section>}
+    {!episode && <section className="panel platform-form canon-timeline"><p className="eyebrow">WHAT THE CHARACTERS REMEMBER</p><h2>The story they remember.</h2>{!timeline.length && <p>The first approved chapter will begin this universe’s shared history.</p>}<ol>{timeline.map((event: any) => <li key={event.id}><p>{event.content}</p><small>Story order {event.story_order}</small>{event.episode_id && <Link href={`/universes/${id}/episodes/${event.episode_id}${event.scene_id ? `#scene-${event.scene_id}` : ''}`}> · Source episode{event.scene_id ? ` / ${event.scene_id}` : ''}</Link>}</li>)}</ol></section>}
   </div>;
 }

@@ -103,6 +103,9 @@ test('hackathon screens reuse real voting, production, playback and creator flow
     await expect.poll(async () => Number(await page.locator('.remotion-preview').getAttribute('data-frame'))).toBeGreaterThan(30);
     await page.getByRole('button', { name: 'Pause video', exact: true }).click();
     await page.screenshot({ path: '/tmp/airl-experience-07-episode.png', fullPage: true });
+    await page.goto(`/universes/barangay-2099/episodes/${job.run_id}#scene-${job.manifest.scenes[1].id}`);
+    await expect(page.locator('.scene-transcript')).toHaveAttribute('open', '');
+    await expect(page.locator('.scene-transcript').getByRole('button').first()).toBeVisible();
     await studio.setViewportSize(sizes[2]);
     await studio.reload(); await settle(studio);
     await studio.screenshot({ path: '/tmp/airl-experience-08-studio.png', fullPage: true });

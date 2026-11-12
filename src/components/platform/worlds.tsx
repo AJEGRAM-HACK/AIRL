@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ArrowUpRight, Search } from "lucide-react";
 import { UniverseArt } from "@/components/universe-art";
 import {
@@ -19,17 +20,18 @@ import { ProviderPicker, defaultProvider } from "./provider-picker";
 import { CommunityPanel } from "@/features/live/community-panel";
 import { RoomJoin } from "@/features/live/room-join";
 export function UniverseLinks({ id }: { id: string }) {
+  const pathname = usePathname();
   return (
     <nav className="universe-links" aria-label="Universe navigation">
-      <Link href={`/universes/${id}`}>Overview</Link>
-      <Link href={`/live/${id}`}>Live</Link>
-      <Link href={`/universes/${id}/episodes`}>Episodes</Link>
-      <Link href={`/universes/${id}/characters`}>Characters</Link>
+      <Link href={`/universes/${id}`} aria-current={pathname === `/universes/${id}` ? "page" : undefined}>Overview</Link>
+      <Link href={`/universes/${id}/episodes`} aria-current={pathname.includes(`/universes/${id}/episodes`) ? "page" : undefined}>Episodes</Link>
+      <Link href={`/universes/${id}/characters`} aria-current={pathname.includes(`/universes/${id}/characters`) ? "page" : undefined}>Characters</Link>
+      <Link href={`/live/${id}`} aria-current={pathname === `/live/${id}` ? "page" : undefined}>Live</Link>
       <CanManage id={id}><Link href={`/studio/worlds/${id}`}>Studio</Link></CanManage>
     </nav>
   );
 }
-function WorldCards({ worlds, discovery = false }: { worlds: World[]; discovery?: boolean }) {
+function WorldCards({ worlds, discovery = false, live = false }: { worlds: World[]; discovery?: boolean; live?: boolean }) {
   return (
     <div className={`platform-grid${discovery ? ' discovery-grid' : ''}`}>
       {worlds.map((world) => (
@@ -54,24 +56,11 @@ function WorldCards({ worlds, discovery = false }: { worlds: World[]; discovery?
               .join(" · ")}
           </p>
           <div className="provider-actions">
-            <Button asChild variant="outline">
-              <Link href={`/live/${world.id}`}>Join Live</Link>
-            </Button>
-            <Link
-              className="text-link"
-              href={`/universes/${world.id}/episodes`}
-            >
-              Watch episodes
-            </Link>
-            <Link
-              className="text-link"
-              href={`/universes/${world.id}/characters`}
-            >
-              Characters
-            </Link>
-            <CanManage id={world.id}><Button asChild variant="ghost">
-              <Link href={`/studio/worlds/${world.id}`}>Open Studio</Link>
-            </Button></CanManage>
+            {discovery ? <Link className="text-link" href={live ? `/live/${world.id}` : `/universes/${world.id}`}>{live ? "Enter live room" : "Enter universe"} <ArrowUpRight size={16} aria-hidden="true"/></Link> : <>
+              <Link className="text-link" href={`/studio/${world.id}`}>Episodes & live</Link>
+              <Link className="text-link" href={`/studio/worlds/${world.id}#world-cast`}>Characters</Link>
+            </>}
+            <CanManage id={world.id}><Button asChild variant="outline"><Link href={`/studio/worlds/${world.id}`}>Open Studio</Link></Button></CanManage>
           </div>
           {world.archived && (
             <Button
@@ -94,8 +83,10 @@ function WorldCards({ worlds, discovery = false }: { worlds: World[]; discovery?
 }
 export function ExploreWorlds({
   title = "Explore universes",
+  live = false,
 }: {
   title?: string;
+  live?: boolean;
 }) {
   const [worlds, setWorlds] = useState<World[]>([]),
     [error, setError] = useState(""),
@@ -117,9 +108,9 @@ export function ExploreWorlds({
     <section className="universe-discovery" aria-label="Universe discovery">
       <div className="platform-heading">
         <div>
-          <p className="eyebrow">FIND YOUR NEXT STORY</p>
+          <p className="eyebrow">{live ? "AIRL LIVE · COMMUNITY STORIES" : "FIND YOUR NEXT STORY"}</p>
           <h1>{title}</h1>
-          <p>Choose a world. Help shape what happens next.</p>
+          <p>{live ? "Enter a universe’s room to see the current round, vote, and watch." : "Choose a world. Help shape what happens next."}</p>
         </div>
         <CanCreate><Button asChild variant="outline">
           <Link href="/studio">Creator Studio</Link>
@@ -135,7 +126,7 @@ export function ExploreWorlds({
       </div>
       {error ? <p role="alert">{error}</p> : loading ? <p role="status" className="discovery-state">Finding your next story…</p> : <>
         <p role="status" className="discovery-count">{visible.length} {visible.length === 1 ? 'universe' : 'universes'} to explore</p>
-        {visible.length ? <WorldCards worlds={visible} discovery /> : <div className="discovery-state"><h2>{worlds.length ? 'No worlds match just yet.' : 'The next story is still to come.'}</h2><p>{worlds.length ? 'Try another title or genre.' : 'Public universes will appear here when they are shared.'}</p>{worlds.length > 0 && <Button variant="outline" onClick={() => { setSearch(''); setGenre(''); }}>Clear filters</Button>}</div>}
+        {visible.length ? <WorldCards worlds={visible} discovery live={live} /> : <div className="discovery-state"><h2>{worlds.length ? 'No worlds match just yet.' : 'The next story is still to come.'}</h2><p>{worlds.length ? 'Try another title or genre.' : 'Public universes will appear here when they are shared.'}</p>{worlds.length > 0 && <Button variant="outline" onClick={() => { setSearch(''); setGenre(''); }}>Clear filters</Button>}</div>}
       </>}
     </section>
   );
@@ -188,16 +179,13 @@ export function CreatorStudio() {
       <div className="platform-heading">
         <div>
           <p className="eyebrow">YOUR CREATIVE SPACE</p>
-          <h1>Creator Studio</h1>
+          <h1>Your next world starts here.</h1>
           <p>Build worlds. Invite an audience. Review what becomes canon.</p>
         </div>
         <Button asChild variant="outline">
-          <Link href="/account">Your profile</Link>
+          <Link href="#create-universe">Create a universe</Link>
         </Button>
       </div>
-      <nav className="creator-nav" aria-label="Creator workspace">
-        <Link href="#my-universes">My universes</Link><Link href="#create-universe">Create a universe</Link><Link href="/studio/ai">Advanced AI settings</Link>
-      </nav>
       {error && (
         <p role="alert" className="form-error">
           {error}
@@ -212,6 +200,7 @@ export function CreatorStudio() {
         </div>
       ) : (
         <>
+          <section id="my-universes" className="owned-universes"><p className="eyebrow">BUILD SOMETHING THAT LASTS</p><h2>My universes</h2>{!worlds.length && <p className="empty-state">Your first universe starts with an idea. Create a private world above, then invite an audience when it is ready.</p>}<WorldCards worlds={worlds} /></section>
           <section id="create-universe" className="panel platform-form">
             <h2>Create a universe</h2>
             <div className="provider-actions">
@@ -307,11 +296,11 @@ export function CreatorStudio() {
               </Button>
             </section>
           )}
-          <section id="my-universes" className="owned-universes"><p className="eyebrow">BUILD SOMETHING THAT LASTS</p><h2>My universes</h2>{!worlds.length && <p className="empty-state">Your first universe starts with an idea. Create a private world above, then invite an audience when it is ready.</p>}<WorldCards worlds={worlds} /></section>
+
         </>
       )}
       {account?.role === "admin" && (
-        <section className="panel platform-form">
+        <section id="account-permissions" className="panel platform-form">
           <h2>Account permissions</h2>
           {accounts.map((user) => (
             <div className="account-row" key={user.id}>
@@ -445,7 +434,6 @@ export function WorldEditor({ id }: { id: string }) {
             : data.universe.visibility}
         </span>
       </div>
-      <UniverseLinks id={id} />
       <nav className="creator-nav" aria-label="World management"><a href="#world-settings">World settings</a><a href="#world-cast">Characters</a><a href="#world-production">Episode production</a></nav>
       {error && (
         <p role="alert" className="form-error">

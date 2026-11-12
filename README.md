@@ -10,6 +10,10 @@ The preservation source branch is `checkpoint/pre-hackathon-ui-pivot-2026-11-12`
 
 Hackathon UI/UX Optimization is authorized from preservation checkpoint `81e975e`. The first increment adds an Explore-led cinematic landing, simplified Home/Explore/Live navigation, permission-aware creation/profile access and visual universe discovery with local search and genre filters. Episodes and Characters remain contextual universe links, all legacy routes remain available, and Manila Journey is preserved. The expanded sprint unifies universe lore/cast, mobile voting, recorded four-stage progress, episode reveal and existing creator Studio with subtle violet styling. Advanced provider/raw event detail is disclosed when needed. Backend APIs, schemas, authentication and providers are unchanged. [Screen report, changed files and real browser screenshots](docs/HACKATHON_UI_REPORT.md). [UI strategy](docs/UI_UX_PIVOT.md), [phase roadmap](docs/REDESIGN_ROADMAP.md)
 
+## Unified frontend
+
+The public interface now uses a dark-first editorial theme and a minimal Explore / Live / Profile header, with the AIRL wordmark returning home. The rebuilt landing presents the required product story, Explore Universes / Join Live actions and the official universe. Existing creator tools share a responsive Dashboard at the retained `/studio` URLs; owner/admin permissions are unchanged. Theme choices and the contextual Journey mode switch remain available in the footer. Public story questions use the local provider default; advanced provider settings remain in protected creator tools and Journey. [Complete screen/feature map, screenshots, checks and rollback](docs/UNIFIED_FRONTEND_REPORT.md).
+
 ## Working capabilities
 
 - AIRL Live provides session-bound community voting, persistent rounds and SSE updates.

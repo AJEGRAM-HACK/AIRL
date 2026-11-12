@@ -2,6 +2,10 @@
 
 Status: the user authorized the first frontend implementation phase on November 12, 2026, from preservation checkpoint `81e975e`. The expanded brief authorizes the design system, landing/navigation, discovery/universe detail, voting, production timeline, episode reveal and existing creator Studio. See [the implemented screen report](HACKATHON_UI_REPORT.md). Backend APIs, schemas, identity policy, providers and infrastructure remain preserved. Manila Journey remains the presenter layout. New identity policies, character parameter fields and persistence/model extensions remain future phases.
 
+## Full restructure implementation
+
+The subsequent complete frontend brief is implemented on `ui/unified-airl`. Public navigation is now Explore / Live / Sign in or Profile, plus permission-aware Dashboard access; the AIRL wordmark returns home. Landing, discovery, universe/story content, audience participation and the existing creator tools share one near-black/warm-white/cool-violet system. `/studio` remains the protected workspace URL with a shared sidebar, compact mobile Menu and contextual universe tools. Journey retains its separately scoped Manila presentation. [UNIFIED_FRONTEND_REPORT.md](UNIFIED_FRONTEND_REPORT.md) records actual screens, feature locations, tokens and acceptance. Earlier phase notes below remain the historical rationale.
+
 ## Design direction
 
 Make AIRL's entertainment value clear before exposing its technical settings. Use strong typography, intentional spacing, cinematic composition, restrained motion and progressive disclosure. The implemented public experience uses subtle violet accents and shared spacing/control tokens in globals.css; Journey retains its stone/olive presentation palette. Every visible element should explain a world, guide an action or show truthful state. Lightweight CSS motion and reusable media assets should work on the M2 Pro with 16 GB RAM and ordinary audience phones.

@@ -60,7 +60,7 @@ export function StudioNavigation({
         : "/studio";
   return (
     <Link href={href} aria-current={active ? "page" : undefined}>
-      Studio
+      Dashboard
     </Link>
   );
 }

@@ -6,7 +6,7 @@ const password = "role-test-password-1234";
 async function noManagement(page: Page) {
   await expect(
     page.getByRole("link", {
-      name: /^(Studio|Creator Studio|Open Studio|Manage world|Create a Universe)$/,
+      name: /^(Studio|Dashboard|Creator Studio|Open Studio|Manage world|Create a Universe)$/,
     }),
   ).toHaveCount(0);
   await expect(
@@ -139,7 +139,7 @@ test("viewers see audience features while creators and admins see only their per
     await expect(
       creatorPage
         .getByRole("navigation", { name: "Main navigation" })
-        .getByRole("link", { name: "Studio", exact: true }),
+        .getByRole("link", { name: "Dashboard", exact: true }),
     ).toBeVisible();
     const ownCard = creatorPage
       .locator(".world-card")
@@ -165,7 +165,7 @@ test("viewers see audience features while creators and admins see only their per
     await expect(
       creatorPage
         .getByRole("navigation", { name: "Main navigation" })
-        .getByRole("link", { name: "Studio" }),
+        .getByRole("link", { name: "Dashboard" }),
     ).toHaveAttribute("href", "/studio");
     expect(
       (await creator.request.get("/studio/worlds/barangay-2099")).status(),
@@ -210,7 +210,7 @@ test("viewers see audience features while creators and admins see only their per
     await expect(
       adminPage
         .getByRole("navigation", { name: "Main navigation" })
-        .getByRole("link", { name: "Studio" }),
+        .getByRole("link", { name: "Dashboard" }),
     ).toBeVisible();
     await adminPage
       .getByRole("button", { name: "Sign out", exact: true })

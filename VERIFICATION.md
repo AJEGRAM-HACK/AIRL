@@ -1,5 +1,23 @@
 # AIRL verification record
 
+
+## Complete frontend restructure — November 12, 2026
+
+Implemented on `ui/unified-airl` from `aeb84927ea19f76aabf6a5def41651c1cacdfdf6`. Public AIRL and the protected Dashboard now share one editorial design system; the existing Studio URLs, server permission boundaries and Manila Journey remain. [UNIFIED_FRONTEND_REPORT.md](docs/UNIFIED_FRONTEND_REPORT.md) records the full route/feature/file map, tokens, thirteen inspected actual screenshots and rollback procedure.
+
+- PASS — strict typecheck and production build, repeated after scoped visual/navigation corrections. All 38 unit/regression tests passed in 3.303 seconds. Identified doubles retain their original limits.
+- PASS — complete production-build Chrome acceptance: all 16 cases in 2.4 minutes, on explicit `/tmp/airl-unified-acceptance-20261112-1.sqlite` with `AIRL_ALLOW_LIVE_REQUESTS=false`. This includes two pre-existing uncommitted rehearsal cases; those changes were preserved, not absorbed into the redesign commit.
+- PASS — independent real votes, Demo and actual local Ollama four-stage jobs, private previews, creator/admin review and publication, canonical memory propagation, scopes/ownership, sign-in/sign-out, actual playback/captions/episode switching/repeated replay, saved fallback and real cited story answers. Community Ollama production took 33.3 seconds, maximum sampled audience API latency 7 ms. Journey job `a8f3ac5f-30e4-4272-a782-fd324714178b` retained its early preview and cited scene-003 at 12 seconds. No paid inference occurred.
+- PASS — 320/390/1440/1920-pixel public/playback/Dashboard layouts, light/dark/system preferences, visible keyboard focus and reduced motion. Primary-action computed contrast: 8.88:1 dark, 7.42:1 light. Automated keyboard participation took 1392 ms in the preserved rehearsal test; this does not measure first-time human usability.
+- Screenshot review led to removing redundant world-management tabs, making the desktop sidebar sticky and opening source-linked scene notes. A fresh build and five focused production-browser cases passed in 13.9 seconds on `/tmp/airl-unified-focused-20261112.sqlite`. A final compact mobile workspace Menu then passed a fresh build/typecheck and two focused cases in 11.4 seconds on `/tmp/airl-unified-menu-20261112.sqlite`, including pointer/Enter toggle, expanded state, focus, scoped links and source-note visibility. Final polish was checked without repeating unrelated inference. The temporary config imports the repository config and starts the already-built app with an explicit repository cwd.
+- PASS — thirteen actual Chrome screenshots, including all eight requested screens, real active Ollama status, accurately labeled Demo review/playback, phone, light and projector layouts. Captures were inspected; relevant ones were refreshed after polish. They use disposable fixture data. Native visible-browser hosting was unavailable, so no manual/device browser run is claimed.
+- PASS — `npm run start` loopback smoke on 3110 with the isolated acceptance database. Root/alias/Explore/universe/Live/account/compatible module routes and QR return 200. Unknown/private universe/room and guest Studio routes return 404. Authorized Studio/private/API behavior is separately covered by the complete browser cases.
+- PASS — 576 protected source/runtime fingerprints unchanged, no runtime additions/removals. Backend/API/provider/schema/domain/fixture/video/dependency/Journey source is preserved. Fourteen pre-existing modified paths and untracked rehearsal test remain outside the redesign commit. Original source/documentation checkpoint references and main remain unchanged. Owned preview/test servers were stopped; unrelated port 3000 was untouched. No migrations, live-data writes, deployment or remote push.
+
+Physical devices, venue/projector hardware, screen-reader usability, first-time comprehension/timing, fresh load/crash rehearsal and live paid providers remain unverified for this increment. The source checkpoint does not replace a full private runtime backup/restore drill. Earlier evidence below remains tied to its stated commits.
+
+---
+
 ## Expanded hackathon frontend — November 12, 2026
 
 UI commit `da763cfa502cc1570397133439ec1bb271151e7a` on `ui/hackathon-experience` starts from clean `a19d82f`. The expanded user brief authorized the existing design system, landing/navigation, discovery/detail, mobile voting, production progress, episode reveal and creator Studio. Server/API/schema/provider/authentication/video implementations and Journey source are unchanged. Source/documentation preservation references remain pinned. Main remains `81e975e`.

@@ -9,6 +9,8 @@ export type ProductionState = {
   events?: StageEvent[];
 };
 const descriptions = ['Shapes the direction', 'Writes the scenes', 'Builds the visual episode', 'Checks story and continuity'];
+const stageNames: Record<string, string> = { Director: 'Story Director', Screenwriter: 'Screenwriter', 'Visual Producer': 'Visual Producer', 'Creative Critic': 'Creative Critic' };
+const statusNames: Record<string, string> = { queued: 'In the queue', running: 'Creating', review: 'In review', published: 'Published', failed: 'Needs attention', rejected: 'Not published' };
 const headlines: Record<string, string> = {
   queued: 'Your next chapter is queued.', running: 'A story is taking shape.',
   review: 'Created. Ready for human review.', published: 'The next chapter is here.',
@@ -19,9 +21,9 @@ const headlines: Record<string, string> = {
 export function ProductionTimeline({ job }: { job: ProductionState }) {
   const finished = ['review', 'published', 'rejected'].includes(job.status);
   return <section className="production-progress" aria-label="Episode production">
-    <div className="production-progress-heading"><p className="eyebrow">{job.mode === 'demo' ? 'DEMO WORKFLOW · DETERMINISTIC TEMPLATES' : 'FROM COMMUNITY CHOICE TO EPISODE'}</p><span className="state-label">{job.status}</span></div>
+    <div className="production-progress-heading"><p className="eyebrow">{job.mode === 'demo' ? 'DEMO WORKFLOW · DETERMINISTIC TEMPLATES' : 'FROM COMMUNITY CHOICE TO EPISODE'}</p><span className="state-label">{statusNames[job.status] || 'Production update'}</span></div>
     <h2>{headlines[job.status] || 'Production update'}</h2>
-    <p className="production-update" role="status">{job.progress ? `${job.progress.stage} · ${job.progress.status}` : job.status === 'queued' ? 'Waiting for a production worker.' : headlines[job.status] || job.status}</p>
+    <p className="production-update" role="status">{job.progress ? `${stageNames[job.progress.stage] || job.progress.stage} · ${job.progress.status === 'started' ? 'Creating this chapter' : job.progress.status === 'succeeded' ? 'Stage complete' : job.progress.status === 'failed' ? 'Production paused' : 'Update received'}` : job.status === 'queued' ? 'Your chapter will begin when production is ready.' : headlines[job.status] || 'Production update'}</p>
     <ol className="production-stages" aria-label="Recorded production stages">
       {Stages.map((stage, index) => {
         const recorded = job.events?.filter(event => event.stage === stage).at(-1);
@@ -32,7 +34,7 @@ export function ProductionTimeline({ job }: { job: ProductionState }) {
         const Icon = state === 'complete' ? Check : state === 'failed' ? TriangleAlert : state === 'working' ? LoaderCircle : Circle;
         return <li key={stage} data-stage={stage} data-state={state} aria-current={state === 'working' ? 'step' : undefined}>
           <span className="stage-marker"><Icon size={17} aria-hidden="true" /></span>
-          <div><small>0{index + 1}</small><h3>{stage}</h3><p>{descriptions[index]}</p><span className="stage-state">{state === 'complete' ? 'Complete' : state === 'failed' ? 'Stopped' : state === 'working' ? 'In progress' : 'Waiting for recorded update'}</span></div>
+          <div><small>0{index + 1}</small><h3>{stageNames[stage] || stage}</h3><p>{descriptions[index]}</p><span className="stage-state">{state === 'complete' ? 'Complete' : state === 'failed' ? 'Stopped' : state === 'working' ? 'In progress' : 'Awaiting update'}</span></div>
         </li>;
       })}
     </ol>

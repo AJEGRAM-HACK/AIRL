@@ -2,6 +2,7 @@
 import { useAccess } from "./access";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { api } from "./api";
 import { ProviderPicker, defaultProvider } from "./provider-picker";
@@ -19,6 +20,8 @@ export function StoryHelper({
   suggestedQuestion?: string;
 }) {
   const {account}=useAccess();
+  const pathname = usePathname();
+  const advanced = !!draftRun || pathname.startsWith('/studio') || pathname === '/journey';
   const [question, setQuestion] = useState(suggestedQuestion || "What happened most recently?"),
     [scope, setScope] = useState(episodeId ? "episode" : "latest"),
     [provider, setProvider] = useState(defaultProvider),
@@ -80,10 +83,10 @@ export function StoryHelper({
           onChange={(event) => setQuestion(event.target.value)}
         />
       </label>
-      <details>
+      {advanced && <details>
         <summary>Provider and model</summary>
         <ProviderPicker value={provider} onChange={setProvider} />
-      </details>
+      </details>}
       <Button disabled={pending || !question.trim()} onClick={ask}>
         {pending ? "Reading story sources…" : "Ask the story"}
       </Button>
@@ -118,7 +121,7 @@ export function StoryHelper({
             ))}
           </ul>
           <small>
-            {answer.mode} · {answer.model}
+            {advanced ? `${answer.mode} · ${answer.model}` : answer.mode === 'demo' ? 'Demo answer · Deterministic template' : 'AI answer · Based on story sources'}
           </small>
         </div>
       )}

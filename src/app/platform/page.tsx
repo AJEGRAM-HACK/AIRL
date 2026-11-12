@@ -1,6 +1,6 @@
 import { CanCreate } from '@/components/platform/access';
 import Link from 'next/link';
-import { ArrowDown, ArrowRight, ArrowUpRight, Play } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Play, Radio } from 'lucide-react';
 import { Nav, Footer } from '@/components/nav';
 import { Button } from '@/components/ui/button';
 import { UniverseArt } from '@/components/universe-art';
@@ -13,41 +13,29 @@ export default async function PlatformPage({ searchParams }: {
   const query = await searchParams;
   const world = await readableUniverse(query.universe || 'barangay-2099');
   const context = { ...query, universe: world.id };
+  const liveUrl = `/live/${world.id}${query.round ? `?round=${encodeURIComponent(query.round)}` : ''}`;
   return <>
-    <Nav active="home" universeId={world.id} />
+    <Nav active="home" universeId={world.id}/>
     <main id="main" className="landing-page">
       <section className="landing-hero" aria-labelledby="landing-title">
         <div className="landing-copy">
-          <p className="eyebrow">ARTIFICIAL IN REAL LIFE</p>
-          <h1 id="landing-title">The real world<br />is the <span>prompt.</span></h1>
-          <p className="landing-description">Choose a universe. Shape its story. Watch AI bring your decisions to life.</p>
+          <p className="eyebrow"><span className="editorial-line"/>ARTIFICIAL IN REAL LIFE</p>
+          <h1 id="landing-title">The real world<br/>is the <span>prompt.</span></h1>
+          <p className="landing-description">Create universes. Shape stories.<br/>Watch AI bring them to life.</p>
           <div className="landing-actions">
-            <Button asChild><Link href="/universes">Explore Universes <ArrowRight size={18} aria-hidden="true" /></Link></Button>
-            <CanCreate><Button asChild variant="outline"><Link href="/studio#create-universe">Create a Universe</Link></Button></CanCreate>
+            <Button asChild><Link href="/universes">Explore Universes <ArrowRight size={18} aria-hidden="true"/></Link></Button>
+            <Button asChild variant="outline"><Link href={liveUrl}><Radio size={16} aria-hidden="true"/>Join Live</Link></Button>
           </div>
-          <Link className="landing-journey" href={experienceUrl('journey', context)}><Play size={15} aria-hidden="true" /> Launch Journey <span>A guided look inside AIRL</span></Link>
+          <div className="landing-secondary"><Link className="landing-journey" href={experienceUrl('journey', context)}><Play size={13} aria-hidden="true"/>Launch Journey <ArrowUpRight size={13} aria-hidden="true"/></Link><CanCreate><Link href="/studio#create-universe">Create a Universe <ArrowUpRight size={13} aria-hidden="true"/></Link></CanCreate></div>
         </div>
         <article className="landing-feature">
-          <UniverseArt id={world.id} title={world.title} />
-          <div className="landing-feature-top"><span>{world.official ? 'FEATURED · OFFICIAL UNIVERSE' : 'SELECTED UNIVERSE'}</span><ArrowUpRight size={18} aria-hidden="true" /></div>
-          <div className="landing-feature-copy">
-            <p className="eyebrow">{world.settings.genre || 'A world of possibilities'}</p>
-            <h2><Link href={`/universes/${world.id}`}>{world.title}</Link></h2>
-            <p>{world.settings.premise}</p>
-            <div className="landing-feature-actions">
-              <Link href={query.episode ? `/universes/${world.id}/episodes/${encodeURIComponent(query.episode)}` : `/live/${world.id}#episode-library`}><Play size={14} aria-hidden="true" /> Watch episodes</Link>
-              <Link href={`/live/${world.id}${query.round ? `?round=${encodeURIComponent(query.round)}` : ''}#community-vote`}>Join the story <ArrowRight size={15} aria-hidden="true" /></Link>
-            </div>
-          </div>
+          <UniverseArt id={world.id} title={world.title}/>
+          <div className="landing-feature-top"><span>{world.official ? 'AN AIRL ORIGINAL' : 'SELECTED UNIVERSE'}</span><span>WORLD / {world.official ? '001' : 'CREATOR'}</span></div>
+          <div className="landing-feature-copy"><p className="eyebrow">{world.official ? 'THE OFFICIAL AIRL UNIVERSE' : world.settings.genre}</p><h2><Link href={`/universes/${world.id}`}>{world.title}</Link></h2><p>{world.settings.premise}</p><Link className="feature-enter" href={`/universes/${world.id}`}>Enter universe <ArrowUpRight size={19} aria-hidden="true"/></Link></div>
         </article>
-        <a className="landing-scroll" href="#how-it-works">A story we make together <ArrowDown size={14} aria-hidden="true" /></a>
       </section>
-      <section id="how-it-works" className="landing-how" aria-label="How AIRL works">
-        <div><span>01 / EXPLORE</span><h2>Find your universe.</h2><p>Meet the cast. Discover their world.</p></div>
-        <div><span>02 / DECIDE</span><h2>Your choice moves the story.</h2><p>Vote with the community on what happens next.</p></div>
-        <div><span>03 / WATCH</span><h2>See it become canon.</h2><p>AI creates. Humans review. Characters remember.</p></div>
-      </section>
+      <section className="landing-how" aria-label="How AIRL works"><div className="landing-how-intro"><p className="eyebrow">A STORY WE MAKE TOGETHER</p><h2>Every world starts<br/>with a possibility.</h2></div><ol><li><span>01</span><div><h3>Discover a universe.</h3><p>Meet the characters. Find your world.</p></div></li><li><span>02</span><div><h3>Shape the story.</h3><p>Choose what happens next, together.</p></div></li><li><span>03</span><div><h3>Watch it come alive.</h3><p>AI creates. People review. The story continues.</p></div></li></ol></section>
     </main>
-    <Footer />
+    <Footer universeId={world.id} roundId={query.round}/>
   </>;
 }

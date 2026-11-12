@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react';
 import { SunMoon } from 'lucide-react';
 type Theme = 'system' | 'light' | 'dark';
 export function ThemeSwitcher() {
-  const [theme, setTheme] = useState<Theme>('system');
+  const [theme, setTheme] = useState<Theme>('dark');
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     const apply = () => {
-      let saved = 'system';
-      try { saved = localStorage.getItem('airl-theme') || 'system'; } catch {}
+      let saved = 'dark';
+      try { saved = localStorage.getItem('airl-theme') || 'dark'; } catch {}
       const selected: Theme = saved === 'light' || saved === 'dark' ? saved : 'system';
       setTheme(selected);
       document.documentElement.dataset.theme = selected === 'system' ? (media.matches ? 'dark' : 'light') : selected;
