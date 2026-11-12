@@ -2,7 +2,7 @@ import type { RoomProvider } from './production-selection';
 'use client';
 import { useAccess } from '@/components/platform/access';
 import { RoomProduction } from '@/features/production/room-production';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Check, Radio, Vote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RoomSnapshot, type RoomState, type SessionState } from './types';
@@ -12,6 +12,9 @@ export function CommunityPanel({ operatorView = false,roomId='barangay-2099', sh
   const access=useAccess();
   const base=`/api/live/rooms/${roomId}`;
   const sessionRevision = useRef(0);
+  const choiceGroup = useRef<HTMLFieldSetElement>(null);
+  const focusChoicesAfterJoin = useRef(false);
+  const choiceId = useId();
   const [room, setRoom] = useState<RoomState | null>(null);
   const [session, setSession] = useState<SessionState>({ joined: false, operator: false, vote: null });
   const [selection, setSelection] = useState('');
@@ -19,6 +22,11 @@ export function CommunityPanel({ operatorView = false,roomId='barangay-2099', sh
   const [error, setError] = useState('');
   const [provider, setProvider] = useState<RoomProvider>({ mode: 'ollama',model:'qwen3:4b-instruct',consent: false });
   const [connected, setConnected] = useState(false);
+  useEffect(() => {
+    if (pending || !session.joined || !focusChoicesAfterJoin.current) return;
+    focusChoicesAfterJoin.current = false;
+    choiceGroup.current?.querySelector<HTMLInputElement>('input[type="radio"]:enabled')?.focus();
+  }, [pending, session.joined]);
   useEffect(() => {
     let active = true;
     async function refresh() {
@@ -57,6 +65,7 @@ export function CommunityPanel({ operatorView = false,roomId='barangay-2099', sh
       const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(url==='/api/live/session'?{...(input as object),universe:roomId}:input) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Unable to complete this action.');
+      if (url === '/api/live/session') focusChoicesAfterJoin.current = true;
       if (data.room) setRoom(RoomSnapshot.parse(data.room));
       sessionRevision.current++;
       setSession(data.session || data);
@@ -74,11 +83,26 @@ export function CommunityPanel({ operatorView = false,roomId='barangay-2099', sh
       <div className="vote-status"><span className="live-dot"/>{room.status === 'open' ? 'Voting open' : 'Voting closed'}<span>{room.options.length} choices</span></div>
       {!session.joined ? <Button disabled={pending} onClick={() => action('/api/live/session', {})}>Join room to vote <Vote size={16} aria-hidden="true"/></Button> : !session.vote && room.status === 'open' && <p className="vote-instruction">Choose a direction below, then tap Cast my vote.</p>}
       {session.vote && <p className="vote-confirmation" role="status"><Check size={18} aria-hidden="true"/><span>Your vote is recorded.<small>{room.options.find(option => option.id === session.vote)?.title}</small></span></p>}
-      <fieldset disabled={pending || !session.joined || !!session.vote || room.status !== 'open'}><legend className="sr-only">Choose the next story direction</legend>{room.options.map((option, index) => {
+      <fieldset ref={choiceGroup} disabled={pending || !session.joined || !!session.vote || room.status !== 'open'}><legend className="sr-only">Choose the next story direction</legend>{room.options.map((option, index) => {
         const percentage = room.totalVotes ? Math.round(option.votes / room.totalVotes * 100) : 0;
         return <label className={`choice ${option.id === (session.vote || selection) ? 'chosen' : ''}`} key={option.id}>
-          <input type="radio" name={operatorView ? 'studio-choice' : 'live-choice'} checked={option.id === (session.vote || selection)} onChange={() => setSelection(option.id)}/>
-          <span><span className="choice-number" aria-hidden="true">0{index + 1}</span><b>{option.title}</b><small>{option.description}</small><span className="result-bar" aria-hidden="true"><i style={{ width: `${percentage}%` }}/></span><small>{option.votes} votes · {percentage}%</small></span>
+          <input
+            type="radio"
+            name={operatorView ? 'studio-choice' : 'live-choice'}
+            aria-labelledby={`${choiceId}-${index}-title`}
+            aria-describedby={`${choiceId}-${index}-description ${choiceId}-${index}-results`}
+            checked={option.id === (session.vote || selection)}
+            onChange={() => setSelection(option.id)}
+          />
+          <span>
+            <span className="choice-number" aria-hidden="true">0{index + 1}</span>
+            <b id={`${choiceId}-${index}-title`}>{option.title}</b>
+            <small id={`${choiceId}-${index}-description`}>{option.description}</small>
+            <span className="result-bar" aria-hidden="true">
+              <i style={{ width: `${percentage}%` }}/>
+            </span>
+            <small id={`${choiceId}-${index}-results`}>{option.votes} votes · {percentage}%</small>
+          </span>
         </label>;
       })}</fieldset>
       {session.joined && <Button disabled={pending || !!session.vote || !selection || room.status !== 'open'} onClick={() => action(`${base}/vote`, { roundId: room.roundId, optionId: selection })}>{session.vote ? <><Check size={16}/> Vote recorded</> : pending ? 'Saving…' : 'Cast my vote'}</Button>}

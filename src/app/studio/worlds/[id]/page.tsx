@@ -1,7 +1,10 @@
+import type { Metadata } from 'next';
 import { requireStudioPage } from '@/server/platform/page';
 import { PublicShell } from "@/components/layout/public-shell";
 import { WorldEditor } from "@/components/platform/worlds";
 import { readableUniverse } from "@/server/platform/page";
+export const metadata: Metadata = { title: 'World management — AIRL' };
+
 export const dynamic = "force-dynamic";
 export default async function Page({
   params,

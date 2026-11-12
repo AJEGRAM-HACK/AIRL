@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import './journey.css';
 import { notFound } from 'next/navigation';
 import JourneyDemo from '@/components/journey-demo';
@@ -5,6 +6,8 @@ import { readableUniverse } from '@/server/platform/page';
 import { sessionToken } from '@/server/live/http';
 import { LiveStore } from '@/server/live/store';
 import { PlatformStore } from '@/server/platform/store';
+
+export const metadata: Metadata = { title: 'Journey — AIRL' };
 
 export default async function JourneyPage({ searchParams }: {
   searchParams: Promise<{ universe?: string; round?: string }>;

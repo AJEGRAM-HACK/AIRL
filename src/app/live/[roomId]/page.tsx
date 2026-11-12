@@ -1,9 +1,18 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { PublicShell } from '@/components/layout/public-shell';
 import { Audience } from '@/components/audience';
 import { readableUniverse } from '@/server/platform/page';
 import { LiveStore } from '@/server/live/store';
 export const dynamic='force-dynamic';
+export async function generateMetadata({ params }: {
+  params: Promise<{ roomId: string }>;
+}): Promise<Metadata> {
+  const { roomId } = await params;
+  const world = await readableUniverse(roomId);
+  return { title: `Vote in ${world.title} — AIRL` };
+}
+
 export default async function Page({params,searchParams}:{params:Promise<{roomId:string}>;searchParams:Promise<{round?:string}>}){
   const {roomId}=await params;
   const world=await readableUniverse(roomId);

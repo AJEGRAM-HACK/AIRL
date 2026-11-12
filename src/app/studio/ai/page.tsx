@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import { requireStudioPage } from '@/server/platform/page';
 import { PublicShell } from '@/components/layout/public-shell';
 import { ProviderSettings } from '@/features/ai/provider-settings';
+export const metadata: Metadata = { title: 'AI settings — AIRL' };
+
 export default async function AISettings({ searchParams }: { searchParams: Promise<{ character?: string }> }) {
   await requireStudioPage();
   const { character } = await searchParams;
