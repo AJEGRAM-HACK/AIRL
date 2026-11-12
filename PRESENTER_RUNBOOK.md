@@ -1,0 +1,28 @@
+# AIRL hackathon presenter runbook
+
+Use the Mac with Node 24, Ollama serving `qwen3:4b-instruct`, the existing SQLite database and the configured ngrok account. Keep power connected, the lid open and internet available. The launcher includes the recovery worker and idle-sleep prevention.
+
+1. Stop the running demo before rebuilding. From the repository, run the following commands.
+
+   ```sh
+   export PATH=/tmp/node-v24.22.2-darwin-arm64/bin:$PATH
+   export AIRL_LIVE_DB_PATH="$PWD/.data/airl-live.sqlite"
+   npm run build
+   npm run demo:tunnel
+   ```
+
+2. Open the printed presenter URL at `/journey?universe=barangay-2099`. Sign in through Account as the existing admin, then return to Journey. For a custom world, its creator owner or an admin can present. The Presentation universe selector lists accessible worlds with configured rooms. An existing job resumes from its stored state. Choose Enter the world in the step navigation when starting the introduction.
+3. Introduce the premise and cast. Open the voting stage and display the QR. Its destination is `/live/[universe]`, where audience phones join, vote and watch. Visitors may need to tap ngrok's Visit Site notice once. The public HTTPS endpoint uses a trusted certificate. Check that voting is open. If the current round is closed, an authorized presenter can start the next round explicitly.
+4. Join the room in the presenter session if prompted. Wait for votes, then choose Close voting & produce. Journey uses local Ollama with `qwen3:4b-instruct`. Follow the recorded winning direction into production. Stage labels, timestamps, validated dialogue and preview versions come from persisted jobs. Drafts remain restricted to authorized users.
+5. Choose Review before the premiere when the job reaches review. Read the proposed canon changes and Critic feedback. Correct canon JSON if needed, then Approve & publish. Official Barangay 2099 publication requires an admin. Play the approved episode, use the player’s fullscreen control on the projector, seek backward, replay, toggle captions and open the transcript. Share the Audience watch link.
+6. Choose Ask about this episode. The helper defaults to this episode's spoiler scope and suggests a featured-character question. Ask what that character said, then open its scene citation. This action performs a separate local inference.
+
+If generation runs long, choose an approved item under Approved saved episode, then Play a saved episode. It is labeled Pre-generated rehearsal episode. Playback reads the stored manifest and makes no inference request. The live production status stays visible. Return to live production opens the pending job, and Open the completed live episode appears after publication. Replaying a saved episode leaves the stored vote, job and review state intact. A world needs at least one approved episode for this action.
+
+Explore mode and Journey mode links carry universe, round and episode context. Direct Live, CinemAI, PersonaAI, Studio and legacy URLs remain available. Refreshing restores the selected Journey step and saved episode from its URL while jobs continue in SQLite. Rejected or failed jobs retain their recorded state. An authorized retry uses the existing bounded retry controls.
+
+If the app stops, restart the launcher with the same database. Queued work is recovered by the worker. Interrupted running work becomes claimable after its 150-second lease expires. Failed jobs need an authorized retry and retain the three-attempt bound. Keep the last approved saved episode ready while waiting. Rebuilding replaces `.next`, so pause the presentation first.
+
+A rehearsal episode can be prepared through the existing Studio Hosted OpenAI workflow before the event. The current server has no configured OpenAI key/model and the paid gate is disabled. Supply credentials privately through ignored server configuration, then obtain explicit approval for the paid run. Configure `OPENAI_API_KEY` and `OPENAI_MODEL`, with optional `OPENAI_ALLOWED_MODELS`. Only after approval, enable `AIRL_ALLOW_LIVE_REQUESTS=true` on a separate trusted local Studio server and its worker using the same database. Select Hosted OpenAI and its allowed model for the intended rehearsal round, explicitly consent to that operation, review the result and publish it. Verify saved playback afterward. The public `demo:tunnel` launcher forces hosted calls off. BYOK credentials remain request-only and cannot run background episodes.
+
+Use an already approved Ollama episode or an approved offline Demo episode while hosted validation is pending. Demo content remains labeled in its production metadata. Before the event, rehearse the venue network and physical iPhone, check ngrok allowance, and repeat the complete sequence with two independent audience sessions. Run automated browser checks separately from the presentation because they rebuild the production output and use an isolated database.

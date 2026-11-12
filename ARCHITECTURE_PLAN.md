@@ -1,6 +1,6 @@
 # AIRL architecture and delivery plan
 
-_Last updated November 12, 2026. Latest verified application commit `7989ccde15933ab6765cd28ceebaa85cd489d535`._
+_Last updated November 12, 2026. Latest verified application commit `05e1542bcf02d191c07eee5e8e98a82915399125`._
 
 [CHANGELOG.md](CHANGELOG.md) summarizes recent changes. [VERIFICATION.md](VERIFICATION.md) separates current acceptance results from historical checkpoints. The current delivery is Mac-hosted SQLite/Ollama with a public ngrok web tunnel. Supabase, Trigger.dev and cloud media exports remain proposed architecture.
 
@@ -49,6 +49,17 @@ The primary demonstration connects participation, creative workflow, review and 
 - Use the same validated media manifest for preview and later export. Store approved asset IDs and animation enums rather than executable model output.
 - Preserve working URLs. Introduce canonical module URLs incrementally, with aliases or redirects when migration is justified.
 - Keep public module flags independent from authentication and authorization.
+- Support two presentation modes over the same backend: a broad Explore mode and a guided Journey mode for live demos and audience-first storytelling.
+
+## 2.1 Experience mode strategy
+
+Explore mode at `/platform` and guided Journey mode at `/journey` share the existing room, production, canon and provider services. The root chooses Journey for the public tunnel or explicit journey environment setting. Existing routes remain available. A shared mode switch carries universe, round, episode, selected step and saved-playback context through URLs. Episode pages supply their stored source round to the switch.
+
+`src/app/journey/page.tsx` validates universe visibility, the selected recorded round and configured room choices. `src/components/journey-demo.tsx` presents five stages from stored state. SSE supplies room changes and production invalidation notices, with five-second presenter and thirty-second audience status fallbacks. Production review reuses `RoomProduction`, and playback/retrieval reuse `EpisodePreview` and `StoryHelper`. Draft fields are fetched through the existing protected production endpoint. Server authorization remains authoritative for every action.
+
+Journey live generation selects Ollama `qwen3:4b-instruct`. The existing Studio selector supports Demo and explicitly consented Hosted OpenAI preparation. Saved fallback reads approved `universe_episodes` manifests with no generation request, keeps the active round job visible and preserves access to the live result. URLs retain the fallback selection through refresh and mode switches.
+
+The tunnel prints separate presenter `/journey` and audience `/live/barangay-2099` addresses. All QR codes encode the selected universe's focused audience route. Projector styling enlarges headings, stage status, dialogue and the QR. Phone layouts prioritize the voting controls. [PRESENTER_RUNBOOK.md](PRESENTER_RUNBOOK.md) records the presentation procedure and gated hosted preparation.
 
 ## 3. Current implementation map
 
@@ -192,7 +203,9 @@ MP4 output, FFmpeg encoding, voice tracks, audio mixing, expression sprites and 
 
 | Route | Audience | Purpose |
 | --- | --- | --- |
-| `/` | Public | AIRL identity and featured modules |
+| `/` | Public | Explore entry or Journey for the configured launch context |
+| `/platform` | Public/visibility-scoped | Explore mode and selected universe |
+| `/journey` | Visibility-scoped, presenter controls protected | Five guided stages, live job tracking and saved episode fallback |
 | `/discover` | Public | Available and coming-soon experiences |
 | `/live` | Public | Room directory |
 | `/live/[roomId]` | Public/session | Audience voting, results and approved episodes |

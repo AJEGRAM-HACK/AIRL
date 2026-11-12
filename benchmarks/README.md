@@ -2,7 +2,7 @@
 
 Run `npm run benchmark:local` from the repository using Node 24, installed dependencies and loopback Ollama serving `qwen3:4b-instruct`. The script sets isolated SQLite storage, disables paid requests, loads fixed inputs from `local-inputs.json` and saves complete results under ignored `.data/benchmarks/<timestamp>/`. The tracked JSON captures the latest successful run. It contains synthetic benchmark data and generated artifacts.
 
-The tracked fixed-input result belongs to application checkpoint `2f37d3602ba2d619f38b8fb2ab07fd04739be5c3`. The latest application checkpoint is `7989ccde15933ab6765cd28ceebaa85cd489d535`, which adds tunnel/replay/role-interface changes. This documentation refresh preserves the recorded benchmark artifact and timings. Current acceptance and public-load results are recorded separately in [VERIFICATION.md](../VERIFICATION.md), with a development summary in [CHANGELOG.md](../CHANGELOG.md).
+The tracked fixed-input result belongs to application checkpoint `2f37d3602ba2d619f38b8fb2ab07fd04739be5c3`. The latest application checkpoint is `05e1542bcf02d191c07eee5e8e98a82915399125`, which adds the guided Journey and saved-episode fallback after the tunnel/replay/role-interface changes. This documentation refresh preserves the recorded benchmark artifact and timings. Current acceptance and public-load results are recorded separately in [VERIFICATION.md](../VERIFICATION.md), with a development summary in [CHANGELOG.md](../CHANGELOG.md).
 
 ## Verified run on November 12, 2026
 

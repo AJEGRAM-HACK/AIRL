@@ -2,23 +2,45 @@
 
 ## Current verified status — November 12, 2026
 
-Latest verified application commit is `7989ccde15933ab6765cd28ceebaa85cd489d535`. This summary describes recorded checks for the current application and identifies earlier evidence separately. Historical entries below retain the outcomes and limitations that applied at each checkpoint. Their pending items may have been completed in later entries.
+Latest verified application commit is `05e1542bcf02d191c07eee5e8e98a82915399125`. This summary describes recorded checks for the current application and identifies earlier evidence separately. Historical entries below retain the outcomes and limitations that applied at each checkpoint. Their pending items may have been completed in later entries.
 
 | Area | Latest evidence | Limits |
 | --- | --- | --- |
-| Static checks | `npm run typecheck` and `npm run build` passed at `7989ccd` | Documentation refresh adds no application changes |
-| Unit/regression suite | `npm test` passed all 38 tests, zero failures, 3.435 s | Includes identified transport/executor doubles |
-| Production-browser suite | `npm run test:browser` passed six cases in 59.6 s | Installed Chrome, isolated database, real Ollama in its provider case |
-| Real creative workflow | Vote → frozen winner → four Ollama stages → preview → review → publication → audience playback passed | Latest browser production 22.4 s, maximum sampled audience API latency 13 ms |
+| Static checks | `npm run typecheck` and final `npm run build` passed at `05e1542` | Final public/visual smoke passed after presentation polish |
+| Unit/regression suite | `npm test` passed all 38 tests, zero failures, 4.492 s | Includes identified transport/executor doubles |
+| Production-browser suite | `npm run test:browser` passed eight cases in 2.0 min | Installed Chrome, isolated database, real Ollama in its provider case |
+| Real creative workflow | Vote → frozen winner → four Ollama stages → preview → review → publication → audience playback passed | Latest community browser production 26.5 s, maximum sampled audience API latency 23 ms |
 | Roles and ownership | Guest/viewer/creator/admin UI, direct page/API protection, owned-world controls and sign-in/sign-out passed | Request-time permission snapshot refreshes with authentication/navigation |
-| Public HTTPS | Guest mobile Chrome smoke passed at `7989ccd`, protected Studio URLs returned 404, playback advanced with zero JS errors | Requires running Mac, internet and tunnel |
-| Physical iPhone | User confirmed public joining/voting, playback, captions and repeated rewind/replay after `8a8903f` | One physical device, subsequent role UI change checked with Chrome |
+| Public HTTPS | Guest mobile Chrome Journey smoke passed at `05e1542`, saved playback/replay/captions worked, Studio returned 404, zero JS errors | Requires running Mac, internet and tunnel |
+| Physical iPhone | User confirmed public joining/voting, playback, captions and repeated rewind/replay after `8a8903f` | Earlier physical result retained. Fresh Journey device check pending, current revision checked with Chrome |
 | 35-session public rehearsal | Earlier `01e710d` run passed, 23.639 s real production, 157 ms request p95 | Simulated HTTP/2 sessions, one mobile Chrome context, no 35-device claim, not rerun after role UI changes |
 | Restart recovery | Earlier genuine interrupted job recovered after lease expiry in 178.3 s, publication stayed idempotent | Repeat crash/restart on the presentation build remains a priority |
 | Local fixed-input benchmark | Official/private episodes 38.569/27.498 s, pitches 14.370 s, cited answer 4.195 s | Short measurements, model residency/load vary, semantic/style review remains necessary |
 | Paid providers and media export | OpenAI/BYOK contracts and isolation tested with doubles, live paid inference unverified | No paid call made, no MP4/voice/art generation implemented |
 
 See the chronological sections for failed attempts, corrections, source artifacts, measurements and exact test boundaries. [CHANGELOG.md](CHANGELOG.md) provides a concise implementation summary. [HANDOFF.md](HANDOFF.md) provides launch and continuation instructions.
+
+## Guided Journey completion — November 12, 2026
+
+Application checkpoint is `05e1542bcf02d191c07eee5e8e98a82915399125`. The starting application baseline was `7989ccd`, with documentation HEAD `5d580d6`. Copilot's uncommitted changes included homepage mode routing, Journey and platform shells, responsive styling, room-join/QR destinations, launcher/rehearsal entry changes and documentation. Its initial Journey embedded the working Audience component. Its supplied verification notes recorded prior six-case acceptance and a loopback tunnel-style smoke. This continuation independently verified the completed implementation.
+
+Preserved the useful shells, landing behavior, styling and room-join copy. Added five state-driven presentation stages, a shared context-preserving mode switch, configured-universe selection, real progress and validated dialogue, protected early previews/canon review, saved rehearsal playback and the episode-scoped story helper. Episode routes supply their stored source round to mode links. QR links target the existing focused `/live/[id]` audience route for every universe. The launcher prints a separate `/journey` presenter URL. Journey's live close action selects Ollama qwen3:4b-instruct. Studio retains the existing provider registry and paid-consent controls.
+
+- PASS — strict typecheck, final optimized production build and `git diff --check`.
+- PASS — all 38 unit/regression tests, zero failures, 4.492 seconds in the final run. Earlier run passed in 3.318 seconds.
+- PASS — all eight production-browser cases in 2.0 minutes. Role interfaces took 2.9 s, Demo community 7.5 s, real Ollama community 33.8 s including 26.5 s production, delayed-session regression 593 ms, Journey 54.3 s, custom Journey 1.0 s, creator journey 3.6 s and silent replay 4.5 s. Maximum sampled audience API latency in the community Ollama case was 23 ms.
+- PASS — an authorized presenter and two independent mobile audience sessions joined, cast two karaoke votes, observed the stored winner, closed using real Ollama, and published after all four stages succeeded. Journey job `9595a2f3-3508-45b9-944c-ed44ed5e4484` resides only in isolated `/tmp/airl-browser-25489.sqlite`. Connection and all stages succeeded on attempt one. A private versioned manifest was observed before Critic completed.
+- PASS — switched Explore/Journey and refreshed during the same production. Job ID, round and single production attempt persisted. An approved offline Demo episode played with zero POST requests during saved selection/playback/refresh. Live status remained present. The public audience response omitted draft fields. Canon review and authorized publication exposed the new live episode to both audiences.
+- PASS — repeated seeking/replay at frame zero and a scene boundary, captions and transcript. Story helper used This episode and actual Ollama to answer what Tita Nena said, citing the generated episode's scene-003 at 12 seconds. The answer matched her recorded line, “Pwede nang magkaraoke, pero may kumikita na ba ang tao?” Scene navigation and subsequent mode switches retained episode and stored source-round context.
+- PASS — custom-universe premise, presenter selection and refresh, guest control hiding, no-saved-episode state, mobile overflow check and unknown-universe 404. Existing suite retains role/ownership and private-world access coverage.
+- PASS — actual ngrok HTTPS mobile Chrome on the normal database. Saved playback advanced, seek/replay and captions worked, guest Studio returned 404 and there were zero page JavaScript errors. QR PNG was decoded with macOS CoreImage to exactly `https://pope-java-fable.ngrok-free.dev/live/barangay-2099`.
+- PASS — 1440-pixel projector and 390-pixel mobile visual checks, light/dark themes, persisted theme on reload and configured-universe selection under reduced-motion emulation. Visual review found a saved-select/button width issue, corrected with bounded responsive widths. Final rebuild and public/isolated visual smoke passed afterward. Screenshots remain under `/tmp/airl-journey-*.png`.
+
+The first complete browser run had six existing passes and two new failures because the new tests expected a visible QR URL on loopback, where RoomJoin intentionally hides phone-unreachable QR content. The corrected tests check loopback guidance and the PNG endpoint. The public smoke separately checks the displayed URL and decoded QR. Both new cases then passed in 50.4 seconds, followed by the final full eight-case pass. No application QR restriction was relaxed.
+
+The server reports OpenAI key/model absent and paid gate disabled. Real Hosted OpenAI generation remains unverified. Existing unit tests verify hosted enablement, explicit consent, background BYOK rejection and provider isolation with identified doubles. The saved path used approved Demo locally and an existing approved Ollama episode publicly. No paid request was made. The public launcher continues to force paid hosted calls off. [PRESENTER_RUNBOOK.md](PRESENTER_RUNBOOK.md) records the gated pre-event Hosted OpenAI preparation path.
+
+A fresh physical-iPhone Journey playback/seek/caption check has been requested and awaits the user's result. Earlier physical-iPhone success remains historical evidence. Venue/projector hardware, a repeat 35-session load test and long-duration memory pressure were not revalidated in this UI sprint. Mode/refresh persistence and existing recovery regression tests passed. A new process-kill rehearsal was not performed. The normal database's existing round, votes and approved episodes were preserved during this continuation. Automated production/publication used isolated test storage. The final public launcher and worker were restored using the normal database.
 
 ## Documentation reconciliation — November 12, 2026
 

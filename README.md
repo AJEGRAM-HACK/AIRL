@@ -8,7 +8,7 @@ The current local milestone connects real votes to a persisted provider-selected
 
 For system design, data ownership, migration options and candidate routes, read [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Actual test outcomes and verification limits are recorded in [VERIFICATION.md](VERIFICATION.md). [CHANGELOG.md](CHANGELOG.md) summarizes implementation checkpoints, and [HANDOFF.md](HANDOFF.md) provides the development handoff.
 
-Latest verified application commit is `7989ccde15933ab6765cd28ceebaa85cd489d535`. Typecheck, production build, 38 unit tests and six production-browser cases passed. Physical iPhone voting, playback, captions and repeated rewind/replay were user-confirmed on the public tunnel. The earlier 35-session simulated rehearsal passed. Full evidence and measurement limits remain in the verification record.
+Latest verified application commit is `05e1542bcf02d191c07eee5e8e98a82915399125`. Typecheck, production build, 38 unit tests and eight production-browser cases passed. Physical iPhone voting, playback, captions and repeated rewind/replay were user-confirmed on the public tunnel. The earlier 35-session simulated rehearsal passed. Full evidence and measurement limits remain in the verification record.
 
 ## Run locally
 
@@ -121,6 +121,18 @@ Worker claims are serialized and have a bounded lease. Completed drafts are reus
 | `/persona/kuya-taho` | Kuya Taho profile |
 
 Legacy `/watch/barangay-2099` and `/universe/barangay-2099` routes remain available. Unknown IDs return 404. The architecture plan records the implemented universe/account routes and candidate hosted features.
+
+## Experience modes
+
+Explore mode at `/platform` retains Live, CinemAI, PersonaAI, authorized Studio and the existing deep links. Journey mode at `/journey?universe=barangay-2099` guides a presenter through the world, audience decision, genuine production, review/premiere and an episode-scoped story question. The header switch carries universe, round and episode context. Journey steps and saved selection are shareable URL parameters. Switching and refreshing reuse the persisted pipeline.
+
+The presenter can select another accessible universe with a configured room. Server wrappers validate visibility and recorded round ownership. Draft dialogue, previews, canon proposals and publication controls retain account and ownership checks. Official publication requires an admin. Journey live production uses Ollama `qwen3:4b-instruct`. Studio retains the existing provider options for separately authorized preparation.
+
+Play a saved episode opens an approved stored episode from the selected universe, labeled Pre-generated rehearsal episode. It makes zero inference calls. Live job status stays visible, with links back to the pending production or completed live episode. A world without an approved episode explains that preparation is needed. The saved path was rehearsed using an explicitly generated offline Demo episode alongside actual Ollama production.
+
+The root uses Journey when `AIRL_PUBLIC_ORIGIN` or `NEXT_PUBLIC_EXPERIENCE_MODE=journey` is set. The tunnel prints a presenter Journey address and an audience `/live/barangay-2099` address. QR codes target the focused `/live/[id]` phone experience in every universe. The existing layout and responsive work from the initial Copilot changes are retained.
+
+Follow [PRESENTER_RUNBOOK.md](PRESENTER_RUNBOOK.md) for launch, QR entry, review, saved fallback and the gated Hosted OpenAI rehearsal preparation procedure. Actual hosted generation awaits server configuration and explicit paid-run approval.
 
 ## AI modes
 
