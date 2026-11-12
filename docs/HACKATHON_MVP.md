@@ -1,6 +1,6 @@
 # Minimum credible hackathon demonstration
 
-The current application baseline is `1a7baf3`, preserved with its documentation at branch `checkpoint/pre-hackathon-ui-pivot-2026-11-12`. This document defines the next presentation target. Actual recorded outcomes and remaining device/provider gaps live in [VERIFICATION.md](../VERIFICATION.md).
+The preserved presentation baseline is `1a7baf3`, retained at branch `checkpoint/pre-hackathon-ui-pivot-2026-11-12`. The latest frontend checkpoint is `da763cf`, with [implemented screens and screenshot evidence](HACKATHON_UI_REPORT.md). This document defines the next presentation target. Actual recorded outcomes and remaining device/provider gaps live in [VERIFICATION.md](../VERIFICATION.md).
 
 The demonstration must show a creator-owned universe, persistent characters, a real community decision, actual four-stage production, human review and playable creative output. Use Barangay 2099 and its existing cast for a predictable presentation. Keep world creation and advanced configuration available in Studio for questions after the main demonstration.
 

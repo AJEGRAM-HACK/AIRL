@@ -1,6 +1,6 @@
 # Redesign roadmap
 
-Phase 0 is complete at documentation checkpoint `81e975e`. The user authorized Phase 1 on November 12, 2026, including universe discovery and responsive refinement. Later implementation phases remain proposals awaiting separate review. The existing code already implements substantial parts of phases 2–6. Each phase starts by checking its actual remaining gaps. Reuse boundaries are defined by [ARCHITECTURE_PLAN.md](../ARCHITECTURE_PLAN.md), model extensions by [UNIVERSE_MODEL.md](UNIVERSE_MODEL.md), and UI goals by [UI_UX_PIVOT.md](UI_UX_PIVOT.md).
+Phase 0 is complete at documentation checkpoint `81e975e`. The user authorized Phase 1 on November 12, 2026, including universe discovery and responsive refinement. The subsequent expanded brief also authorized presentation-only refinements of existing live voting, production progress, episode reveal and creator workflows, recorded in [HACKATHON_UI_REPORT.md](HACKATHON_UI_REPORT.md). Later identity, schema, provider and infrastructure proposals still require separate review. The existing code already implements substantial parts of phases 2–6. Each phase starts by checking its actual remaining gaps. Reuse boundaries are defined by [ARCHITECTURE_PLAN.md](../ARCHITECTURE_PLAN.md), model extensions by [UNIVERSE_MODEL.md](UNIVERSE_MODEL.md), and UI goals by [UI_UX_PIVOT.md](UI_UX_PIVOT.md).
 
 ## Phase 0 — Preservation and documentation
 

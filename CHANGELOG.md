@@ -1,6 +1,16 @@
 # AIRL development changes
 
-Updated November 12, 2026. Latest verified application commit is `1731549c43f82ca760a1b814c030c167831afe9f`. This file summarizes implemented changes. Detailed checks, earlier failures and remaining verification limits are in [VERIFICATION.md](VERIFICATION.md).
+Updated November 12, 2026. Latest verified application commit is `da763cfa502cc1570397133439ec1bb271151e7a`. This file summarizes implemented changes. Detailed checks, earlier failures and remaining verification limits are in [VERIFICATION.md](VERIFICATION.md).
+
+## Complete entertainment frontend — `da763cf`
+
+- Unified public surfaces with local typography, restrained violet tokens, consistent controls/focus/states and responsive layouts.
+- Refined universe lore, cast, episode/canon presentation and accurate Official canon / Creator universe labels.
+- Simplified mobile voting with large native choices, recorded confirmation and actual counts; kept the original anonymous/session/SSE flow.
+- Added a four-stage timeline from persisted stage/status/events, with accurate Demo provenance and private draft boundaries.
+- Made the existing player the episode reveal, with winning choice, cast, source decision and continuation links.
+- Simplified creator/private creation and Studio navigation; advanced providers and script/event detail remain accessible through disclosure. Preserved every backend/schema/provider/authentication/video contract.
+- Passed 38 unit tests and 13 full-suite browser cases, then a fresh build/focused check for a final copy clarification. Reviewed/preserved ten real Chrome screenshots; physical-device/venue/human timing checks remain open. See [the full report](docs/HACKATHON_UI_REPORT.md).
 
 ## Hackathon UI/UX Optimization — `1731549`
 

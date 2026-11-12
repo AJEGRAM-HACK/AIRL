@@ -1,12 +1,12 @@
 # AIRL architecture and delivery plan
 
-_Last updated November 12, 2026. Latest verified application commit `1731549c43f82ca760a1b814c030c167831afe9f`._
+_Last updated November 12, 2026. Latest verified application commit `da763cfa502cc1570397133439ec1bb271151e7a`._
 
 [CHANGELOG.md](CHANGELOG.md) summarizes recent changes. [VERIFICATION.md](VERIFICATION.md) separates current acceptance results from historical checkpoints. The current delivery is Mac-hosted SQLite/Ollama with a public ngrok web tunnel. Supabase, Trigger.dev and cloud media exports remain proposed architecture.
 
 ## Current status and proposed redesign
 
-The preservation source reference is `checkpoint/pre-hackathon-ui-pivot-2026-11-12` at original HEAD `fc48254`. The user authorized the first Hackathon UI/UX Optimization frontend sprint from documentation checkpoint `81e975e`. It refines the landing, public navigation, discovery and responsive CSS without changing server APIs, schemas, providers or authentication. The proposed design plan is [UI_UX_PIVOT.md](docs/UI_UX_PIVOT.md) and the review gates are [REDESIGN_ROADMAP.md](docs/REDESIGN_ROADMAP.md). The technical route/provider/lifecycle sections below describe existing code or explicitly labeled future options. Browser acceptance needs an explicit disposable AIRL_LIVE_DB_PATH because playwright.config.ts preserves an inherited value. See README for the safe command.
+The preservation source reference is `checkpoint/pre-hackathon-ui-pivot-2026-11-12` at original HEAD `fc48254`. The user authorized the first Hackathon UI/UX Optimization frontend sprint from documentation checkpoint `81e975e`. The expanded frontend sprint refines landing/navigation, discovery/lore/cast, mobile voting, recorded production progress, episode reveal and existing Studio without changing server APIs, schemas, providers or authentication. The public ProductionTimeline uses only the existing latest-stage response; private event history remains protected. See [the UI report](docs/HACKATHON_UI_REPORT.md) for implemented screens and evidence. The proposed design plan is [UI_UX_PIVOT.md](docs/UI_UX_PIVOT.md) and the review gates are [REDESIGN_ROADMAP.md](docs/REDESIGN_ROADMAP.md). The technical route/provider/lifecycle sections below describe existing code or explicitly labeled future options. Browser acceptance needs an explicit disposable AIRL_LIVE_DB_PATH because playwright.config.ts preserves an inherited value. See README for the safe command.
 
 | Status | Capability | Evidence or boundary |
 | --- | --- | --- |
