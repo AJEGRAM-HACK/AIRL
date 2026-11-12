@@ -22,7 +22,7 @@ export function ModeSwitcher({ universeId, roundId }: { universeId?: string; rou
     saved: query.get('saved') || undefined,
   };
   return <nav className="experience-switch" aria-label="Experience mode">
-    <Link href={experienceUrl('platform', context)} aria-current={pathname === '/platform' ? 'page' : undefined}>Explore mode</Link>
+    <Link href={experienceUrl('explore', context)} aria-current={pathname !== '/journey' ? 'page' : undefined}>Explore mode</Link>
     <Link href={experienceUrl('journey', context)} aria-current={pathname === '/journey' ? 'page' : undefined}>Journey mode</Link>
   </nav>;
 }

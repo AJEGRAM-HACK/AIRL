@@ -1,3 +1,4 @@
+import './journey.css';
 import { notFound } from 'next/navigation';
 import JourneyDemo from '@/components/journey-demo';
 import { readableUniverse } from '@/server/platform/page';

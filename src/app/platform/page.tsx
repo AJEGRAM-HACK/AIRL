@@ -27,7 +27,7 @@ export default async function PlatformPage({ searchParams }: {
               </CanCreate>
             </p>
             <div className="provider-actions">
-              <Button asChild><Link href={experienceUrl('journey', context)}>Start Journey</Link></Button>
+              <Button asChild><Link href={experienceUrl('journey', context)}>Launch Journey</Link></Button>
               <Button asChild variant="outline">
                 <Link href="/universes">Explore Universes</Link>
               </Button>

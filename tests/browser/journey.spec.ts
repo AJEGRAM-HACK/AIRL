@@ -35,7 +35,7 @@ test('Journey preserves a real production across modes and premieres a saved epi
     const accounts = new PlatformStore(path);
     try { accounts.bootstrapAdmin('journey-admin@example.test'); } finally { accounts.close(); }
     await page.goto(`/journey?universe=barangay-2099&round=${round}`);
-    await expect(page.getByRole('heading', { name: 'Enter the world', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Barangay 2099.', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Open the voting stage' }).click();
     await expect(page.locator('.room-join')).toContainText('public tunnel or HTTPS LAN demo address');
     expect((await presenter.request.get('/api/live/rooms/barangay-2099/join-qr')).headers()['content-type']).toBe('image/png');
@@ -51,7 +51,7 @@ test('Journey preserves a real production across modes and premieres a saved epi
     await page.getByRole('button', { name: 'Close voting & produce', exact: true }).click();
     await expect(page.locator('.journey-winner')).toContainText('karaoke');
     await page.getByRole('button', { name: 'Follow the production' }).click();
-    await expect(page.getByRole('heading', { name: 'Watch the episode take shape', exact: true })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Watch the episode take shape', exact: true })).toBeVisible();
     await expect(page.locator('.journey-agents')).toContainText('Story Director');
     const first = await (await presenter.request.get('/api/production?operator=1')).json();
     const jobId = first.jobs[0].id;
@@ -60,10 +60,11 @@ test('Journey preserves a real production across modes and premieres a saved epi
     expect(first.jobs[0].round_id).toBe(round);
     expect(['queued', 'running']).toContain(first.jobs[0].status);
 
-    await page.getByRole('link', { name: 'Explore mode', exact: true }).click();
-    await expect(page).toHaveURL(new RegExp(`/platform\\?.*round=${round}`));
+    await page.getByRole('link', { name: 'Exit to Explore', exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/\\?.*round=${round}`));
     await expect(page.getByRole('link', { name: 'Journey mode', exact: true })).toBeVisible();
     await page.getByRole('link', { name: 'Journey mode', exact: true }).click();
+    await expect(page).toHaveURL(/\/journey\?/);
     await page.reload();
     await expect(page.getByTestId('journey-live-status')).toContainText('ollama');
     const privateDuringRun = await (await audienceA.request.get('/api/production')).json();
@@ -71,7 +72,9 @@ test('Journey preserves a real production across modes and premieres a saved epi
     expect(privateDuringRun.jobs[0].script).toBeUndefined();
     expect(privateDuringRun.jobs[0].events).toEqual([]);
 
+    await page.getByRole('button', { name: 'Choose saved episode', exact: true }).click();
     await page.getByLabel('Approved saved episode', { exact: true }).selectOption(savedEpisode);
+    await page.getByRole('button', { name: 'Close sheet', exact: true }).click();
     const mutations: string[] = [];
     page.on('request', request => { if (request.method() === 'POST') mutations.push(request.url()); });
     await page.getByRole('button', { name: 'Play a saved episode', exact: true }).click();
@@ -103,6 +106,9 @@ test('Journey preserves a real production across modes and premieres a saved epi
     await page.getByRole('button', { name: 'Review before the premiere' }).click();
     await expect(page.getByRole('heading', { name: 'Proposed canon changes' })).toBeVisible();
     await page.getByRole('button', { name: 'Approve & publish', exact: true }).click();
+    await page.getByRole('button', { name: 'Close sheet', exact: true }).click();
+    await expect(page).toHaveURL(/step=production/);
+    await page.getByRole('button', { name: 'Premiere the live episode', exact: true }).click();
     await expect(page.locator('.journey-premiere')).toContainText(result.manifest.title);
     await expect(page.getByRole('link', { name: 'Audience watch link', exact: true })).toHaveAttribute('href', `/universes/barangay-2099/episodes/${result.run_id}`);
     for (const view of [a, b]) await expect(view.locator('.episode-gallery')).toContainText(result.manifest.title, { timeout: 15000 });
@@ -115,8 +121,15 @@ test('Journey preserves a real production across modes and premieres a saved epi
     }
     await livePreview.getByRole('checkbox', { name: 'Captions', exact: true }).uncheck();
     await livePreview.getByRole('checkbox', { name: 'Captions', exact: true }).check();
-    await livePreview.getByText('Episode transcript', { exact: true }).click();
-    await expect(livePreview.locator('details')).toHaveAttribute('open', '');
+    const pausedFrame = await livePreview.getAttribute('data-frame');
+    const chapterURL = page.url();
+    await page.getByRole('button', { name: 'Episode transcript', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: 'Episode transcript', exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).not.toBeVisible();
+    await expect(page.getByRole('button', { name: 'Episode transcript', exact: true })).toBeFocused();
+    expect(page.url()).toBe(chapterURL);
+    await expect(livePreview).toHaveAttribute('data-frame', pausedFrame!);
     await page.getByRole('button', { name: 'Ask about this episode', exact: true }).click();
     await expect(page.getByLabel('Source scope')).toHaveValue('episode');
     await page.getByLabel('Your question').fill('What did Tita Nena say in this episode?');
@@ -150,9 +163,10 @@ test('Journey scopes custom universes and hides draft controls from guests', asy
     await expect(page.getByRole('button', { name: 'Approve & publish', exact: true })).toHaveCount(0);
     await expect(page.getByLabel('Presentation universe')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Play a saved episode', exact: true })).toBeDisabled();
-    await page.getByRole('link', { name: 'Enter the world', exact: true }).click();
+    await page.getByRole('button', { name: 'Previous chapter', exact: true }).click();
+    await page.getByRole('button', { name: 'Previous chapter', exact: true }).click();
     await expect(page.getByText('A missing star map divides the crew.', { exact: true })).toBeVisible();
-    await page.getByRole('link', { name: 'Explore mode', exact: true }).click();
+    await page.getByRole('link', { name: 'Exit to Explore', exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`universe=${world.id}`));
     await expect(page.getByRole('heading', { name: 'Journey Observatory', exact: true })).toBeVisible();
     await page.getByRole('link', { name: 'Journey mode', exact: true }).click();
@@ -163,5 +177,44 @@ test('Journey scopes custom universes and hides draft controls from guests', asy
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
     const missing = await page.goto('/journey?universe=unknown-world');
     expect(missing?.status()).toBe(404);
+  } finally { await context.close(); }
+});
+
+test('Explore stays the everyday entry while Journey traps sheet focus and respects keyboard and reduced motion', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+  try {
+    const page = await context.newPage();
+    await page.goto('/');
+    await expect(page.getByRole('navigation', { name: 'Main navigation', exact: true })).toBeVisible();
+    await expect(page.locator('.journey-experience')).toHaveCount(0);
+    await page.getByRole('link', { name: 'Launch Journey', exact: true }).click();
+    await expect(page.locator('.journey-brand')).toContainText('/ Journey');
+    await expect(page.getByRole('navigation', { name: 'Main navigation', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Exit to Explore', exact: true })).toBeVisible();
+    await expect(page.locator('.journey-experience')).toHaveCSS('background-color', 'rgb(232, 232, 227)');
+    expect(await page.locator('.journey-atmosphere i').first().evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+    const chapterURL = page.url();
+    await page.getByRole('button', { name: 'Meet the cast', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'Meet the cast', exact: true });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Captain Bot', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Close sheet', exact: true })).toBeFocused();
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => !!document.activeElement?.closest('dialog'))).toBeTruthy();
+    await page.keyboard.press('ArrowRight');
+    expect(page.url()).toBe(chapterURL);
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+    await expect(page.getByRole('button', { name: 'Meet the cast', exact: true })).toBeFocused();
+    await page.keyboard.press('ArrowRight');
+    await expect(page).toHaveURL(/step=vote/);
+    await page.keyboard.press('PageDown');
+    await expect(page).toHaveURL(/step=production/);
+    await page.keyboard.press('PageUp');
+    await expect(page).toHaveURL(/step=vote/);
+    await page.getByRole('link', { name: 'Exit to Explore', exact: true }).click();
+    await expect(page.getByRole('navigation', { name: 'Main navigation', exact: true })).toBeVisible();
+    expect(new URL(page.url()).pathname).toBe('/');
+    await expect(page.getByRole('link', { name: 'Launch Journey', exact: true })).toBeVisible();
   } finally { await context.close(); }
 });

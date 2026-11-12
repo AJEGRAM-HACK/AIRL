@@ -9,10 +9,11 @@ export type ExperienceContext = {
   saved?: string;
 };
 
-export function experienceUrl(mode: 'journey' | 'platform', context: ExperienceContext) {
+export function experienceUrl(mode: 'journey' | 'platform' | 'explore', context: ExperienceContext) {
   const query = new URLSearchParams({ universe: context.universe });
   for (const key of ['round', 'episode', 'step', 'saved'] as const) {
     if (context[key]) query.set(key, context[key]);
   }
-  return `/${mode}?${query}`;
+  const path = mode === 'explore' ? '/' : `/${mode}`;
+  return `${path}?${query}`;
 }
