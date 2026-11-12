@@ -1,5 +1,7 @@
 # AIRL project conventions
 
+The November 12 audio follow-up additionally authorizes episode audio playback, published-story next-episode suggestions, the additive routes needed for those features, and one complete seeded-premise demo video with paid API usage capped at $6 for that run. Use isolated acceptance databases. Future paid operations continue to require the existing explicit consent and server gates. This exception supersedes the frontend-only API restriction below for these requested features.
+
 ## Scope
 The active task is the user-authorized Hackathon UI/UX Optimization phase, starting from preservation checkpoint `81e975e`. The expanded user brief authorizes frontend refinement of the design system, landing/navigation, discovery/universe detail, live voting, recorded production timeline, episode reveal and existing creator Studio. Work incrementally; preserve the separate Journey flow. The latest user brief authorizes a shared blue theme across Explore and Journey, plus a lightweight 3D presentation. Preserve the existing accounts, creator-owned universes, scoped cast/canon, voting, four-stage jobs, providers, review, publication and Manila Journey. Do not change database schemas, backend APIs, authentication policy, AI providers or infrastructure. No paid API calls, deployment or remote pushes are authorized. Use explicit isolated databases for acceptance.
 

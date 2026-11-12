@@ -2,6 +2,7 @@ import { z } from "zod";
 import { platformRequest, jsonBody } from "@/server/platform/http";
 import { Selection, answerStory } from "@/server/platform/ai";
 import { LiveError } from "@/server/live/store";
+import { suggestNextEpisode } from '@/server/platform/suggestions';
 type Context = { params: Promise<{ id: string; resource: string }> };
 export const dynamic = "force-dynamic";
 export function POST(request: Request, context: Context) {
@@ -30,6 +31,13 @@ export function POST(request: Request, context: Context) {
       return answerStory(store, id, actor, input.provider, input);
     }
     const actor = store.requireAccount(token, true);
+    if (resource === 'suggestions') {
+      const input = z.object({ episodeId: z.string().uuid(), provider: Selection }).strict().parse(await jsonBody(request));
+      if (input.provider.mode === 'creator_byok' && new URL(request.url).protocol !== 'https:') {
+        throw new LiveError(400, 'BYOK requires HTTPS.');
+      }
+      return suggestNextEpisode(store, id, actor, input.provider, input.episodeId);
+    }
     if (resource === "characters")
       return {
         character: store.saveCharacter(actor, id, await jsonBody(request)),

@@ -16,10 +16,12 @@ export function ProviderPicker({
   value,
   onChange,
   background = false,
+  labelPrefix = 'Production',
 }: {
   value: ProviderChoice;
   onChange: (value: ProviderChoice) => void;
   background?: boolean;
+  labelPrefix?: string;
 }) {
   const [catalog, setCatalog] = useState<{
     ollama: string[];
@@ -40,7 +42,7 @@ export function ProviderPicker({
       <label>
         Provider
         <select
-          aria-label="Production provider"
+          aria-label={`${labelPrefix} provider`}
           value={value.mode}
           onChange={(event) =>
             onChange({
@@ -69,7 +71,7 @@ export function ProviderPicker({
           Model
           {value.mode === "creator_byok" || !catalog ? (
             <input
-              aria-label="Production model"
+              aria-label={`${labelPrefix} model`}
               value={value.model || ""}
               onChange={(event) =>
                 onChange({ ...value, model: event.target.value })
@@ -77,7 +79,7 @@ export function ProviderPicker({
             />
           ) : (
             <select
-              aria-label="Production model"
+              aria-label={`${labelPrefix} model`}
               value={value.model || ""}
               onChange={(event) =>
                 onChange({ ...value, model: event.target.value })

@@ -1045,3 +1045,17 @@ main.experience-shell { animation: airl-rise-in var(--motion-entrance) var(--mot
 @media(hover:hover) and (pointer:fine) { .discovery-cover:hover > .spatial-world { transform: scale(1.025); } }
 @media(max-width:540px) { .landing-feature .spatial-world { --world-scale: .88; }.spatial-world-label { left: 22px; right: 22px; }.world-overview-art .spatial-world { --world-scale: .84; } }
 @media(prefers-reduced-motion:reduce) { .spatial-rig { transform: scale(var(--world-scale,1))!important; } }
+
+.next-episode-suggestions, .next-episode-options, .next-episode-options fieldset, .next-episode-options label {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.next-episode-suggestions { margin-top: 1rem; }
+.next-episode-suggestions h3, .next-episode-suggestions p { margin: 0; }
+.next-episode-options fieldset { border: 1px solid var(--border); border-radius: 1rem; padding: 1rem; }
+.next-episode-options input, .next-episode-options textarea { width: 100%; min-width: 0; }
+.next-episode-options textarea { min-height: 5.5rem; resize: vertical; }
+.episode-audio-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-block: 0.75rem; }
+.episode-audio-controls label { display: flex; align-items: center; gap: 0.75rem; }
+.episode-audio-controls input { width: 8rem; max-width: 100%; }

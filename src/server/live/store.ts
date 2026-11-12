@@ -168,13 +168,17 @@ export class LiveStore {
       this.db.exec('COMMIT');
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
-  nextRound(token: string | undefined, previousId: string, options?: {id:string;title:string;description:string}[]) {
+  nextRound(token: string | undefined, previousId: string, options?: {id:string;title:string;description:string}[], sourceEpisodeId?: string) {
     this.requireSession(token, true);
     this.db.exec('BEGIN IMMEDIATE');
     try {
       const latest = this.db.prepare('SELECT id,status FROM live_rounds WHERE room_id=? ORDER BY created DESC,rowid DESC LIMIT 1').get(this.roomId)!;
       if (latest.id === previousId) {
         if (latest.status !== 'closed') throw new LiveError(409, 'Close the current round first.');
+        if (sourceEpisodeId) {
+          const episode = this.db.prepare('SELECT episode_id FROM universe_episodes WHERE universe_id=? ORDER BY story_order DESC LIMIT 1').get(this.roomId);
+          if (episode?.episode_id !== sourceEpisodeId) throw new LiveError(409, 'The published story changed. Generate fresh suggestions.');
+        }
         this.insertRound(options);
       }
       this.db.exec('COMMIT');

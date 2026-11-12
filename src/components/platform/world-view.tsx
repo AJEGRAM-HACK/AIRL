@@ -39,7 +39,7 @@ export function WorldView({ id, mode = "world", characterId, episodeId, initialS
     <UniverseLinks id={id} />
     {episode ? <>
       <div className="episode-reveal-grid">
-        <div className="episode-stage"><EpisodePreview manifest={episode.artifact.manifest} seekFrame={seek} /></div>
+        <div className="episode-stage"><EpisodePreview manifest={episode.artifact.manifest} seekFrame={seek} universeId={id} episodeId={episode.episode_id} /></div>
         <aside className="episode-story"><p className="eyebrow">CHAPTER {episode.story_order} · APPROVED EPISODE</p><h2>{episode.artifact.manifest.title}</h2>{episode.artifact.script?.summary && <p className="episode-synopsis">{episode.artifact.script.summary}</p>}<p className="episode-choice"><span>THE AUDIENCE CHOSE</span>{episode.choice || "Standalone production"}</p>
           {episode.round_id && <Link className="text-link" href={`/live/${id}?round=${episode.round_id}#source-round`}>See the audience decision <ArrowRight size={15} aria-hidden="true" /></Link>}
           <div className="episode-cast"><span>IN THIS CHAPTER</span>{episode.artifact.manifest.cast?.map((item: any) => <Link key={item.id} href={`/universes/${id}/characters/${item.id}`}>{item.name}</Link>)}</div>

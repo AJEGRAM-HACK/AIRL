@@ -1,5 +1,9 @@
 # AIRL architecture and delivery plan
 
+## Episode audio and next-episode direction generation — November 12, 2026
+
+Saved episode and authorized room-preview audio is generated locally into a private content-addressed WAV cache, then played by a native audio element synchronized to Remotion frame events. `GET /api/universes/[id]/audio` enforces the existing visibility and draft permissions. `POST /api/universes/[id]/suggestions` uses the current structured provider gateway with latest published story/canon/cast, account permission and paid consent. Next-round requests accept an optional source episode identifier, checked inside the existing transaction before inserting options. Database tables and production artifact contracts retain their existing shapes. The paid seeded-premise MP4 remains a separately rendered local artifact. [Behavior, local dependencies and evidence](docs/AUDIO_AND_NEXT_EPISODE.md).
+
 _Last updated November 12, 2026. Latest verified application commit `da763cfa502cc1570397133439ec1bb271151e7a`._
 
 [CHANGELOG.md](CHANGELOG.md) summarizes recent changes. [VERIFICATION.md](VERIFICATION.md) separates current acceptance results from historical checkpoints. The current delivery is Mac-hosted SQLite/Ollama with a public ngrok web tunnel. Supabase, Trigger.dev and cloud media exports remain proposed architecture.

@@ -1,5 +1,9 @@
 # AIRL hackathon presenter runbook
 
+## Dialogue and the next episode
+
+Saved episode and Studio room-preview players prepare their dialogue audio on first load. Wait for preparation, press Play, then use Mute dialogue and Volume as needed. After publication, open Studio room controls or Journey Presentation settings, choose Generate next-episode suggestions, edit the three directions and choose Open voting with these suggestions. Suggestion settings have their own provider and paid consent. A separate complete seeded-premise MP4 is available through the local port-3112 viewer. [Media paths and operating details](docs/AUDIO_AND_NEXT_EPISODE.md).
+
 Use the Mac with Node 24, the private OpenAI configuration, the paid presentation database and the configured ngrok account. Ollama remains available for local story questions and explicitly selected local generation. Keep power connected, the lid open and internet available. The launcher includes the recovery worker and idle-sleep prevention.
 
 1. Stop the running demo before rebuilding. From the repository, run the following commands.

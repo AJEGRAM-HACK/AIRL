@@ -23,7 +23,12 @@ export interface CreativeAIProvider {
 export class DemoCreativeProvider implements CreativeAIProvider {
   readonly mode = 'demo';
   async generateStructured<T extends z.ZodType>(schema:T,_instruction:string,input:unknown):Promise<z.infer<T>> {
-    const task=input as {kind:string;question?:string;sources?:{id:string;text:string}[];interests?:{settings?:string[];genres?:string[];tone?:string;languages?:string[];idea?:string}};
+    const task=input as {kind:string;question?:string;sources?:{id:string;text:string}[];episode?:{title:string};characters?:{name:string}[];interests?:{settings?:string[];genres?:string[];tone?:string;languages?:string[];idea?:string}};
+    if (task.kind === 'next-episode') return schema.parse({ options: [
+      { title: `Follow ${task.characters?.[0]?.name || 'the cast'}’s next move`, description: `Continue the unresolved ending of ${task.episode?.title || 'the published episode'} through a new community decision.` },
+      { title: 'Let the community challenge the plan', description: `The cast questions the consequences of ${task.episode?.title || 'the last decision'} and proposes a different solution.` },
+      { title: 'Test the decision with an unexpected complication', description: `Explore a new obstacle to the plan established in ${task.episode?.title || 'the published episode'}.` },
+    ] });
     if(task.kind==='pitches')return schema.parse(PitchSet.parse({pitches:[0,1,2].map(index=>({title:`${task.interests?.settings?.[0]||'A new world'} · ${index+1}`,settings:WorldSettings.parse({setting:task.interests?.settings?.[0]||'An unfamiliar community',genre:task.interests?.genres?.[0]||'Adventure',tone:task.interests?.tone||'Hopeful',premise:task.interests?.idea||'Neighbors face an unexpected shared challenge.',rules:[]}),conflict:'The community must decide whether to trust a stranger.',characters:[{id:'guide',name:'The Guide',role:'Local guide',personality:['curious'],voice:'Thoughtful',appearance:'An original fictional guide',motivations:['Protect the community'],speakingStyle:'Clear and concise',backstory:'Knows the local paths',rules:[],memories:[],assets:[],color:'#a78bfa',symbol:'person'}],firstVote:['Trust the visitor','Investigate first','Ask the council']}))}));
     const source=task.sources?.[0];return schema.parse(StoryAnswer.parse({answer:source?source.text:'The available sources leave this unclear.',citationIds:source?[source.id]:[],unclear:!source}));
   }

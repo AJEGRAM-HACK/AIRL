@@ -5,7 +5,7 @@ import { RoomJobs, runRoomJob } from '../../src/server/production/room-jobs';
 
 declare global { interface Window { blockAudioResume: boolean; blockedAudioResumes: number } }
 
-test('silent episodes replay after seeking when browser audio resume never settles', async ({ browser }) => {
+test('episodes replay after seeking when browser audio resume never settles', async ({ browser }) => {
   const path = process.env.AIRL_LIVE_DB_PATH!;
   new PlatformStore(path).close();
   const live = new LiveStore(path);

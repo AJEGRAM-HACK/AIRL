@@ -1,5 +1,9 @@
 # Redesign roadmap
 
+## Audio and next-episode follow-up
+
+The November 12 follow-up authorizes cached episode audio playback, next-episode voting suggestions grounded in a published story, the additive server routes required by those features and a separate complete demo video based on the seeded premise. The one-off paid run has a $6 ceiling. The audio implementation uses the existing Mac runtime. Suggestions reuse provider selection, consent and scoped story retrieval. [Implemented behavior and observed limits](AUDIO_AND_NEXT_EPISODE.md).
+
 ## Authorized paid-demo follow-up
 
 The user's November 12 follow-up authorizes a reversible one-universe/one-episode presentation snapshot, private OpenAI-key configuration, a paid preview and using paid generation for the demo. Journey now reuses the existing protected provider picker and close endpoint, including fresh operation consent. Shared stage guidance is aligned with the actual three-scene pictogram renderer; provider selection, SDK adapters, APIs, schemas, authentication and publication gates remain unchanged. [DEMO_OPENAI_SETUP.md](DEMO_OPENAI_SETUP.md) records the real paid rehearsal, earlier failures, private/public data separation and local/tunnel boundaries. No deployment or remote push is included.

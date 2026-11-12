@@ -15,6 +15,7 @@ import { StoryHelper } from '@/components/platform/story-helper';
 import { api } from '@/components/platform/api';
 import { ProviderPicker, defaultProvider, type ProviderChoice } from '@/components/platform/provider-picker';
 import { RoomJoin } from '@/features/live/room-join';
+import { NextEpisodeSuggestions } from '@/features/production/next-episode-suggestions';
 import { Job, RoomProduction } from '@/features/production/room-production';
 import { RoomSnapshot, type RoomState, type SessionState } from '@/features/live/types';
 import { Manifest, Script, Stages } from '@/server/production/schemas';
@@ -310,7 +311,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
                     <button disabled={!job.manifest} aria-pressed={artifact === 'preview'} onClick={() => setArtifactChoice('preview')}>Preview{job.previewVersion ? ` v${job.previewVersion}` : ''}</button>
                   </div>
                   {artifact === 'preview' && job.manifest ? <>
-                    <EpisodePreview manifest={job.manifest} externalTranscript />
+                    <EpisodePreview manifest={job.manifest} universeId={world.id} jobId={job.id} externalTranscript />
                     <button className="journey-text-button" onClick={() => openTranscript('preview')}><BookOpen size={16} /> Open transcript</button>
                     <p className="journey-kicker">Last valid preview · version {job.previewVersion}</p>
                   </> : excerpt ? <div className="journey-excerpt" key={`${job.id}-${excerpt.sceneId}-${excerptIndex}`}>
@@ -325,7 +326,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
           {step === 'premiere' && <div className="journey-premiere">
             {selectedEpisode ? <>
               <div className="journey-film-heading"><p className="journey-kicker">{saved ? 'Pre-generated rehearsal episode' : 'Approved episode'}</p><h1>{selectedEpisode.artifact.manifest.title}</h1></div>
-              <div className="journey-film" aria-label="Premiere player"><EpisodePreview key={selectedEpisode.episode_id} manifest={selectedEpisode.artifact.manifest} externalTranscript /></div>
+              <div className="journey-film" aria-label="Premiere player"><EpisodePreview key={selectedEpisode.episode_id} manifest={selectedEpisode.artifact.manifest} universeId={world.id} episodeId={selectedEpisode.episode_id} externalTranscript /></div>
               <div className="journey-film-links"><button className="journey-text-button" onClick={() => openTranscript('episode')}><BookOpen size={16} /> Episode transcript</button><Link href={watchUrl!}>Audience watch link <ArrowRight size={16} /></Link></div>
             </> : <div className="journey-premiere-wait"><p className="journey-kicker">{job?.status === 'review' ? 'A chapter ready for approval' : 'The premiere'}</p><h1>{job?.status === 'review' ? 'Ready for review.' : 'A story worth waiting for.'}</h1><p>{selectedId ? 'This approved episode is unavailable in the selected universe.' : 'Review the live production or play an approved saved episode.'}</p></div>}
           </div>}
@@ -345,7 +346,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
         {sheet === 'cast' && <div className="journey-sheet-cast">{characters.map(character => <article key={character.id}><p className="journey-kicker">{character.role}</p><h3>{character.name}</h3><p>{character.backstory}</p><p>{character.personality.join(' · ')}</p></article>)}</div>}
         {sheet === 'transcript' && transcript && <div className="journey-transcript"><h3>{transcript.title}</h3>{transcript.scenes.map(scene => <article key={scene.id}><p className="journey-kicker">{scene.id}</p>{scene.dialogue.map((line, index) => <p key={index}><b>{characters.find(character => character.id === line.characterId)?.name || line.characterId}</b> {line.text}</p>)}</article>)}</div>}
         {sheet === 'review' && canInspect && job && <RoomProduction key={job.id} operator roomId={world.id} jobId={job.id} presentation />}
-        {sheet === 'settings' && canManage && <div className="journey-settings"><label>Presentation universe<select aria-label="Presentation universe" value={world.id} onChange={event => router.push(experienceUrl('journey', { universe: event.target.value }))}>{rooms.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><fieldset disabled={pending}><ProviderPicker value={provider} onChange={chooseProvider} background /></fieldset><p>{provider.mode === 'hosted_openai' ? 'OpenAI production is paid. Authorize each round before closing voting.' : provider.mode === 'demo' ? 'Demo uses deterministic templates without inference.' : 'Live production uses the selected local Ollama model.'} Saved playback uses no inference.</p>{room.status === 'closed' && <Button disabled={pending} onClick={() => roomAction('next')}>Start next round</Button>}<Link href={`/studio/worlds/${world.id}`}>Open world Studio <ArrowRight size={16} /></Link></div>}
+        {sheet === 'settings' && canManage && <div className="journey-settings"><label>Presentation universe<select aria-label="Presentation universe" value={world.id} onChange={event => router.push(experienceUrl('journey', { universe: event.target.value }))}>{rooms.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><fieldset disabled={pending}><ProviderPicker value={provider} onChange={chooseProvider} background /></fieldset><p>{provider.mode === 'hosted_openai' ? 'OpenAI production is paid. Authorize each round before closing voting.' : provider.mode === 'demo' ? 'Demo uses deterministic templates without inference.' : 'Live production uses the selected local Ollama model.'} Saved playback uses no inference.</p>{room.status === 'closed' && <NextEpisodeSuggestions roomId={world.id} roundId={room.roundId} pending={pending} onStarted={data => { sessionRevision.current++; setRoom(data.room); setSession(data.session); setSheet(null); router.push(experienceUrl('journey', { universe: world.id, round: data.room.roundId, step: 'vote' })); }} />}<Link href={`/studio/worlds/${world.id}`}>Open world Studio <ArrowRight size={16} /></Link></div>}
         {sheet === 'saved' && <div className="journey-settings"><label>Approved saved episode<select aria-label="Approved saved episode" value={fallback?.episode_id || ''} onChange={event => router.replace(experienceUrl('journey', { ...context, episode: event.target.value }), { scroll: false })}>{episodes.map(item => <option key={item.episode_id} value={item.episode_id}>{item.artifact.manifest.title}</option>)}</select></label><p>Approved episodes from {world.title} play immediately from storage.</p><Button disabled={!fallback} onClick={() => fallback && go('premiere', fallback.episode_id, true)}>Use this episode <ArrowRight size={18} /></Button></div>}
       </JourneySheet>
     </div>

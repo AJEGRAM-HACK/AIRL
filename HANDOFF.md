@@ -1,5 +1,9 @@
 # AIRL development handoff
 
+## Audio, next-episode suggestions and complete demo — November 12, 2026
+
+The latest follow-up adds cached local dialogue audio to saved episode and room-preview playback, plus editable next-episode voting suggestions in Studio and Journey settings. Sources, publication/ownership, paid consent and stale-source checks are server-side. The separate 58.8-second **Karaoke Ordinance** MP4 uses paid character voices, animated gestures, music, sound effects and captions, with a loopback viewer at port 3112. Reported API usage estimates total $0.039691 against the authorized $6 run budget. The presentation retains its existing Taho Tender record. [Implementation, artifact paths, costs and remaining limits](docs/AUDIO_AND_NEXT_EPISODE.md). See the newest VERIFICATION entry before continuing.
+
 Updated November 12, 2026. Repository `/Users/ajegram/CinemAI`. Continue in this conversation. Read `AGENTS.md`, this file, `ARCHITECTURE_PLAN.md` and `VERIFICATION.md` before editing.
 
 ## Curated demonstration and OpenAI setup — November 12, 2026
