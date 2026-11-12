@@ -34,6 +34,8 @@ npm run demo
 
 Open [Journey](http://127.0.0.1:3000/journey?universe=barangay-2099) and choose **Play first production**, or go straight to the [published episode](http://127.0.0.1:3000/universes/barangay-2099/episodes/efbdba79-9564-4de1-8ca0-984c26d284f5). Each launch creates a separate local SQLite database with the saved episode and closed voting round, including the recorded totals of seven votes for taho, three for karaoke, and two for sending Captain Bot offline. Saved playback requires no API key or Ollama. The [presenter runbook](PRESENTER_RUNBOOK.md) covers the separate live setup with audience phones and a new voting round.
 
+For the hosted viewer demo with persistent voting, see the [deployment runbook](docs/VIEWER_DEPLOYMENT.md).
+
 ## Run locally
 
 Use Node.js 24 LTS and npm. From a fresh checkout:

@@ -19,7 +19,7 @@ export function StoryHelper({
   draftRun?: string;
   suggestedQuestion?: string;
 }) {
-  const {account}=useAccess();
+  const {account, viewerDemo}=useAccess();
   const pathname = usePathname();
   const advanced = !!draftRun || pathname.startsWith('/studio') || pathname === '/journey';
   const [question, setQuestion] = useState(suggestedQuestion || "What happened most recently?"),
@@ -50,6 +50,7 @@ export function StoryHelper({
       setProvider((value) => ({ ...value, consent: false }));
     }
   }
+  if (viewerDemo) return null;
   if(!account)return <section className="panel platform-form story-helper"><h2>Ask about this story</h2><p><Link href="/account">Sign in</Link> to ask about this story.</p></section>;
   return (
     <section className="panel platform-form story-helper">

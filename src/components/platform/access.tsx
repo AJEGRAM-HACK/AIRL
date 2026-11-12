@@ -26,7 +26,8 @@ export function AccessProvider({
 }
 export const useAccess = () => useContext(AccessContext);
 export function AccountNavigation({ active = false }: { active?: boolean }) {
-  const { account } = useAccess();
+  const { account, viewerDemo } = useAccess();
+  if (viewerDemo) return null;
   return <Link href="/account" aria-current={active ? 'page' : undefined}>
     {account ? 'Profile' : 'Sign in'}
   </Link>;

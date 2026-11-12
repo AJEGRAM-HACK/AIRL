@@ -1,5 +1,6 @@
 import { cache } from 'react';
-import type { PageAccess } from '@/lib/access';
+import { anonymousAccess, type PageAccess } from '@/lib/access';
+import { viewerDemoEnabled } from '@/lib/config/viewer-demo';
 import { LiveStore, LiveError } from '@/server/live/store';
 import { notFound } from "next/navigation";
 import { sessionToken } from "@/server/live/http";
@@ -38,6 +39,7 @@ export async function readableStoryItem(
 
 // React cache shares this request's server-validated permissions with layout/page guards.
 export const pageAccess = cache(async (): Promise<PageAccess> => {
+  if (viewerDemoEnabled()) return { ...anonymousAccess, viewerDemo: true };
   const store = new PlatformStore();
   let live: LiveStore | undefined;
   try {

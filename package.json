@@ -21,6 +21,7 @@
     "test:sprint": "tsx --test tests/sprint.test.ts",
     "test:browser": "playwright test",
     "demo": "tsx scripts/run-showcase.ts",
+    "demo:viewer": "tsx scripts/run-showcase.ts --viewer",
     "demo:setup": "node scripts/demo-lan.mjs --setup",
     "demo:lan": "NODE_ENV=production node scripts/demo-lan.mjs",
     "account:admin": "tsx scripts/account-admin.ts",

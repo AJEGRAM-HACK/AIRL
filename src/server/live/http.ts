@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { ZodError } from 'zod';
+import { viewerApiAllowed, viewerDemoEnabled } from '@/lib/config/viewer-demo';
 import { features } from '@/lib/config/features';
 import { LiveError, LiveStore } from './store';
 export const SESSION_COOKIE = 'airl-session';
@@ -8,6 +9,7 @@ export async function setSession(token: string, request: Request) {
   (await cookies()).set(SESSION_COOKIE, token, { httpOnly: true, sameSite: 'strict', secure: new URL(request.url).protocol === 'https:', path: '/', maxAge: 7 * 86400 });
 }
 export function checkRequest(request: Request) {
+  if (viewerDemoEnabled() && !viewerApiAllowed(request)) throw new LiveError(404, 'Endpoint not found.');
   if (!features.live || !features.cinemai) throw new LiveError(404, 'Live experience unavailable.');
   if (request.method !== 'GET' && request.headers.get('origin') !== `${new URL(request.url).protocol}//${request.headers.get('host')}`) throw new LiveError(403, 'A same-origin request is required.');
 }

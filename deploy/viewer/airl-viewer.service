@@ -1,0 +1,21 @@
+[Unit]
+Description=AIRL hackathon viewer demo
+After=network.target
+
+[Service]
+User=airl-viewer
+Group=airl-viewer
+WorkingDirectory=/opt/airl-viewer
+Environment=NODE_ENV=production
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Environment=AIRL_LIVE_DB_PATH=/var/lib/airl-viewer/airl.sqlite
+StateDirectory=airl-viewer
+StateDirectoryMode=0700
+UMask=0077
+ExecStart=/usr/bin/env npm run demo:viewer
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

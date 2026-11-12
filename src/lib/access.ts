@@ -5,6 +5,7 @@ export type PageAccess = {
   canCreate: boolean;
   managedWorldIds: string[];
   legacyOperator: boolean;
+  viewerDemo?: boolean;
 };
 export const anonymousAccess: PageAccess = {
   account: null,

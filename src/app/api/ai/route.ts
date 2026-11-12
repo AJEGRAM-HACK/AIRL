@@ -1,3 +1,4 @@
+import { viewerDemoEnabled } from '@/lib/config/viewer-demo';
 import { PlatformStore } from '@/server/platform/store';
 import { canonicalCharacters } from '@/ai/memory/canonical';
 import { inferenceLimits } from '@/ai/config/limits';
@@ -12,6 +13,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 export async function GET() {
+  if (viewerDemoEnabled()) return errorResponse(new LiveError(404, 'Endpoint not found.'));
   const store = new LiveStore();
   try {
     const accounts=new PlatformStore();let owner:string;try{owner=accounts.requireAccount(await sessionToken(),true).id;}finally{accounts.close();}
@@ -19,6 +21,7 @@ export async function GET() {
   } catch (error) { return errorResponse(error); } finally { store.dispose(); }
 }
 export async function POST(request: Request) {
+  if (viewerDemoEnabled()) return errorResponse(new LiveError(404, 'Endpoint not found.'));
   const store = new LiveStore();
   let usageId: string | undefined;
   let resource: string | undefined;
