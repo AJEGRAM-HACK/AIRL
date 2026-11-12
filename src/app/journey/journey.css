@@ -290,3 +290,5 @@
 @media(prefers-reduced-motion:reduce) {
   .journey-experience .journey-chapter { animation: none!important; transition: none!important; transform: none!important; filter: none!important; }
 }
+
+.journey-settings > fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }

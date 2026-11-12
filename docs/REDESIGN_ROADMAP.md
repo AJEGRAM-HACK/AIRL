@@ -1,5 +1,9 @@
 # Redesign roadmap
 
+## Authorized paid-demo follow-up
+
+The user's November 12 follow-up authorizes a reversible one-universe/one-episode presentation snapshot, private OpenAI-key configuration, a paid preview and using paid generation for the demo. Journey now reuses the existing protected provider picker and close endpoint, including fresh operation consent. Shared stage guidance is aligned with the actual three-scene pictogram renderer; provider selection, SDK adapters, APIs, schemas, authentication and publication gates remain unchanged. [DEMO_OPENAI_SETUP.md](DEMO_OPENAI_SETUP.md) records the real paid rehearsal, earlier failures, private/public data separation and local/tunnel boundaries. No deployment or remote push is included.
+
 Phase 0 is complete at documentation checkpoint `81e975e`. The user authorized Phase 1 on November 12, 2026, including universe discovery and responsive refinement. The subsequent expanded brief also authorized presentation-only refinements of existing live voting, production progress, episode reveal and creator workflows, recorded in [HACKATHON_UI_REPORT.md](HACKATHON_UI_REPORT.md). Later identity, schema, provider and infrastructure proposals still require separate review. The existing code already implements substantial parts of phases 2–6. Each phase starts by checking its actual remaining gaps. Reuse boundaries are defined by [ARCHITECTURE_PLAN.md](../ARCHITECTURE_PLAN.md), model extensions by [UNIVERSE_MODEL.md](UNIVERSE_MODEL.md), and UI goals by [UI_UX_PIVOT.md](UI_UX_PIVOT.md).
 
 ## Shared blue Journey and 3D presentation

@@ -13,6 +13,7 @@ import { ThemeSwitcher } from '@/components/theme-switcher';
 import { useAccess } from '@/components/platform/access';
 import { StoryHelper } from '@/components/platform/story-helper';
 import { api } from '@/components/platform/api';
+import { ProviderPicker, defaultProvider, type ProviderChoice } from '@/components/platform/provider-picker';
 import { RoomJoin } from '@/features/live/room-join';
 import { Job, RoomProduction } from '@/features/production/room-production';
 import { RoomSnapshot, type RoomState, type SessionState } from '@/features/live/types';
@@ -49,11 +50,31 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
   const [session, setSession] = useState<SessionState>({ joined: false, operator: false, vote: null });
   const sessionRevision = useRef(0);
   const [pending, setPending] = useState(false);
+  const [provider, setProvider] = useState<ProviderChoice>(defaultProvider);
   const [sheet, setSheet] = useState<'cast' | 'transcript' | 'review' | 'settings' | 'saved' | null>(null);
   const [transcriptSource, setTranscriptSource] = useState<'episode' | 'preview'>('episode');
   const [artifactChoice, setArtifactChoice] = useState<'excerpt' | 'preview' | null>(null);
   const [excerptIndex, setExcerptIndex] = useState(0);
   const stageRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    let active = true;
+    setProvider(defaultProvider);
+    if (canManage) void api('/api/models').then(catalog => {
+      if (active && catalog.hostedConfigured && catalog.hosted?.[0]) {
+        setProvider(current => current === defaultProvider ? { mode: 'hosted_openai', model: catalog.hosted[0], consent: false } : current);
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [canManage, access.account?.id]);
+
+  useEffect(() => {
+    setProvider(current => current.consent ? { ...current, consent: false } : current);
+  }, [room.roundId]);
+
+  function chooseProvider(next: ProviderChoice) {
+    setProvider(current => ({ ...next, consent: current.mode === next.mode && current.model === next.model ? next.consent : false }));
+  }
 
   useEffect(() => {
     let active = true;
@@ -191,7 +212,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
         ? await api('/api/live/session', { universe: world.id })
         : await api(`/api/live/rooms/${world.id}/${action}`, {
           roundId: room.roundId,
-          ...(action === 'close' ? { provider: { mode: 'ollama', model: 'qwen3:4b-instruct', consent: false } } : {}),
+          ...(action === 'close' ? { provider } : {}),
         });
       sessionRevision.current++;
       setSession(data.session || data);
@@ -203,7 +224,10 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
       }
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'Unable to complete this action.');
-    } finally { setPending(false); }
+    } finally {
+      setPending(false);
+      if (action === 'close') setProvider(current => ({ ...current, consent: false }));
+    }
   }
 
   function openTranscript(source: 'episode' | 'preview') {
@@ -217,6 +241,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
       if (recordedRound.status === 'closed') return <Button onClick={() => go('production', null, false)}>Follow the production <ArrowRight size={18} /></Button>;
       if (!canInspect) return <Button asChild><Link href={`/live/${world.id}`}>Open audience voting <ArrowRight size={18} /></Link></Button>;
       if (!session.joined) return <Button disabled={pending} onClick={() => roomAction('join')}>Join room to vote</Button>;
+      if (canManage && provider.mode === 'hosted_openai' && (!provider.model || !provider.consent)) return <Button onClick={() => setSheet('settings')}>Set up OpenAI production <ArrowRight size={18} /></Button>;
       return <Button disabled={pending || roundId !== room.roundId} onClick={() => roomAction('close')}>{pending ? 'Closing the round…' : 'Close voting & produce'} <ArrowRight size={18} /></Button>;
     }
     if (step === 'production' || (step === 'premiere' && !selectedEpisode)) {
@@ -320,7 +345,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
         {sheet === 'cast' && <div className="journey-sheet-cast">{characters.map(character => <article key={character.id}><p className="journey-kicker">{character.role}</p><h3>{character.name}</h3><p>{character.backstory}</p><p>{character.personality.join(' · ')}</p></article>)}</div>}
         {sheet === 'transcript' && transcript && <div className="journey-transcript"><h3>{transcript.title}</h3>{transcript.scenes.map(scene => <article key={scene.id}><p className="journey-kicker">{scene.id}</p>{scene.dialogue.map((line, index) => <p key={index}><b>{characters.find(character => character.id === line.characterId)?.name || line.characterId}</b> {line.text}</p>)}</article>)}</div>}
         {sheet === 'review' && canInspect && job && <RoomProduction key={job.id} operator roomId={world.id} jobId={job.id} presentation />}
-        {sheet === 'settings' && canManage && <div className="journey-settings"><label>Presentation universe<select aria-label="Presentation universe" value={world.id} onChange={event => router.push(experienceUrl('journey', { universe: event.target.value }))}>{rooms.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><p>Live production uses Ollama qwen3:4b-instruct.</p>{room.status === 'closed' && <Button disabled={pending} onClick={() => roomAction('next')}>Start next round</Button>}<Link href={`/studio/worlds/${world.id}`}>Open world Studio <ArrowRight size={16} /></Link></div>}
+        {sheet === 'settings' && canManage && <div className="journey-settings"><label>Presentation universe<select aria-label="Presentation universe" value={world.id} onChange={event => router.push(experienceUrl('journey', { universe: event.target.value }))}>{rooms.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><fieldset disabled={pending}><ProviderPicker value={provider} onChange={chooseProvider} background /></fieldset><p>{provider.mode === 'hosted_openai' ? 'OpenAI production is paid. Authorize each round before closing voting.' : provider.mode === 'demo' ? 'Demo uses deterministic templates without inference.' : 'Live production uses the selected local Ollama model.'} Saved playback uses no inference.</p>{room.status === 'closed' && <Button disabled={pending} onClick={() => roomAction('next')}>Start next round</Button>}<Link href={`/studio/worlds/${world.id}`}>Open world Studio <ArrowRight size={16} /></Link></div>}
         {sheet === 'saved' && <div className="journey-settings"><label>Approved saved episode<select aria-label="Approved saved episode" value={fallback?.episode_id || ''} onChange={event => router.replace(experienceUrl('journey', { ...context, episode: event.target.value }), { scroll: false })}>{episodes.map(item => <option key={item.episode_id} value={item.episode_id}>{item.artifact.manifest.title}</option>)}</select></label><p>Approved episodes from {world.title} play immediately from storage.</p><Button disabled={!fallback} onClick={() => fallback && go('premiere', fallback.episode_id, true)}>Use this episode <ArrowRight size={18} /></Button></div>}
       </JourneySheet>
     </div>

@@ -21,11 +21,13 @@ The public interface now uses a dark-first blue editorial theme and a minimal Ex
 - PersonaAI provides scoped character profiles, relationships, approved memories and episode-scoped story questions with source links.
 - Profiles start as viewers. Admin-granted creators manage owned private/public universes. Official Barangay 2099 canon requires an admin.
 - Remotion browser playback supports seek, captions, transcripts and repeat replay. The labeled saved-episode path performs zero inference.
-- Demo runs offline. Local Ollama is verified. Hosted OpenAI and HTTPS request-only BYOK have guarded adapters, with actual paid validation pending.
+- Demo runs offline. Local Ollama is verified. Hosted OpenAI completed a consented private four-stage rehearsal with GPT-6.1 Terra; HTTPS request-only BYOK retains its guarded adapter and separate live-validation limit.
 
 Media is currently a silent animated portrait composition using reusable original story content, approved CSS backgrounds and Lucide character pictograms. Reference-image storage/linking exists, while custom artwork rendering, generated voices and MP4 export remain future work.
 
 ## Local setup
+
+For the curated one-universe, one-episode presentation and private OpenAI configuration, follow [DEMO_OPENAI_SETUP.md](docs/DEMO_OPENAI_SETUP.md). The current port-3110 preview uses its preserved-data snapshot and has authorized Hosted OpenAI enabled with GPT-6.1 Terra. Journey presentation settings expose the existing provider selector and require fresh paid consent per round. Published episodes replace reference samples in the Live picker. The new Critic-approved OpenAI rehearsal remains private; the one public episode is the preserved Ollama fallback.
 
 Use Node.js 24 LTS and npm. Reuse the existing dependency installation. On a fresh checkout, install the pinned dependencies with `npm ci`. Check `node --version` before starting. The temporary development runtime, when present, can be selected with the following command.
 
@@ -42,7 +44,7 @@ ollama pull qwen3:4b-instruct
 npm run dev
 ```
 
-Open `http://127.0.0.1:3000`. `AI_PROVIDER=ollama` with `OLLAMA_MODEL=qwen3:4b-instruct` is the default. Demo needs no model or key. `AI_PROVIDER=demo` selects offline CLI generation, and Studio has an explicit provider selector. Journey live generation stays on Ollama. Module flags in `src/lib/config/features.ts` control availability independently from authorization. The future WorldForge flag does not disable implemented owned universes.
+Open `http://127.0.0.1:3000`. `AI_PROVIDER=ollama` with `OLLAMA_MODEL=qwen3:4b-instruct` is the default. Demo needs no model or key. `AI_PROVIDER=demo` selects offline CLI generation, and Studio has an explicit provider selector. Journey managers can choose the configured Hosted OpenAI model with explicit paid consent; local Ollama remains available. Module flags in `src/lib/config/features.ts` control availability independently from authorization. The future WorldForge flag does not disable implemented owned universes.
 
 Copy `.env.example` to ignored `.env.local` only when changing configuration. Keep credentials server-side. Hosted OpenAI requires a server key/model, enabled paid gate and explicit operation consent. BYOK credentials stay in page/request memory and never enter background jobs. Supabase/Trigger placeholders in the example are planned integrations. [Current architecture and provider boundaries](ARCHITECTURE_PLAN.md)
 

@@ -85,9 +85,12 @@ for (const mode of ['demo','ollama'] as const) test(`${mode} audience votes beco
       await preview.getByRole('button',{name:'Pause video',exact:true}).click();
     }
     await a.screenshot({path:`/tmp/airl-${mode}-audience.png`,fullPage:true});
-    await a.getByRole('combobox',{name:'Episode library',exact:true}).selectOption('ep-01');
-    await expect(a.locator('.episode-meta .eyebrow')).toHaveText('SEEDED REFERENCE EPISODE');
-    await a.getByRole('combobox',{name:'Episode library',exact:true}).selectOption(job.id);
+    const library=a.getByRole('combobox',{name:'Episode library',exact:true});
+    await expect(library.locator('option[value="ep-01"]')).toHaveCount(0);
+    await expect(library).not.toContainText('Reference fixture');
+    const previous=await library.locator('option').evaluateAll((options,current)=>options.map(option=>(option as HTMLOptionElement).value).find(value=>value!==current),job.id);
+    if(previous){await library.selectOption(previous);await expect(library).toHaveValue(previous);}
+    await library.selectOption(job.id);
     await expect(a.locator('.episode-meta .eyebrow')).toContainText(mode);
     if(mode==='ollama'){
       const memory = new (await import('../../src/server/production/store')).ProductionStore(process.env.AIRL_LIVE_DB_PATH!);

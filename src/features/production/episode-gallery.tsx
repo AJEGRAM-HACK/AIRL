@@ -36,11 +36,14 @@ export function EpisodeGallery({roomId="barangay-2099"}:{roomId?:string}) {
     document.addEventListener('visibilitychange',refresh);
     return()=>{active=false;clearInterval(timer);window.removeEventListener(`airl-production:${roomId}`,refresh);window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',refresh);};
   },[roomId]);
-  if(roomId!=='barangay-2099'&&!generated.length)return <section id="episode-library" className="room-production episode-gallery" aria-label="Episode library"><h2>Your story starts here.</h2>{latest && latest.status !== 'published' && <ProductionTimeline job={latest}/>}{error&&<p role="alert">{error}</p>}<p role="status">{loading ? "Loading episodes…" : "Cast a vote. The first approved episode will appear here."}</p></section>;
-  const id=selected || generated[0]?.id || episodes[episodes.length-1].id;
+  if(loading)return <section id="episode-library" className="room-production episode-gallery" aria-label="Episode library"><p role="status">Loading episodes…</p></section>;
+  if(roomId!=='barangay-2099'&&!generated.length)return <section id="episode-library" className="room-production episode-gallery" aria-label="Episode library"><h2>Your story starts here.</h2>{latest && latest.status !== 'published' && <ProductionTimeline job={latest}/>}{error&&<p role="alert">{error}</p>}<p role="status">Cast a vote. The first approved episode will appear here.</p></section>;
+  const references=roomId==='barangay-2099'&&!generated.length?episodes:[];
+  const available=[...generated,...references];
+  const id=available.some(item=>item.id===selected)?selected:generated[0]?.id || references[references.length-1].id;
   const job=generated.find(item=>item.id===id);
   const reference=episodes.find(item=>item.id===id)||episodes[episodes.length-1];
-  return <section id="episode-library" className="room-production episode-gallery" aria-label="Episode library"><label className="job-picker">Episode library<select aria-label="Episode library" value={id} onChange={event=>setSelected(event.target.value)}>{generated.map(item=><option key={item.id} value={item.id}>{item.manifest?.title} · {item.mode}</option>)}{(roomId==='barangay-2099'?episodes:[]).map(item=><option key={item.id} value={item.id}>{item.title} · Reference fixture</option>)}</select></label>
+  return <section id="episode-library" className="room-production episode-gallery" aria-label="Episode library"><label className="job-picker">Episode library<select aria-label="Episode library" value={id} onChange={event=>setSelected(event.target.value)}>{generated.map(item=><option key={item.id} value={item.id}>{item.manifest?.title} · {item.mode}</option>)}{references.map(item=><option key={item.id} value={item.id}>{item.title} · Reference fixture</option>)}</select></label>
     {latest && latest.status !== 'published' && <ProductionTimeline job={latest}/>}{error&&<p role="alert">{error}</p>}
     <div className="episode-meta"><div className="eyebrow">{job ? `${job.mode} · APPROVED COMMUNITY EPISODE` : 'SEEDED REFERENCE EPISODE'}</div><h2>{job?.manifest?.title || reference.title}</h2></div>
     {generated[0] && selected && selected !== generated[0].id && <Button variant="outline" onClick={() => setSelected(generated[0].id)}>Watch the latest community episode</Button>}

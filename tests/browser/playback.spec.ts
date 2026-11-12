@@ -10,12 +10,14 @@ test('silent episodes replay after seeking when browser audio resume never settl
   new PlatformStore(path).close();
   const live = new LiveStore(path);
   const jobs = new RoomJobs(path);
+  let publishedCount = 0;
   try {
     const token = live.redeemOperatorCode(live.join(), live.issueOperatorCode());
     if (live.snapshot().status === 'closed') live.nextRound(token, live.snapshot().roundId);
     live.closeRound(token, live.snapshot().roundId, { mode: 'demo' });
     await runRoomJob(path);
     jobs.action(jobs.list('barangay-2099', true)[0].id, 'publish');
+    publishedCount = jobs.list('barangay-2099').filter(job => job.status === 'published' && job.manifest).length;
   } finally { live.dispose(); jobs.close(); }
 
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -39,6 +41,9 @@ test('silent episodes replay after seeking when browser audio resume never settl
     await page.goto('/live/barangay-2099');
     const preview = page.locator('.episode-gallery .remotion-preview');
     await expect(preview).toBeVisible();
+    const library = page.getByRole('combobox', { name: 'Episode library', exact: true });
+    await expect(library.locator('option')).toHaveCount(publishedCount);
+    await expect(library).not.toContainText('Reference fixture');
     await preview.getByRole('button', { name: 'Play video', exact: true }).tap();
     await expect.poll(async () => Number(await preview.getAttribute('data-frame'))).toBeGreaterThan(20);
     await preview.getByRole('button', { name: 'Pause video', exact: true }).tap();
