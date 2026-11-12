@@ -4,7 +4,7 @@
 
 AIRL is a creator-driven, community-powered AI entertainment platform. Creators build fictional universes and persistent characters. Communities shape story decisions, and four AI agents turn those decisions into episodes with human review and approved continuity.
 
-## Current checkpoint
+## Current checkpoint 
 
 The preservation source branch is `checkpoint/pre-hackathon-ui-pivot-2026-11-12`, pinned to original HEAD `fc48254f74262756c6a630fd1b83aac26bc7467d`. The earlier expanded-frontend checkpoint is `da763cfa502cc1570397133439ec1bb271151e7a`. Current audio and next-episode acceptance is recorded at the top of VERIFICATION.md. Typecheck, production build, 38 unit tests and 13 production-browser cases passed for the expanded frontend sprint; a focused check also passed after final failure-copy clarification. Detailed evidence and historical results remain in VERIFICATION.md. Ignored databases/configuration require a separate backup. [Preservation record and procedure](docs/PRESERVATION_CHECKPOINT.md)
 
@@ -70,6 +70,8 @@ AIRL_LIVE_DB_PATH="/tmp/airl-browser-rehearsal-$(date +%s)-$$.sqlite" AIRL_ALLOW
 ```
 
 For documentation-only work, use Git diff, link/command checks and preservation validation. The fixed-input benchmark and 35-session rehearsal have separate commands and consume local/public resources. Their recorded results and failure limits remain in [VERIFICATION.md](VERIFICATION.md) and [benchmarks/README.md](benchmarks/README.md).
+
+##Ollama local model
 
 ## Documentation map
 
