@@ -20,7 +20,7 @@ export default async function PlatformPage({ searchParams }: {
         <div className="landing-copy">
           <p className="eyebrow">ARTIFICIAL IN REAL LIFE</p>
           <h1 id="landing-title">The real world<br />is the <span>prompt.</span></h1>
-          <p className="landing-description">Living universes. Unforgettable characters.<br />AI brings the story to life. You decide what happens next.</p>
+          <p className="landing-description">Choose a universe. Shape its story. Watch AI bring your decisions to life.</p>
           <div className="landing-actions">
             <Button asChild><Link href="/universes">Explore Universes <ArrowRight size={18} aria-hidden="true" /></Link></Button>
             <CanCreate><Button asChild variant="outline"><Link href="/studio#create-universe">Create a Universe</Link></Button></CanCreate>

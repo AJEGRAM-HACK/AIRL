@@ -28,17 +28,24 @@ for (const mode of ['demo','ollama'] as const) test(`${mode} audience votes beco
     await operator.goto('/studio/barangay-2099');
     await operator.getByRole('button',{name:/Join room to vote/}).click();
     await expect(operator.getByRole('button',{name:/Join room to vote/})).toHaveCount(0);
+    await operator.locator('.operator-controls').getByText('Production settings', {exact:true}).click();
     await operator.locator('.operator-controls').getByLabel('Production provider',{exact:true}).selectOption(mode);
     if(mode==='ollama')await operator.locator('.operator-controls').getByLabel('Production model',{exact:true}).selectOption('qwen3:4b-instruct');
     await operator.getByRole('button',{name:'Close voting & produce',exact:true}).first().click();
     const latencies:number[]=[];
     let job:any;
     const started=Date.now();
+    let capturedLiveStage=false;
     while(Date.now()-started<130000){
       const response=await operator.request.get('/api/production?operator=1');
       const data=await response.json();job=data.jobs[0];
       if(job?.status==='failed')throw new Error('Production failed: '+JSON.stringify(job.events));
       if(job?.status==='review')break;
+      if(mode==='ollama'&&!capturedLiveStage&&job?.progress?.stage&&job?.status==='running'){
+        await expect(a.getByRole('region',{name:'Episode production'})).toBeVisible({timeout:10000});
+        await a.getByRole('region',{name:'Episode production'}).screenshot({path:'/tmp/airl-experience-production-live.png'});
+        capturedLiveStage=true;
+      }
       const before=Date.now();await a.request.get('/api/live/rooms/barangay-2099/state');latencies.push(Date.now()-before);
       await operator.waitForTimeout(500);
     }

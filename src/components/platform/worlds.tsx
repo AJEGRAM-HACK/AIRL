@@ -39,7 +39,7 @@ function WorldCards({ worlds, discovery = false }: { worlds: World[]; discovery?
             <span><ArrowUpRight size={19} aria-hidden="true" /></span>
           </Link>}
           <small>
-            {world.official ? "Official universe" : world.visibility}
+            {world.official ? "Official canon" : `Creator universe · ${world.visibility}`}
             {world.archived ? " · Archived" : ""}
           </small>
           <h2>
@@ -142,6 +142,7 @@ export function ExploreWorlds({
 }
 export function CreatorStudio() {
   const access=useAccess();
+  const [pitchOpen, setPitchOpen] = useState(false);
   const [account, setAccount] = useState<Account | null>(null),
     [worlds, setWorlds] = useState<World[]>([]),
     [accounts, setAccounts] = useState<any[]>([]),
@@ -183,9 +184,10 @@ export function CreatorStudio() {
   }
   if(!access.canCreate)return <p><Link href="/universes">Explore universes</Link></p>;
   return (
-    <>
+    <div className="creator-workspace">
       <div className="platform-heading">
         <div>
+          <p className="eyebrow">YOUR CREATIVE SPACE</p>
           <h1>Creator Studio</h1>
           <p>Build worlds. Invite an audience. Review what becomes canon.</p>
         </div>
@@ -193,17 +195,16 @@ export function CreatorStudio() {
           <Link href="/account">Your profile</Link>
         </Button>
       </div>
+      <nav className="creator-nav" aria-label="Creator workspace">
+        <Link href="#my-universes">My universes</Link><Link href="#create-universe">Create a universe</Link><Link href="/studio/ai">Advanced AI settings</Link>
+      </nav>
       {error && (
         <p role="alert" className="form-error">
           {error}
         </p>
       )}
       {!account ? (
-        <p>
-          <Link href="/account">Sign in or create a viewer profile</Link> to
-          manage your worlds. Anonymous voting remains available in public Live
-          rooms.
-        </p>
+        <p role="status">Opening your creative workspace…</p>
       ) : account.role === "viewer" ? (
         <div className="notice">
           Your account is a viewer. An admin can grant creator access.{" "}
@@ -228,10 +229,12 @@ export function CreatorStudio() {
               >
                 Start from scratch
               </Button>
-              <Button variant="outline" onClick={() => setDraft(null)}>
+              <Button variant="outline" aria-expanded={pitchOpen} aria-controls="pitch-starting-points" onClick={() => setPitchOpen(value => !value)}>
                 Generate starting points
               </Button>
             </div>
+            <div id="pitch-starting-points" className="pitch-starting-points" hidden={!pitchOpen}>
+            <p>Find a starting point with your selected provider. Review every pitch before saving a private world.</p>
             <details>
               <summary>Pitch interests and overrides</summary>
               <InterestFields value={interests} onChange={setInterests} />
@@ -252,6 +255,7 @@ export function CreatorStudio() {
             >
               {pending ? "Generating…" : "Generate three pitches"}
             </Button>
+            </div>
           </section>
           {pitches.length > 0 && (
             <div className="platform-grid">
@@ -303,7 +307,7 @@ export function CreatorStudio() {
               </Button>
             </section>
           )}
-          <WorldCards worlds={worlds} />
+          <section id="my-universes" className="owned-universes"><p className="eyebrow">BUILD SOMETHING THAT LASTS</p><h2>My universes</h2>{!worlds.length && <p className="empty-state">Your first universe starts with an idea. Create a private world above, then invite an audience when it is ready.</p>}<WorldCards worlds={worlds} /></section>
         </>
       )}
       {account?.role === "admin" && (
@@ -341,7 +345,7 @@ export function CreatorStudio() {
           ))}
         </section>
       )}
-    </>
+    </div>
   );
 }
 function SettingsEditor({
@@ -420,7 +424,7 @@ export function WorldEditor({ id }: { id: string }) {
     }
   }
   if(!access.managedWorldIds.includes(id))return <p><Link href="/universes">Explore universes</Link></p>;
-  if (!data) return <p role="status">{error || "Loading Studio…"}</p>;
+  if (!data) return <p role={error ? "alert" : "status"}>{error || "Loading Studio…"}</p>;
   if (!data.canManage)
     return (
       <>
@@ -431,7 +435,8 @@ export function WorldEditor({ id }: { id: string }) {
       </>
     );
   return (
-    <>
+    <div className="world-editor">
+      <p className="eyebrow">CREATOR STUDIO · WORLD MANAGEMENT</p>
       <div className="platform-heading">
         <h1>{data.universe.title}</h1>
         <span>
@@ -441,12 +446,13 @@ export function WorldEditor({ id }: { id: string }) {
         </span>
       </div>
       <UniverseLinks id={id} />
+      <nav className="creator-nav" aria-label="World management"><a href="#world-settings">World settings</a><a href="#world-cast">Characters</a><a href="#world-production">Episode production</a></nav>
       {error && (
         <p role="alert" className="form-error">
           {error}
         </p>
       )}
-      <section className="panel platform-form">
+      <section id="world-settings" className="panel platform-form">
         <h2>World Settings</h2>
         <label>
           Title
@@ -517,7 +523,7 @@ export function WorldEditor({ id }: { id: string }) {
           )}
         </div>
       </section>
-      <section className="panel platform-form">
+      <section id="world-cast" className="panel platform-form">
         <h2>Cast</h2>
         <div className="provider-actions">
           {data.characters.map((item: any) => (
@@ -677,8 +683,7 @@ export function WorldEditor({ id }: { id: string }) {
           ))}
         </ul>
       </section>
-      <RoomJoin roomId={id} />
-      <CommunityPanel operatorView roomId={id} />
-    </>
+      <section id="world-production" className="world-production"><p className="eyebrow">FROM AN AUDIENCE CHOICE TO A NEW CHAPTER</p><h2>Episode production</h2><RoomJoin roomId={id} /><CommunityPanel operatorView roomId={id} /></section>
+    </div>
   );
 }

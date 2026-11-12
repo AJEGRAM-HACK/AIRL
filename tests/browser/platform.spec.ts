@@ -119,6 +119,7 @@ test("viewer onboarding, creator permissions, both creation paths and private-wo
       ).status(),
     ).toBe(403);
     await page.getByRole("button", { name: /Join room to vote/ }).click();
+    await page.getByText('Production settings', { exact: true }).click();
     await page
       .getByLabel("Production provider", { exact: true })
       .selectOption("demo");
@@ -177,6 +178,7 @@ test("viewer onboarding, creator permissions, both creation paths and private-wo
       ),
     ).toBe(true);
     await page.goto("/studio");
+    await page.getByRole('button', { name: 'Generate starting points', exact: true }).click();
     await page
       .getByLabel("Production provider", { exact: true })
       .selectOption("demo");
