@@ -2,6 +2,15 @@
 
 Updated November 12, 2026. Latest verified application commit is `1a7baf3a09233a3e43d01d89c93320a8e2b76a79`. This file summarizes implemented changes. Detailed checks, earlier failures and remaining verification limits are in [VERIFICATION.md](VERIFICATION.md).
 
+## Preservation and next redesign planning
+
+- Created local source branch `checkpoint/pre-hackathon-ui-pivot-2026-11-12` at clean original HEAD `fc48254`, preserving application baseline `1a7baf3` and all later documentation.
+- Audited existing source/contracts/docs and ignored-data locations. Added a preservation record and private backup/isolated restore procedure.
+- Added product vision, proposed UI information architecture, current/proposed universe and character mappings, credible hackathon demonstration and phased roadmap.
+- Realigned documentation with already implemented accounts, roles, owned universes and scoped cast/canon. Corrected the obsolete configurable-root route description and mapped Member to the current viewer role.
+- Consolidated onboarding and documentation links in README, retaining detailed LAN operation in the presenter runbook. Historical verification and benchmark outputs were preserved.
+- Application tests and inference were not rerun. The next UI sprint awaits user review.
+
 ## Manila Journey presentation — `1a7baf3`
 
 - Restored `/` as the everyday Explore entry with regular navigation. `/platform` remains an alias. Added prominent Launch Journey and dedicated Exit to Explore actions carrying universe, round, episode and selected chapter context.

@@ -4,6 +4,8 @@ Run `npm run benchmark:local` from the repository using Node 24, installed depen
 
 The tracked fixed-input result belongs to application checkpoint `2f37d3602ba2d619f38b8fb2ab07fd04739be5c3`. The latest application checkpoint is `1a7baf3a09233a3e43d01d89c93320a8e2b76a79`, which adds the Manila Journey layout and accessible sheets after the guided Journey, saved fallback and tunnel/replay/role-interface changes. This documentation refresh preserves the recorded benchmark artifact and timings. Current acceptance and public-load results are recorded separately in [VERIFICATION.md](../VERIFICATION.md), with a development summary in [CHANGELOG.md](../CHANGELOG.md).
 
+The pre-redesign preservation sprint retains this benchmark and its JSON without rerunning inference. Source/data coverage and backup limits are in [PRESERVATION_CHECKPOINT.md](../docs/PRESERVATION_CHECKPOINT.md). Future UI acceptance is proposed in [REDESIGN_ROADMAP.md](../docs/REDESIGN_ROADMAP.md).
+
 ## Verified run on November 12, 2026
 
 Model was `qwen3:4b-instruct`, temperature 0, context 8192, request deadline 110000 ms and maximum output 2400 tokens. Episode stage caps are 650 Director, 1400 Screenwriter, 800 Visual Producer and 600 Critic. Inference runs sequentially on the M2 Pro / 16 GB Mac. Timing includes local persistence and review/publication operations for episode tasks. System/application load and model residency affect comparisons.

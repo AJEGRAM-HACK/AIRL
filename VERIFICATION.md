@@ -1,5 +1,17 @@
 # AIRL verification record
 
+## Preservation-only documentation checkpoint — November 12, 2026
+
+Original HEAD was `fc48254f74262756c6a630fd1b83aac26bc7467d` on clean branch `main`. Source branch `checkpoint/pre-hackathon-ui-pivot-2026-11-12` preserves that exact state. The older requested baseline `318b2f0` exists and is an ancestor 20 commits behind original HEAD. Latest verified application code remains `1a7baf3a09233a3e43d01d89c93320a8e2b76a79`.
+
+This sprint reviews source contracts and documentation, creates the source reference and commits documentation/plans. Application source, dependency/lockfiles, databases and private configuration are preserved. Initial validation captured SHA-256 fingerprints for 145 tracked non-Markdown files and inventoried 528 ignored data files. Database/artifact contents use private fingerprints, while sensitive TLS/configuration files use metadata. Those comparison details stay outside the repository. Source fingerprints and configuration metadata matched. All original data files matched at the first comparison. A later check observed the main live SQLite file changing while the running application held a nonempty WAL and shared-memory file created after inventory. Those sidecars were retained. This read-only sprint cannot certify a frozen logical database snapshot. Full comparison limits and documentation checks are recorded in the preservation record and completion report.
+
+No typecheck, build, application unit/browser suite, Ollama inference, paid API call or migration is rerun. Existing 38-unit/nine-browser results below are prior acceptance evidence. New UI design targets have no implementation or test result in this task. The current running demo was not restarted for documentation checks.
+
+The original verification body below is retained verbatim, including failures, benchmark records, historical pending items and their later resolutions. The old Current verified status section describes the existing application baseline. The new [preservation record](docs/PRESERVATION_CHECKPOINT.md) owns source/data inventory and backup limits. The proposed [roadmap](docs/REDESIGN_ROADMAP.md) awaits user review.
+
+---
+
 ## Current verified status — November 12, 2026
 
 Latest verified application commit is `1a7baf3a09233a3e43d01d89c93320a8e2b76a79`. This summary describes recorded checks for the current application and identifies earlier evidence separately. Historical entries below retain the outcomes and limitations that applied at each checkpoint. Their pending items may have been completed in later entries.

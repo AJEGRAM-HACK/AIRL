@@ -4,6 +4,24 @@ _Last updated November 12, 2026. Latest verified application commit `1a7baf3a092
 
 [CHANGELOG.md](CHANGELOG.md) summarizes recent changes. [VERIFICATION.md](VERIFICATION.md) separates current acceptance results from historical checkpoints. The current delivery is Mac-hosted SQLite/Ollama with a public ngrok web tunnel. Supabase, Trigger.dev and cloud media exports remain proposed architecture.
 
+## Current status and proposed redesign
+
+The preservation source reference is `checkpoint/pre-hackathon-ui-pivot-2026-11-12` at original HEAD `fc48254`. The active sprint changes documentation only. The proposed design plan is [UI_UX_PIVOT.md](docs/UI_UX_PIVOT.md) and the review gates are [REDESIGN_ROADMAP.md](docs/REDESIGN_ROADMAP.md). The technical route/provider/lifecycle sections below describe existing code or explicitly labeled future options. Browser acceptance needs an explicit disposable AIRL_LIVE_DB_PATH because playwright.config.ts preserves an inherited value. See README for the safe command.
+
+| Status | Capability | Evidence or boundary |
+| --- | --- | --- |
+| Implemented and previously verified | Accounts/roles, owned universes, custom cast/relationships, private/public visibility, ordered canon, votes, SSE, jobs/review/publication and Remotion preview | Source contracts and prior tests at `1a7baf3`, retained in VERIFICATION |
+| Implemented and previously verified | Offline Demo, real local Ollama, Journey, QR and saved playback | Browser acceptance, real inference and public/device records at their stated checkpoints |
+| Partially implemented | Hosted OpenAI and HTTPS BYOK | Adapters, consent/credential isolation and contract tests exist, actual paid inference remains unverified |
+| Partially implemented | Reference-image and character visual customization | Protected storage/profile linking exists, upload UI and custom artwork rendering remain future work |
+| Planned, awaiting review | Next landing/navigation refinement, numeric traits, character/profile/prompt-policy versions and richer universe identity/preferences | Product/design/model proposal documents, without code/schema changes in this sprint |
+| Deferred infrastructure | Supabase Auth/Postgres/RLS/Storage/Realtime, Trigger.dev and always-on hosted execution | Configuration placeholders and architectural options, with separate approval required |
+| Deferred product/media | MP4/audio/voice generation, forks, teams and broader moderation | Later bounded milestones |
+
+Current identity uses viewer/creator/admin account roles and anonymous audience sessions. Member is proposed product terminology, with no role-enum or voting-policy migration in this task. [UNIVERSE_MODEL.md](docs/UNIVERSE_MODEL.md) documents current ownership and proposed schema extensions. The singleton-to-universe migration was already implemented and historically applied after verification. No further migration runs in this preservation sprint.
+
+The current publication transaction commits episode, approved canon and final status together. Preview construction precedes Critic completion. Public playback follows approval. This ordering is the runtime preservation contract even when a product diagram narrates continuity after the premiere.
+
 ## Multi-universe implementation
 
 The local implementation now includes profiles, viewer/creator/admin roles, optional private interests, owned worlds, public discovery, settings, configurable cast, scoped relationships/assets, ordered episodes/canon, AI pitches and grounded story answers. Local salted scrypt passwords and opaque HttpOnly cookie sessions reuse the existing server architecture. Account recovery and hosted identity hardening remain future work.
@@ -203,7 +221,7 @@ MP4 output, FFmpeg encoding, voice tracks, audio mixing, expression sprites and 
 
 | Route | Audience | Purpose |
 | --- | --- | --- |
-| `/` | Public | Explore entry or Journey for the configured launch context |
+| `/` | Public | Everyday Explore entry, including through the public tunnel |
 | `/platform` | Public/visibility-scoped | Explore mode and selected universe |
 | `/journey` | Visibility-scoped, presenter controls protected | Five guided stages, live job tracking and saved episode fallback |
 | `/discover` | Public | Available and coming-soon experiences |
