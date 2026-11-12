@@ -9,7 +9,7 @@ Updated November 12, 2026. Latest verified application commit is `05e1542bcf02d1
 - Added approved saved-episode playback with the Pre-generated rehearsal episode label and zero generation calls. Live status remains available and completed live episodes remain selectable.
 - Kept QR links on the focused mobile `/live/[id]` route and added a separate presenter Journey address to the launcher. Journey uses local qwen3:4b-instruct. Studio retains explicitly gated Hosted OpenAI preparation.
 - Passed typecheck, optimized build, 38 unit tests and eight browser cases, including two independent audience sessions, real Ollama, mode/refresh persistence, private drafts, saved playback, publication and a cited 12-second scene answer.
-- Verified public HTTPS saved playback, rewind/captions, exact decoded QR destination, guest Studio 404 and light/dark projector/mobile layouts. Fresh physical-iPhone Journey results and actual Hosted OpenAI generation remain pending.
+- Verified public HTTPS saved playback, rewind/captions, exact decoded QR destination, guest Studio 404 and light/dark projector/mobile layouts. The user also confirmed saved-episode playback, seeking, replay and captions on the physical iPhone. Actual Hosted OpenAI generation remains pending.
 - Added [PRESENTER_RUNBOOK.md](PRESENTER_RUNBOOK.md) for launch, presentation, fallback and gated pre-generation.
 
 ## Viewer and admin interfaces — `7989ccd`
