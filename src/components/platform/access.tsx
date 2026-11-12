@@ -25,6 +25,12 @@ export function AccessProvider({
   );
 }
 export const useAccess = () => useContext(AccessContext);
+export function AccountNavigation({ active = false }: { active?: boolean }) {
+  const { account } = useAccess();
+  return <Link href="/account" aria-current={active ? 'page' : undefined}>
+    {account ? 'Profile' : 'Sign in'}
+  </Link>;
+}
 export function CanCreate({ children }: { children: React.ReactNode }) {
   return useAccess().canCreate ? children : null;
 }

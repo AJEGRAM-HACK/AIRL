@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowUpRight, Search } from "lucide-react";
+import { UniverseArt } from "@/components/universe-art";
 import {
   Account,
   World,
@@ -19,19 +21,23 @@ import { RoomJoin } from "@/features/live/room-join";
 export function UniverseLinks({ id }: { id: string }) {
   return (
     <nav className="universe-links" aria-label="Universe navigation">
-      <Link href={`/universes/${id}`}>World</Link>
+      <Link href={`/universes/${id}`}>Overview</Link>
       <Link href={`/live/${id}`}>Live</Link>
-      <Link href={`/universes/${id}/episodes`}>CinemAI</Link>
-      <Link href={`/universes/${id}/characters`}>PersonaAI</Link>
+      <Link href={`/universes/${id}/episodes`}>Episodes</Link>
+      <Link href={`/universes/${id}/characters`}>Characters</Link>
       <CanManage id={id}><Link href={`/studio/worlds/${id}`}>Studio</Link></CanManage>
     </nav>
   );
 }
-function WorldCards({ worlds }: { worlds: World[] }) {
+function WorldCards({ worlds, discovery = false }: { worlds: World[]; discovery?: boolean }) {
   return (
-    <div className="platform-grid">
+    <div className={`platform-grid${discovery ? ' discovery-grid' : ''}`}>
       {worlds.map((world) => (
         <article className="panel world-card" key={world.id}>
+          {discovery && <Link href={`/universes/${world.id}`} className="discovery-cover" aria-label={`Explore ${world.title}`}>
+            <UniverseArt id={world.id} title={world.title} />
+            <span><ArrowUpRight size={19} aria-hidden="true" /></span>
+          </Link>}
           <small>
             {world.official ? "Official universe" : world.visibility}
             {world.archived ? " · Archived" : ""}
@@ -92,16 +98,26 @@ export function ExploreWorlds({
   title?: string;
 }) {
   const [worlds, setWorlds] = useState<World[]>([]),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [loading, setLoading] = useState(true),
+    [search, setSearch] = useState(""),
+    [genre, setGenre] = useState("");
   useEffect(() => {
     api("/api/universes")
       .then((data) => setWorlds(data.universes))
-      .catch((error) => setError(error.message));
+      .catch((error) => setError(error.message))
+      .finally(() => setLoading(false));
   }, []);
+  const genres = [...new Set(worlds.map(world => world.settings.genre).filter(Boolean))].sort();
+  const visible = worlds.filter(world =>
+    (!genre || world.settings.genre === genre) &&
+    `${world.title} ${world.settings.premise} ${world.settings.genre}`.toLowerCase().includes(search.trim().toLowerCase())
+  );
   return (
-    <>
+    <section className="universe-discovery" aria-label="Universe discovery">
       <div className="platform-heading">
         <div>
+          <p className="eyebrow">FIND YOUR NEXT STORY</p>
           <h1>{title}</h1>
           <p>Choose a world. Help shape what happens next.</p>
         </div>
@@ -109,9 +125,19 @@ export function ExploreWorlds({
           <Link href="/studio">Creator Studio</Link>
         </Button></CanCreate>
       </div>
-      {error && <p role="alert">{error}</p>}
-      <WorldCards worlds={worlds} />
-    </>
+      <div className="discovery-toolbar">
+        <label className="discovery-search"><Search size={18} aria-hidden="true" /><span className="sr-only">Search universes</span>
+          <input type="search" placeholder="Search worlds, stories, genres…" value={search} onChange={event => setSearch(event.target.value)} />
+        </label>
+        <label className="discovery-genre">Genre
+          <select aria-label="Genre" value={genre} onChange={event => setGenre(event.target.value)}><option value="">All genres</option>{genres.map(value => <option key={value}>{value}</option>)}</select>
+        </label>
+      </div>
+      {error ? <p role="alert">{error}</p> : loading ? <p role="status" className="discovery-state">Finding your next story…</p> : <>
+        <p role="status" className="discovery-count">{visible.length} {visible.length === 1 ? 'universe' : 'universes'} to explore</p>
+        {visible.length ? <WorldCards worlds={visible} discovery /> : <div className="discovery-state"><h2>{worlds.length ? 'No worlds match just yet.' : 'The next story is still to come.'}</h2><p>{worlds.length ? 'Try another title or genre.' : 'Public universes will appear here when they are shared.'}</p>{worlds.length > 0 && <Button variant="outline" onClick={() => { setSearch(''); setGenre(''); }}>Clear filters</Button>}</div>}
+      </>}
+    </section>
   );
 }
 export function CreatorStudio() {
@@ -185,7 +211,7 @@ export function CreatorStudio() {
         </div>
       ) : (
         <>
-          <section className="panel platform-form">
+          <section id="create-universe" className="panel platform-form">
             <h2>Create a universe</h2>
             <div className="provider-actions">
               <Button

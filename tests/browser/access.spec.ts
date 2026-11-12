@@ -6,7 +6,7 @@ const password = "role-test-password-1234";
 async function noManagement(page: Page) {
   await expect(
     page.getByRole("link", {
-      name: /^(Studio|Creator Studio|Open Studio|Manage world)$/,
+      name: /^(Studio|Creator Studio|Open Studio|Manage world|Create a Universe)$/,
     }),
   ).toHaveCount(0);
   await expect(
@@ -132,6 +132,9 @@ test("viewers see audience features while creators and admins see only their per
       expect((await viewer.request.get(path)).status()).toBe(403);
 
     const creatorPage = await creator.newPage();
+    await creatorPage.goto('/');
+    await expect(creatorPage.getByRole('link', { name: 'Create a Universe', exact: true })).toHaveAttribute('href', '/studio#create-universe');
+    await expect(creatorPage.getByRole('link', { name: 'Profile', exact: true })).toBeVisible();
     await creatorPage.goto("/universes");
     await expect(
       creatorPage

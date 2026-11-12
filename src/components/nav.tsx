@@ -1,26 +1,25 @@
 import { ModeSwitcher } from './journey/mode-switcher';
-import { StudioNavigation } from './platform/access';
+import { AccountNavigation, StudioNavigation } from './platform/access';
 import { ThemeSwitcher } from './theme-switcher';
 import Link from 'next/link';
-import { ArrowUpRight, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { features } from '@/lib/config/features';
-import { Button } from './ui/button';
 export function Nav({ active = '', universeId, roundId }: { active?: string; universeId?:string; roundId?:string|null }) {
-  return <header className="nav airl-nav">
+  return <header className="nav airl-nav public-nav">
     <Link href="/" className="brand" aria-label="AIRL home"><Sparkles aria-hidden="true"/><span>AIRL<span className="brand-period">.</span></span></Link>
     <nav aria-label="Main navigation">
+      <Link aria-current={active === 'home' ? 'page' : undefined} href="/">Home</Link>
       <Link aria-current={active === 'discover' ? 'page' : undefined} href="/universes">Explore</Link>
       {features.live && <Link aria-current={active === 'live' ? 'page' : undefined} href={universeId?`/live/${universeId}`:"/live"}>Live</Link>}
-      {features.cinemai && <Link aria-current={['watch', 'universe', 'cinemai'].includes(active) ? 'page' : undefined} href={universeId?`/universes/${universeId}/episodes`:"/cinemai"}>CinemAI</Link>}
-      {features.persona && <Link aria-current={active === 'persona' ? 'page' : undefined} href={universeId?`/universes/${universeId}/characters`:"/persona"}>PersonaAI</Link>}
       <StudioNavigation active={active === 'studio'} universeId={universeId}/>
-      <Link href="/account">Account</Link>
+      <AccountNavigation active={active === 'account'}/>
     </nav>
-    <ModeSwitcher universeId={universeId} roundId={roundId}/>
-    <ThemeSwitcher/>
-    <Button asChild variant="outline" size="sm"><Link href="/discover">Find your experience <ArrowUpRight size={14}/></Link></Button>
+    <div className="public-nav-tools">
+      <ModeSwitcher universeId={universeId} roundId={roundId}/>
+      <ThemeSwitcher/>
+    </div>
   </header>;
 }
 export function Footer() {
-  return <footer><Link href="/" className="brand">AIRL.</Link><span>Artificial In Real Life · The real world is the prompt.</span><small>Demo experience</small></footer>;
+  return <footer className="public-footer"><Link href="/" className="brand">AIRL.</Link><span>Artificial In Real Life · The real world is the prompt.</span><Link href="/discover">All experiences ↗</Link></footer>;
 }

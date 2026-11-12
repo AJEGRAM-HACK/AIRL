@@ -187,7 +187,7 @@ test('Explore stays the everyday entry while Journey traps sheet focus and respe
     await page.goto('/');
     await expect(page.getByRole('navigation', { name: 'Main navigation', exact: true })).toBeVisible();
     await expect(page.locator('.journey-experience')).toHaveCount(0);
-    await page.getByRole('link', { name: 'Launch Journey', exact: true }).click();
+    await page.getByRole('link', { name: /^Launch Journey\b/ }).click();
     await expect(page.locator('.journey-brand')).toContainText('/ Journey');
     await expect(page.getByRole('navigation', { name: 'Main navigation', exact: true })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Exit to Explore', exact: true })).toBeVisible();
@@ -215,6 +215,6 @@ test('Explore stays the everyday entry while Journey traps sheet focus and respe
     await page.getByRole('link', { name: 'Exit to Explore', exact: true }).click();
     await expect(page.getByRole('navigation', { name: 'Main navigation', exact: true })).toBeVisible();
     expect(new URL(page.url()).pathname).toBe('/');
-    await expect(page.getByRole('link', { name: 'Launch Journey', exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: /^Launch Journey\b/ })).toBeVisible();
   } finally { await context.close(); }
 });
