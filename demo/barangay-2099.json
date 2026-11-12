@@ -1,0 +1,295 @@
+{
+  "round": {
+    "id": "af38c22f-c2f8-4aba-a1e2-42583781ae1a",
+    "winner": "taho",
+    "created": 1794472357604,
+    "options": [
+      {
+        "id": "karaoke",
+        "title": "Launch a mandatory karaoke night",
+        "description": "One mic. An entire barangay. Zero escape.",
+        "votes": 3
+      },
+      {
+        "id": "taho",
+        "title": "Declare taho the official currency",
+        "description": "The economy gets a little sweeter.",
+        "votes": 7
+      },
+      {
+        "id": "offline",
+        "title": "Send Captain Bot offline for a day",
+        "description": "Let the humans run the algorithm.",
+        "votes": 2
+      }
+    ]
+  },
+  "episode": {
+    "id": "efbdba79-9564-4de1-8ca0-984c26d284f5",
+    "artifact": {
+      "concept": {
+        "title": "Taho Tender",
+        "premise": "Scene 1: Sa barangay hall, itinaas ni Captain Bot ang isang baso. “Effective immediately, taho is our official currency.” Napahinto si Kuya Taho: “Captain, breakfast ko ’yan. O savings account?”",
+        "conflict": "Scene 2: Habang nagbabayad si Tita Nena, lumamig ang kanyang taho at bumaba ang halagang kinuwenta ni Captain Bot. “Aba, pati pera ko may expiration?” Nag-alok si Kuya Taho ng extra arnibal—may dagdag na bayad.",
+        "humor": "Scene 3: Para iligtas ang halaga, ipinainom ni Tita Nena kay Captain Bot ang pambayad. Nag-beep siya: “Payment received. Internal assets: malagkit.” Ngumisi si Kuya Taho. “May upgrade din akong sago.”",
+        "cliffhanger": "Biglang nag-flash ang screen ni Captain Bot: “WARNING: Currency now circulating inside captain.” Kumulo ang tiyan niya. “Tita Nena, am I… the central bank?”"
+      },
+      "script": {
+        "title": "Taho Tender",
+        "summary": "Ginawang opisyal na pera ang taho, pero may kakaibang epekto ang unang bayad.",
+        "scenes": [
+          {
+            "id": "scene-1",
+            "description": "14 segundo. Sa barangay hall, itinataas ni Captain Bot ang isang baso ng taho.",
+            "dialogue": [
+              {
+                "characterId": "captain-bot",
+                "text": "Effective immediately, taho ang opisyal na currency ng barangay."
+              },
+              {
+                "characterId": "kuya-taho",
+                "text": "Captain, breakfast ko ’yan. O savings account?"
+              },
+              {
+                "characterId": "tita-nena",
+                "text": "Paano pag lumamig ang ipon ko?"
+              },
+              {
+                "characterId": "captain-bot",
+                "text": "Ma’am, pinag-aaralan pa ng algorithm ang interest."
+              }
+            ]
+          },
+          {
+            "id": "scene-2",
+            "description": "14 segundo. Nagbabayad si Tita Nena gamit ang taho.",
+            "dialogue": [
+              {
+                "characterId": "captain-bot",
+                "text": "Notice: lumamig ang taho ninyo. Bumaba ang halaga ng bayad."
+              },
+              {
+                "characterId": "tita-nena",
+                "text": "Aba, pati pera ko may expiration?"
+              },
+              {
+                "characterId": "kuya-taho",
+                "text": "Extra arnibal, Tita? May dagdag na bayad, siyempre."
+              },
+              {
+                "characterId": "tita-nena",
+                "text": "Naku, ipapainom ko na lang kay Captain bago pa malugi!"
+              }
+            ]
+          },
+          {
+            "id": "scene-3",
+            "description": "14 segundo. Ipinaiinom ni Tita Nena ang taho kay Captain Bot.",
+            "dialogue": [
+              {
+                "characterId": "captain-bot",
+                "text": "Payment received. Internal assets: malagkit."
+              },
+              {
+                "characterId": "kuya-taho",
+                "text": "May upgrade din akong sago, Captain!"
+              },
+              {
+                "characterId": "captain-bot",
+                "text": "Warning: currency now circulating inside captain. Kumukulo ang tiyan ko."
+              },
+              {
+                "characterId": "tita-nena",
+                "text": "Ayan, Captain. Ikaw na ang central bank!"
+              }
+            ]
+          }
+        ],
+        "memoryUpdates": [
+          {
+            "characterId": "captain-bot",
+            "memory": "Idineklara niyang opisyal na currency ng barangay ang taho."
+          },
+          {
+            "characterId": "tita-nena",
+            "memory": "Bumaba ang halaga ng kanyang taho nang lumamig ito."
+          },
+          {
+            "characterId": "kuya-taho",
+            "memory": "Nag-alok siya kay Tita Nena ng extra arnibal na may dagdag na bayad."
+          },
+          {
+            "characterId": "captain-bot",
+            "memory": "Tinanggap niya bilang bayad ang tahong ipinainom ni Tita Nena; umiikot ito sa loob niya."
+          }
+        ],
+        "relationshipUpdates": []
+      },
+      "manifest": {
+        "title": "Taho Tender",
+        "scenes": [
+          {
+            "id": "scene-1",
+            "style": "dramatic-reveal",
+            "background": "barangay-hall",
+            "characters": [
+              "captain-bot",
+              "kuya-taho",
+              "tita-nena"
+            ],
+            "animation": "fade-in",
+            "durationSeconds": 14,
+            "dialogue": [
+              {
+                "characterId": "captain-bot",
+                "text": "Effective immediately, taho ang opisyal na currency ng barangay."
+              },
+              {
+                "characterId": "kuya-taho",
+                "text": "Captain, breakfast ko ’yan. O savings account?"
+              },
+              {
+                "characterId": "tita-nena",
+                "text": "Paano pag lumamig ang ipon ko?"
+              },
+              {
+                "characterId": "captain-bot",
+                "text": "Ma’am, pinag-aaralan pa ng algorithm ang interest."
+              }
+            ]
+          },
+          {
+            "id": "scene-2",
+            "style": "character-dialogue",
+            "background": "barangay-hall",
+            "characters": [
+              "captain-bot",
+              "kuya-taho",
+              "tita-nena"
+            ],
+            "animation": "gentle-bob",
+            "durationSeconds": 14,
+            "dialogue": [
+              {
+                "characterId": "captain-bot",
+                "text": "Notice: lumamig ang taho ninyo. Bumaba ang halaga ng bayad."
+              },
+              {
+                "characterId": "tita-nena",
+                "text": "Aba, pati pera ko may expiration?"
+              },
+              {
+                "characterId": "kuya-taho",
+                "text": "Extra arnibal, Tita? May dagdag na bayad, siyempre."
+              },
+              {
+                "characterId": "tita-nena",
+                "text": "Naku, ipapainom ko na lang kay Captain bago pa malugi!"
+              }
+            ]
+          },
+          {
+            "id": "scene-3",
+            "style": "cliffhanger",
+            "background": "barangay-hall",
+            "characters": [
+              "captain-bot",
+              "kuya-taho",
+              "tita-nena"
+            ],
+            "animation": "slide-in",
+            "durationSeconds": 14,
+            "dialogue": [
+              {
+                "characterId": "captain-bot",
+                "text": "Payment received. Internal assets: malagkit."
+              },
+              {
+                "characterId": "kuya-taho",
+                "text": "May upgrade din akong sago, Captain!"
+              },
+              {
+                "characterId": "captain-bot",
+                "text": "Warning: currency now circulating inside captain. Kumukulo ang tiyan ko."
+              },
+              {
+                "characterId": "tita-nena",
+                "text": "Ayan, Captain. Ikaw na ang central bank!"
+              }
+            ]
+          }
+        ],
+        "cast": [
+          {
+            "id": "captain-bot",
+            "name": "Captain Bot",
+            "color": "#c7aafa",
+            "symbol": "bot"
+          },
+          {
+            "id": "kuya-taho",
+            "name": "Kuya Taho",
+            "color": "#8be2d2",
+            "symbol": "coffee"
+          },
+          {
+            "id": "tita-nena",
+            "name": "Tita Nena",
+            "color": "#f3b3de",
+            "symbol": "glasses"
+          }
+        ]
+      },
+      "critique": {
+        "approved": true,
+        "continuity": "The taho currency decision, cooling payment, and internal circulation follow coherently. All memory updates are established by the script; the warning leaves the consequences unresolved.",
+        "characterVoice": "The cast remains faithful to their distinct voices, with a clear comic payoff.",
+        "visualFeasibility": "Three 14-second scenes with four short lines each are feasible; dialogue and captions convey the payment and drinking actions alongside symbolic artwork.",
+        "feedback": []
+      },
+      "executionMode": "hosted_openai"
+    },
+    "createdAt": "2026-11-12T08:43:27.651Z",
+    "storyOrder": 1,
+    "publishedAt": "2026-11-12T08:43:27.651Z"
+  },
+  "job": {
+    "id": "a74e1393-1260-4a13-a8a7-ffa3c13335bd",
+    "choice": "Declare taho the official currency",
+    "attempts": 3,
+    "created": 1794472389383,
+    "updated": 1794473007651,
+    "mode": "hosted_openai",
+    "model": "gpt-6.1-terra"
+  },
+  "canon": [
+    {
+      "id": "efbdba79-9564-4de1-8ca0-984c26d284f5:memory:0",
+      "characterId": "captain-bot",
+      "sceneId": "scene-1",
+      "content": "Idineklara niyang opisyal na currency ng barangay ang taho.",
+      "kind": "memory"
+    },
+    {
+      "id": "efbdba79-9564-4de1-8ca0-984c26d284f5:memory:1",
+      "characterId": "tita-nena",
+      "sceneId": "scene-1",
+      "content": "Bumaba ang halaga ng kanyang taho nang lumamig ito.",
+      "kind": "memory"
+    },
+    {
+      "id": "efbdba79-9564-4de1-8ca0-984c26d284f5:memory:2",
+      "characterId": "kuya-taho",
+      "sceneId": "scene-1",
+      "content": "Nag-alok siya kay Tita Nena ng extra arnibal na may dagdag na bayad.",
+      "kind": "memory"
+    },
+    {
+      "id": "efbdba79-9564-4de1-8ca0-984c26d284f5:memory:3",
+      "characterId": "captain-bot",
+      "sceneId": "scene-1",
+      "content": "Tinanggap niya bilang bayad ang tahong ipinainom ni Tita Nena; umiikot ito sa loob niya.",
+      "kind": "memory"
+    }
+  ]
+}

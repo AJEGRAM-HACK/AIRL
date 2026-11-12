@@ -21,7 +21,18 @@ A universe gives a creator's characters, lore, and stories a home that can grow 
 3. **Follow the winning choice into production.** An authorized operator closes the round. The production job carries the winner through Director → Screenwriter → Visual Producer → Critic and prepares a playable preview. An authorized reviewer approves the episode and its canon changes before publication.
 4. **Watch the premiere.** In the configured showcase, choose **Play first production** in Journey or open `/universes/barangay-2099/episodes/efbdba79-9564-4de1-8ca0-984c26d284f5` to watch **Taho Tender**.
 
-**Taho Tender** is a saved, four-shot Flow/Veo export of about 32 seconds. The same film appears across Explore, Live, the episode library and detail page, Journey, and published Studio previews when the local showcase media is installed. The original is stored at `.data/flow-demo/DEMO B2099.mp4`. The H.264/AAC copy and poster are served through ignored `public/demo-media` links, so a fresh checkout requires the local media to show this film. Use the [presenter runbook](PRESENTER_RUNBOOK.md) for showcase setup, phone access, and saved playback.
+**Taho Tender** is a saved, four-shot Flow/Veo export of about 32 seconds. The video, poster, and replay fixture are included in the repository.
+
+### Play the saved showcase from a fresh clone
+
+Use Node.js 24 LTS and npm.
+
+```sh
+npm ci
+npm run demo
+```
+
+Open [Journey](http://127.0.0.1:3000/journey?universe=barangay-2099) and choose **Play first production**, or go straight to the [published episode](http://127.0.0.1:3000/universes/barangay-2099/episodes/efbdba79-9564-4de1-8ca0-984c26d284f5). Each launch creates a separate local SQLite database with the saved episode and closed voting round, including the recorded totals of seven votes for taho, three for karaoke, and two for sending Captain Bot offline. Saved playback requires no API key or Ollama. The [presenter runbook](PRESENTER_RUNBOOK.md) covers the separate live setup with audience phones and a new voting round.
 
 ## Run locally
 

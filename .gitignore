@@ -7,4 +7,6 @@ out/
 .DS_Store
 
 .data/
-/public/demo-media
+/public/demo-media/*
+!/public/demo-media/Taho-Tender.mp4
+!/public/demo-media/Taho-Tender.jpg
