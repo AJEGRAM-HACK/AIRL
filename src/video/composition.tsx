@@ -1,4 +1,4 @@
-import { AbsoluteFill, Sequence, interpolate, useCurrentFrame } from 'remotion';
+import { AbsoluteFill, Img, Sequence, interpolate, staticFile, useCurrentFrame } from 'remotion';
 import { Bot, Glasses, Coffee, UserRound } from 'lucide-react';
 import { z } from 'zod';
 import { Manifest } from '@/server/production/schemas';
@@ -45,11 +45,51 @@ function Scene({ scene, captions, reducedMotion, cast }: { cast?:EpisodeManifest
     {scene.style === 'cliffhanger' && <div style={{position:'absolute',bottom:95,width:'100%',textAlign:'center',fontSize:20,letterSpacing:5,color:'#e879f9'}}>TO BE CONTINUED…</div>}
   </AbsoluteFill>;
 }
+
+function CinematicScene({ scene, captions, reducedMotion, cast, title, sceneIndex }: {
+  scene: EpisodeManifest['scenes'][number];
+  captions: boolean;
+  reducedMotion: boolean;
+  cast: NonNullable<EpisodeManifest['cast']>;
+  title: string;
+  sceneIndex: number;
+}) {
+  const frame = useCurrentFrame();
+  const duration = scene.durationSeconds * FPS;
+  const lineIndex = Math.min(scene.dialogue.length - 1, Math.floor(frame / duration * scene.dialogue.length));
+  const line = scene.dialogue[lineIndex];
+  const speaker = cast.find(character => character.id === line?.characterId);
+  const zoom = reducedMotion ? 1 : interpolate(frame, [0, duration], [1.025, 1.095]);
+  const pan = reducedMotion ? 0 : interpolate(frame, [0, duration], [sceneIndex === 1 ? -9 : 8, sceneIndex === 1 ? 9 : -8]);
+  return <AbsoluteFill data-scene-id={scene.id} style={{ background: '#06152c', color: '#f4f9ff', fontFamily: 'Schibsted Grotesk, Arial, sans-serif' }}>
+    <AbsoluteFill style={{ overflow: 'hidden' }}>
+      <Img src={staticFile('images/barangay-2099-cinematic.png')} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${zoom}) translateX(${pan}px)` }} />
+      <AbsoluteFill style={{ background: 'linear-gradient(180deg, rgba(3,13,31,.7), transparent 36%, transparent 52%, rgba(3,13,31,.95) 88%)' }} />
+      <AbsoluteFill style={{ boxShadow: 'inset 0 0 130px rgba(0,10,28,.55)' }} />
+    </AbsoluteFill>
+    <div style={{ position: 'absolute', top: 62, left: 46, right: 46 }}>
+      <p style={{ color: '#9edcff', fontSize: 21, letterSpacing: 4, margin: 0 }}>BARANGAY 2099</p>
+      {sceneIndex === 0
+        ? <div style={{ fontSize: 53, fontWeight: 750, lineHeight: 1.06, letterSpacing: -2, maxWidth: 590, margin: '22px 0 0', textShadow: '0 4px 30px #051128' }}>{title}</div>
+        : <p style={{ fontSize: 29, color: '#e5f2ff', margin: '18px 0 0' }}>{backgrounds[scene.background].label}</p>}
+    </div>
+    {captions && line && <div style={{ position: 'absolute', bottom: 240, left: 38, right: 38, padding: '27px 30px 30px', borderRadius: 22, background: 'linear-gradient(135deg, rgba(7,28,56,.96), rgba(5,18,39,.97))', border: '1px solid #98d8ff55', boxShadow: '0 18px 65px #020b1bc0' }}>
+      <p style={{ fontSize: 30, fontWeight: 700, margin: '0 0 13px', color: '#a4deff' }}>{speaker?.name || line.characterId}</p>
+      <p style={{ fontSize: 40, lineHeight: 1.35, fontWeight: 550, margin: 0, color: '#f6faff' }}>{line.text}</p>
+      <div aria-hidden="true" style={{ display: 'flex', gap: 7, marginTop: 23 }}>{scene.dialogue.map((_, index) => <i key={index} style={{ height: 3, flex: 1, background: index <= lineIndex ? '#8edaff' : '#6b8daa44', borderRadius: 4 }} />)}</div>
+    </div>}
+    {scene.style === 'cliffhanger' && <p style={{ position: 'absolute', bottom: 60, width: '100%', textAlign: 'center', color: '#9edcff', fontSize: 18, letterSpacing: 5, margin: 0 }}>TO BE CONTINUED</p>}
+  </AbsoluteFill>;
+}
+
 export function EpisodeComposition({ manifest, captions = true, reducedMotion = false }: { manifest: EpisodeManifest; captions?: boolean; reducedMotion?: boolean }) {
   let from = 0;
-  return <AbsoluteFill style={{background:'#0d0d17'}}>{manifest.scenes.map(scene => {
+  const cinematic = manifest.cast?.length === 3 && Object.entries(characterAssets).every(([id, character]) => manifest.cast?.some(item => item.id === id && item.name === character.name));
+  return <AbsoluteFill style={{background:'#0d0d17'}}>{manifest.scenes.map((scene, sceneIndex) => {
     const start = from;
     from += scene.durationSeconds * FPS;
-    return <Sequence key={scene.id} from={start} durationInFrames={scene.durationSeconds * FPS}><Scene cast={manifest.cast} scene={scene} captions={captions} reducedMotion={reducedMotion}/></Sequence>;
+    return <Sequence key={scene.id} from={start} durationInFrames={scene.durationSeconds * FPS}>{cinematic
+      ? <CinematicScene cast={manifest.cast!} title={manifest.title} sceneIndex={sceneIndex} scene={scene} captions={captions} reducedMotion={reducedMotion}/>
+      : <Scene cast={manifest.cast} scene={scene} captions={captions} reducedMotion={reducedMotion}/>}</Sequence>;
   })}</AbsoluteFill>;
 }

@@ -1,5 +1,7 @@
 # Curated demonstration and OpenAI setup
 
+The user's subsequent replacement request is implemented in [PAID_SHOWCASE.md](PAID_SHOWCASE.md). The active database is now `.data/demo-paid-showcase-20261112.sqlite`, serving the Critic-approved paid **Taho Tender** episode through loopback 3110 and ngrok. An explicit paid gate is supported by the launcher. The earlier snapshot and private-preview records below remain historical evidence for credential preparation.
+
 Prepared November 12, 2026 from application checkpoint `d78b053`. This follow-up is authorized by the user's request to show one universe/episode and prepare OpenAI credentials. Original working-tree edits remain separate.
 
 ## Presentation data

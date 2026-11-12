@@ -3,6 +3,60 @@ import assert from 'node:assert/strict';
 import { selectProvider } from '../src/ai/providers/registry';
 import { GatewayRequest } from '../src/ai/schemas/gateway';
 import { estimateCost } from '../src/ai/usage/estimate';
+test('paid visual output uses supplied speakers and excludes the unused optional cast field (mock transport)', async () => {
+  const originalFetch = globalThis.fetch;
+  const { OpenAICreativeProvider } = await import('../src/ai/providers/openai');
+  const script = {
+    title: 'Paid visual contract regression', summary: 'A test fixture.', memoryUpdates: [], relationshipUpdates: [],
+    scenes: [1, 2, 3].map(index => ({ id: `scene-${index}`, description: 'A captioned scene.', dialogue: [
+      { characterId: 'captain-bot', text: 'A test line.' },
+      { characterId: 'tita-nena', text: 'Another test line.' },
+      { characterId: 'kuya-taho', text: 'The final test line.' },
+    ] })),
+  };
+  const plan = { title: script.title, scenes: script.scenes.map(() => ({
+    style: 'character-dialogue', background: 'barangay-plaza', characters: ['captain-bot', 'tita-nena', 'kuya-taho'], animation: 'fade-in', durationSeconds: 14,
+  })) };
+  globalThis.fetch = async (_url, options) => {
+    const request = JSON.parse(String(options?.body));
+    assert.equal(Object.hasOwn(request.text.format.schema.properties, 'cast'), false);
+    return new Response(JSON.stringify({ id: 'resp_visual_fixture', status: 'completed', model: 'test-model', output: [
+      { id: 'msg_visual_fixture', type: 'message', role: 'assistant', status: 'completed', content: [{ type: 'output_text', text: JSON.stringify(plan), annotations: [] }] },
+    ], usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2, input_tokens_details: { cached_tokens: 0 }, output_tokens_details: { reasoning_tokens: 0 } } }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+  try {
+    const result = await new OpenAICreativeProvider('test-only-key', 'test-model').generateScenes(script);
+    assert.deepEqual(result.scenes.map(scene => scene.dialogue), script.scenes.map(scene => scene.dialogue));
+    assert.deepEqual(result.scenes.map(scene => scene.durationSeconds), [14, 14, 14]);
+  } finally { globalThis.fetch = originalFetch; }
+});
+test('OpenAI call pacing cancels promptly without sending another request (mock transport)', async () => {
+  const originalFetch = globalThis.fetch;
+  const originalInterval = process.env.OPENAI_MIN_CALL_INTERVAL_MS;
+  const controller = new AbortController();
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    return new Response(JSON.stringify({ error: { message: 'Test rejection', type: 'invalid_request_error', code: 'invalid_api_key' } }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+  };
+  process.env.OPENAI_MIN_CALL_INTERVAL_MS = '2000';
+  try {
+    const { createOpenAIExecutor } = await import('../src/server/production/openai');
+    const { z } = await import('zod');
+    const executor = createOpenAIExecutor('test-only-key', 'test-model', controller.signal);
+    await assert.rejects(executor.reply(z.object({ text: z.string() }), 'Test'));
+    const started = Date.now();
+    const pending = executor.reply(z.object({ text: z.string() }), 'Test');
+    controller.abort();
+    await assert.rejects(pending, { name: 'AbortError' });
+    assert.equal(calls, 1);
+    assert.ok(Date.now() - started < 500);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalInterval === undefined) delete process.env.OPENAI_MIN_CALL_INTERVAL_MS;
+    else process.env.OPENAI_MIN_CALL_INTERVAL_MS = originalInterval;
+  }
+});
 test('BYOK uses only the supplied creator credential and fails without fallback (mock transport)', async () => {
   const original = globalThis.fetch;
   let calls = 0;

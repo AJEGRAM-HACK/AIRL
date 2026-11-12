@@ -24,7 +24,8 @@ The preservation source reference is `checkpoint/pre-hackathon-ui-pivot-2026-11-
 | --- | --- | --- |
 | Implemented and previously verified | Accounts/roles, owned universes, custom cast/relationships, private/public visibility, ordered canon, votes, SSE, jobs/review/publication and Remotion preview | Source contracts and prior tests at `1a7baf3`, retained in VERIFICATION |
 | Implemented and previously verified | Offline Demo, real local Ollama, Journey, QR and saved playback | Browser acceptance, real inference and public/device records at their stated checkpoints |
-| Partially implemented | Hosted OpenAI and HTTPS BYOK | Adapters, consent/credential isolation and contract tests exist, actual paid inference remains unverified |
+| Implemented and verified | Hosted OpenAI | GPT-6.1 Terra completed a paid room job, Critic review, publication and public playback |
+| Partially implemented | HTTPS BYOK | Request-only credentials and contract tests exist, live paid BYOK validation remains pending |
 | Partially implemented | Reference-image and character visual customization | Protected storage/profile linking exists, upload UI and custom artwork rendering remain future work |
 | Frontend increment | Explore-led landing, simplified public navigation, visual universe discovery with local search and genre filters | Existing APIs, permissions, routes and provider contracts retained; see VERIFICATION for new evidence |
 | Planned, awaiting review | Numeric traits, character/profile/prompt-policy versions and richer universe identity/preferences | Later product/model proposals, outside this frontend sprint |
@@ -41,7 +42,7 @@ The local implementation now includes profiles, viewer/creator/admin roles, opti
 
 `src/server/platform/migration.ts` adds tables transactionally and backfills the official universe while preserving legacy tables and IDs. `scripts/migrate-universes.ts` verifies a SQLite backup before applying to live data. Universe characters use a composite universe/slug key. Asset access and draft retrieval use the same visibility/ownership checks. Archival is recoverable. Characters referenced by production snapshots remain retained.
 
-`src/server/platform/store.ts` owns profile/world/cast/asset access. `src/server/platform/ai.ts` owns pitch inference and pre-inference spoiler-scoped retrieval. `src/ai/providers/stage-contracts.ts` shares live adapter contracts, bounded context, instructions and deterministic manifest assembly. Provider-specific transport stays in Ollama/OpenAI adapters. All stages still validate against the shared production domain.
+`src/server/platform/store.ts` owns profile/world/cast/asset access. `src/server/platform/ai.ts` owns pitch inference and pre-inference spoiler-scoped retrieval. `src/ai/providers/stage-contracts.ts` owns shared context handling and deterministic manifest assembly. Local generation uses compact scene requests. The OpenAI adapter requests three 14-second scenes with three or four short lines per scene. Provider-specific transport stays in Ollama/OpenAI adapters. All stages still validate against the shared production domain.
 
 Closing a round freezes world, cast, approved history, winner, model and explicit story order. Script validation persists the outline. Manifest validation persists a playable version before Critic execution. Compatible retries reuse validated stages and retain the last preview. Publication validates corrected canon and atomically commits the episode, memories, relationships and ordered source events. Repeated publication preserves one result. Public job status omits scripts and private previews.
 
@@ -61,7 +62,7 @@ Story retrieval first filters visibility, universe, optional character and expli
 
 Private worlds start unpublished. Owners/admins can edit and archive them. Admins grant creator access, and only admins manage official canon. BYOK remains request-only and HTTPS. Hosted models come from a server allowlist, require server enablement and per-operation consent, including explicit paid retries. No provider/model fallback occurs.
 
-Creator-supplied reference images can be stored through the protected image API and linked from character profiles. Custom artwork rendering, audio, forks and team collaboration remain follow-on work. Browser compositions use reusable pictograms and approved CSS backgrounds, including neutral settings.
+Creator-supplied reference images can be stored through the protected image API and linked from character profiles. The official Barangay cast now uses generated cinematic artwork with camera motion and timed captions. Other cast compositions use reusable pictograms and approved CSS backgrounds, including neutral settings. General reference-art rendering, audio, forks and team collaboration remain follow-on work. [Published paid showcase](docs/PAID_SHOWCASE.md).
 
 ## 1. Product boundaries
 
@@ -317,7 +318,7 @@ Run Next.js on Node 24 with SQLite on a persistent Mac filesystem. Ollama stays 
 
 ### Approved hackathon tunnel
 
-For up to 35 audience members, the approved demo keeps Next.js, SQLite and Ollama on the Mac and forwards the web app through ngrok. `scripts/demo-tunnel.mjs` discovers the assigned HTTPS origin, starts `scripts/tunnel-server.mjs` on loopback, launches the existing recovery worker and prevents idle sleep on macOS. The upstream accepts the configured hostname, including its equivalent default HTTPS port, canonicalizes Host and replaces forwarded headers. Public HTTPS account cookies remain Secure and strict same-origin mutation checks apply. Agent request inspection and paid hosted calls are disabled. Ollama is excluded from the upstream port selection.
+For up to 35 audience members, the approved demo keeps Next.js, SQLite and Ollama on the Mac and forwards the web app through ngrok. `scripts/demo-tunnel.mjs` discovers the assigned HTTPS origin, starts `scripts/tunnel-server.mjs` on loopback, launches the existing recovery worker and prevents idle sleep on macOS. The upstream accepts the configured hostname, including its equivalent default HTTPS port, canonicalizes Host and replaces forwarded headers. Public HTTPS account cookies remain Secure and strict same-origin mutation checks apply. Agent request inspection is disabled. An explicit `AIRL_ALLOW_LIVE_REQUESTS=true` enables the authorized paid demo for the web upstream and recovery worker, with existing account checks and per-operation consent. The default paid gate is false. Ollama is excluded from the upstream port selection.
 
 The live stream keeps its database handles for the connection lifetime, revalidates access each second, sends room snapshots only when changed, and sends content-free production invalidation notices. Gallery/review clients fetch authorized content on notices, with slower fallback polling. This reduces request quota usage while preserving real progress and publication updates. Each stream closes and cleans up its handles on abort, cancellation, revocation or the five-minute connection limit.
 
@@ -337,7 +338,7 @@ A compatible persistent Node host can keep SQLite and local scheduling for a sma
 
 1. Preserve the completed local vote → job → review → preview → publication loop, additive world migration, QR sharing and server-side roles.
 2. Complete the owner-admin venue rehearsal, repeat crash recovery and monitor repeated-run memory, latency and tunnel allowance.
-3. Validate Hosted OpenAI and request-only HTTPS BYOK after credentials and explicit paid-call authorization.
+3. Hosted OpenAI paid room generation and publication are verified. Validate request-only HTTPS BYOK through its authenticated consent workflow.
 4. If always-on hosting is approved, migrate identity/data/storage to Supabase, preserving UUIDs, story order and transactional invariants. Add adversarial RLS verification before enabling writes.
 5. Replace local scheduling with a durable worker and outbox while retaining application-owned job/event records. A Mac-worker bridge needs its own authorization and security design.
 6. Add export only after preview correctness, license eligibility and resource profiling. Moderation, team collaboration and forks need separate scopes.
@@ -346,7 +347,7 @@ A compatible persistent Node host can keep SQLite and local scheduling for a sma
 
 Verify duplicate submissions, vote/closure races, one job per round, no draft exposure, idempotent approval, replay-safe retries, claim expiry, missing assets, manifest timing and changes based on the winning choice. Verify that old provider IDs and stored episodes remain readable.
 
-Playwright acceptance verifies browser playback, scene seeking, captions and the mobile audience flow for Demo and Ollama. Wider keyboard, reduced-motion and device coverage remain follow-up QA. OpenAI tests remain unverified until credentials and explicit approval are supplied.
+Playwright acceptance verifies browser playback, scene seeking, captions and the mobile audience flow for Demo and Ollama. Wider keyboard, reduced-motion and device coverage remain follow-up QA. An authorized GPT-6.1 Terra room job, review/publication and public ngrok playback are verified. Request-only paid BYOK testing remains pending.
 
 Known limits include cookie-recreatable anonymous voting identities, local password accounts without email verification/reset, request-time role snapshots that refresh with navigation/authentication, no hosted RLS, no MP4/audio export and no full content moderation system. Multiple owned universes and scoped rooms are implemented. The Mac, network and ngrok allowance remain demo dependencies. The 35-session result is a short synthetic rehearsal, with one physical iPhone verified separately. Generated quality and cultural consistency still require human review, including on successful local-model runs.
 

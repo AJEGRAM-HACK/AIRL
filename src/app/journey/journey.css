@@ -104,7 +104,7 @@
 .journey-experience .journey-film-heading { text-align: center; }
 .journey-experience .journey-film-heading h1 { font-size: clamp(25px, 3vw, 42px); margin: 8px auto; max-width: 1000px; }
 .journey-film-heading .journey-kicker { margin: 0; }
-.journey-film { width: min(100%, 380px, calc((100svh - 460px) * .5625)); min-width: 160px; }
+.journey-film { width: min(100%, 420px, calc((100svh - 340px) * .5625)); min-width: 160px; }
 .journey-experience .journey-film .remotion-preview { width: 100%; max-width: none; margin: 0; }
 .journey-film-links { display: flex; gap: 30px; align-items: center; font-size: 12px; }
 .journey-film-links a { display: inline-flex; align-items: center; gap: 10px; text-decoration: underline; text-underline-offset: 4px; }
@@ -193,7 +193,7 @@
   .journey-artifact { border: 0; border-top: 1px solid var(--border); padding: 24px 0 0; }
   .journey-artifact .remotion-preview { width: min(100%, 230px); }
   .journey-experience .journey-film-heading h1 { font-size: 25px; margin: 8px 0; }
-  .journey-film { width: min(100%, calc((100svh - 520px) * .5625)); }
+  .journey-film { width: min(100%, 320px, calc((100svh - 360px) * .5625)); }
   .journey-film-links { gap: 16px; flex-wrap: wrap; justify-content: center; }
   .journey-question .story-helper [role=status] { font-size: 18px; }
   .journey-sheet-panel { inset: 12px 0 0; }

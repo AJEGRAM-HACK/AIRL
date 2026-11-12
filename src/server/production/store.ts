@@ -1,6 +1,6 @@
 import { migratePlatform, worldSnapshot, OFFICIAL } from '@/server/platform/migration';
 import { CanonChanges } from '@/lib/domain';
-import { Script, Manifest, validateScript, validateManifest } from './schemas';
+import { Input, Script, Manifest, validateScript, validateManifest } from './schemas';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -115,7 +115,7 @@ export class ProductionStore {
   }
   resumable(id:string,input:ProductionInput,model:string,mode:string) {
     const old=this.inspect(id);const production=old.production;
-    if(!production||production.model!==model||production.execution_mode!==mode||production.input!==JSON.stringify(input))return {};
+    if(!production||production.model!==model||production.execution_mode!==mode||production.input!==JSON.stringify(Input.parse(input)))return {};
     const output=(stage:string)=>{const row=old.events.filter(event=>event.stage===stage&&event.status==='succeeded').at(-1);return row?JSON.parse(String(row.data)).output:undefined;};
     const concept=output('Story Director'),feedback=output('Creative Critic');
     if(feedback&&!feedback.approved)return {concept,feedback};

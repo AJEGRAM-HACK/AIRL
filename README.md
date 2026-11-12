@@ -21,13 +21,13 @@ The public interface now uses a dark-first blue editorial theme and a minimal Ex
 - PersonaAI provides scoped character profiles, relationships, approved memories and episode-scoped story questions with source links.
 - Profiles start as viewers. Admin-granted creators manage owned private/public universes. Official Barangay 2099 canon requires an admin.
 - Remotion browser playback supports seek, captions, transcripts and repeat replay. The labeled saved-episode path performs zero inference.
-- Demo runs offline. Local Ollama is verified. Hosted OpenAI completed a consented private four-stage rehearsal with GPT-6.1 Terra; HTTPS request-only BYOK retains its guarded adapter and separate live-validation limit.
+- Demo runs offline. Local Ollama is verified. Hosted OpenAI completed a paid room job, review and publication with GPT-6.1 Terra; HTTPS request-only BYOK retains its guarded adapter and separate live-validation limit.
 
-Media is currently a silent animated portrait composition using reusable original story content, approved CSS backgrounds and Lucide character pictograms. Reference-image storage/linking exists, while custom artwork rendering, generated voices and MP4 export remain future work.
+Media is a silent animated portrait composition with timed captions. The official Barangay cast uses generated cinematic artwork and camera motion. Other cast compositions use approved CSS backgrounds and Lucide character pictograms. Reference-image storage/linking is available. Generated voices, general character-artwork rendering and MP4 export remain future work.
 
 ## Local setup
 
-For the curated one-universe, one-episode presentation and private OpenAI configuration, follow [DEMO_OPENAI_SETUP.md](docs/DEMO_OPENAI_SETUP.md). The current port-3110 preview uses its preserved-data snapshot and has authorized Hosted OpenAI enabled with GPT-6.1 Terra. Journey presentation settings expose the existing provider selector and require fresh paid consent per round. Published episodes replace reference samples in the Live picker. The new Critic-approved OpenAI rehearsal remains private; the one public episode is the preserved Ollama fallback.
+The current presentation serves **Taho Tender**, a paid GPT-6.1 Terra generation, as its one published episode in Barangay 2099. The 42-second premiere uses generated blue character artwork, camera motion and 12 Taglish lines. The active database is ignored `.data/demo-paid-showcase-20261112.sqlite`. Loopback 3110 and the ngrok launcher use that database. An explicit `AIRL_ALLOW_LIVE_REQUESTS=true` enables Hosted OpenAI for the tunnel server and worker, with fresh operation consent in Journey. [Current premiere, launch command and verification](docs/PAID_SHOWCASE.md). [Private credential setup](docs/DEMO_OPENAI_SETUP.md).
 
 Use Node.js 24 LTS and npm. Reuse the existing dependency installation. On a fresh checkout, install the pinned dependencies with `npm ci`. Check `node --version` before starting. The temporary development runtime, when present, can be selected with the following command.
 
@@ -54,7 +54,7 @@ Copy `.env.example` to ignored `.env.local` only when changing configuration. Ke
 
 Sign up at `/account`. Accounts start as viewers. Use the trusted local `npm run account:admin -- your-email@example.com` bootstrap when an initial admin is needed. Admins grant creator access in `/studio`. `/studio/worlds/[id]` manages owned worlds and `/studio/[roomId]` operates production. Unauthorized Studio pages return 404 and APIs retain independent role/ownership checks.
 
-The approved hackathon setup uses the Mac, SQLite, local Ollama and an ngrok public HTTPS web tunnel for up to 35 viewers. `npm run demo:tunnel` starts the web upstream and recovery worker with paid hosted calls disabled. Build first with presentation servers stopped. The local-network certificate path remains a fallback. [Complete presenter launch, review, fallback and LAN instructions](PRESENTER_RUNBOOK.md)
+The approved hackathon setup uses the Mac, SQLite, local Ollama and an ngrok public HTTPS web tunnel for up to 35 viewers. `npm run demo:tunnel` starts the web upstream and recovery worker. An explicit `AIRL_ALLOW_LIVE_REQUESTS=true` enables the authorized paid presentation, with its configured database path. Build first with presentation servers stopped. The local-network certificate path remains a fallback. [Complete presenter launch, review, fallback and LAN instructions](PRESENTER_RUNBOOK.md)
 
 SQLite defaults to ignored `.data/airl-live.sqlite`. The web app and recovery worker must share its path. `CINEMAI_DB_PATH` can override standalone CLI storage. Use `npm run production:worker` for a separate local recovery worker or `npm run production:drain` for one pass. The tunnel launcher includes its worker. The local scheduler and filesystem are current demo dependencies. [Backup and isolated restore procedure](docs/PRESERVATION_CHECKPOINT.md)
 

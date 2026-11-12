@@ -2,6 +2,7 @@ import { inferenceLimits } from '@/ai/config/limits';
 import { Agent, Runner, OpenAIProvider } from '@openai/agents';
 import OpenAI from 'openai';
 import { z } from 'zod';
+import { setTimeout as delay } from 'node:timers/promises';
 import type { Stage } from './schemas';
 import type { Executor } from './workflow';
 export const instructions: Record<Stage, string> = {
@@ -13,20 +14,34 @@ export const instructions: Record<Stage, string> = {
 export function createOpenAIExecutor(apiKey: string, model: string, signal?: AbortSignal, onUsage?: (usage: { inputTokens: number; outputTokens: number }) => void): Executor & { structured(schema:z.ZodType,prompt:string,instruction:string,name?:string):Promise<unknown>; reply(schema: z.ZodType, prompt: string): Promise<unknown> } {
   const client = new OpenAI({ apiKey, maxRetries: 0, timeout: 25_000 });
   const runner = new Runner({ modelProvider: new OpenAIProvider({ openAIClient: client }), tracingDisabled: true });
+  const effort = z.enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max']).optional().parse(process.env.OPENAI_REASONING_EFFORT || undefined);
+  const reasoning = effort ? { reasoning: { effort } } : {};
+  const configuredInterval = Number(process.env.OPENAI_MIN_CALL_INTERVAL_MS || 0);
+  const interval = Number.isFinite(configuredInterval) ? Math.min(20_000, Math.max(0, configuredInterval)) : 0;
+  let previousCallAt = 0;
+  async function paceCall() {
+    const remaining = interval - (Date.now() - previousCallAt);
+    if (remaining > 0) await delay(remaining, undefined, { signal });
+    signal?.throwIfAborted();
+    previousCallAt = Date.now();
+  }
   return {
     async structured(schema:z.ZodType,prompt:string,instruction:string,name='Creative assistant') {
-      const agent=new Agent({name,model,instructions:instruction,outputType:schema,modelSettings:{maxTokens:inferenceLimits().outputTokens}});
+      await paceCall();
+      const agent=new Agent({name,model,instructions:instruction,outputType:schema,modelSettings:{maxTokens:inferenceLimits().outputTokens,...reasoning}});
       const result=await runner.run(agent,prompt,{maxTurns:1,signal});onUsage?.({inputTokens:result.state.usage.inputTokens,outputTokens:result.state.usage.outputTokens});return result.finalOutput;
     },
     async reply(schema: z.ZodType, prompt: string) {
-      const agent = new Agent({ name: 'Character', model, instructions: 'Respond using the supplied fictional character profile and constraints.', outputType: schema, modelSettings: { maxTokens: 300 } });
+      await paceCall();
+      const agent = new Agent({ name: 'Character', model, instructions: 'Respond using the supplied fictional character profile and constraints.', outputType: schema, modelSettings: { maxTokens: 300, ...reasoning } });
       const result = await runner.run(agent, prompt, { maxTurns: 1, signal });
       onUsage?.({ inputTokens: result.state.usage.inputTokens, outputTokens: result.state.usage.outputTokens });
       return result.finalOutput;
     },
     async preflight() { await client.models.retrieve(model, { signal }); },
     async execute(stage: Stage, schema: z.ZodType, prompt: string) {
-      const agent = new Agent({ name: stage, model, instructions: instructions[stage], outputType: schema, modelSettings: { maxTokens: inferenceLimits().outputTokens } });
+      await paceCall();
+      const agent = new Agent({ name: stage, model, instructions: instructions[stage], outputType: schema, modelSettings: { maxTokens: inferenceLimits().outputTokens, ...reasoning } });
       const result = await runner.run(agent, prompt, { maxTurns: 1, signal });
       onUsage?.({ inputTokens: result.state.usage.inputTokens, outputTokens: result.state.usage.outputTokens });
       if (result.finalOutput === undefined) throw new Error('Agent returned no final output');

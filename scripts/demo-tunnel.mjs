@@ -99,7 +99,7 @@ try {
     AIRL_LIVE_DB_PATH: resolve(
       process.env.AIRL_LIVE_DB_PATH || ".data/airl-live.sqlite",
     ),
-    AIRL_ALLOW_LIVE_REQUESTS: "false",
+    AIRL_ALLOW_LIVE_REQUESTS: process.env.AIRL_ALLOW_LIVE_REQUESTS === "true" ? "true" : "false",
   };
   delete environment.NODE_OPTIONS;
   const server = child(process.execPath, ["scripts/tunnel-server.mjs"], {

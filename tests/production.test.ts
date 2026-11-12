@@ -80,6 +80,24 @@ test('one active run per room prevents overlapping continuity writes',()=>{
   try {const id=t.store.create(input,'test-model');assert.throws(()=>t.store.create(input,'test-model'));t.store.finish(id,'failed');assert.ok(t.store.create(input,'test-model'));} finally {t.cleanup();}
 });
 
+test('snapshot retries reuse completed stages when input properties arrive in a different order', async () => {
+  const t = setup();
+  let id = '';
+  const snapshot = t.store.context(input.roomId);
+  const requested = { ...input, universeId: input.roomId, snapshot };
+  try {
+    await assert.rejects(produce(t.store, executor(stage => {
+      if (stage === 'Creative Critic') throw new Error('Test transport interruption');
+      return outputs()[stage];
+    }), requested, 'test-model', runId => { id = runId; }, true));
+    const reordered = { winningChoice: input.winningChoice, snapshot, universeId: input.roomId, roomId: input.roomId };
+    const resume = t.store.resumable(id, reordered, 'test-model', 'openai');
+    assert.equal((resume.script as { title: string }).title, 'Karaoke protocol');
+    assert.equal((resume.manifest as { scenes: unknown[] }).scenes.length, 3);
+    assert.deepEqual(t.store.resumable(id, { ...reordered, winningChoice: 'Different direction' }, 'test-model', 'openai'), {});
+  } finally { t.cleanup(); }
+});
+
 test('a Critic transport failure preserves a playable private preview and compatible retries reuse validated stages', async () => {
   const t = setup();
   let failedId = '';

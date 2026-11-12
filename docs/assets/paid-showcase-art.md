@@ -1,0 +1,11 @@
+# Paid showcase artwork
+
+Generated November 12, 2026 with the built-in image generation tool in generate mode. The inspected image is saved in the project at [barangay-2099-cinematic.png](../../public/images/barangay-2099-cinematic.png). The cinematic player uses the image for the three established official characters, with camera motion and timed captions.
+
+SHA-256 `dbe69bedb8a03bb95a3ca83021dcfe1f40baf6a4c4cff0cb8f0b876ce5cfd3ed`.
+
+## Final prompt
+
+```text
+Use case: stylized-concept. Create a premium cinematic 3D animated-film key art asset for AIRL's fictional Barangay 2099, intended to fill a vertical 9:16 episode player. A rain-polished future Manila barangay plaza at blue hour, electric cobalt and cyan neon, atmospheric volumetric light, street-level Filipino neighborhood texture, distant futuristic skyline, a subtle karaoke-stage glow. Three original fictional lead characters together, expressive and charming, sophisticated animation-film art direction and realistic materials. Center: Captain Bot, a well-intentioned overconfident Filipino barangay-captain robot, sleek navy/white rounded humanoid shell, a luminous cyan face visor, small official sash and expressive digital eyes. Left: Tita Nena, a spirited middle-aged Filipina neighborhood aunt with glasses, short dark hair, practical blue clothing, arms crossed with an amused skeptical eyebrow. Right: Kuya Taho, a friendly street-smart Filipino taho vendor in a navy work shirt, carrying his traditional two silver taho buckets on a shoulder pole, warm grin. They are staged in the middle third, heads near 38 percent of the image height, bodies visible, clear silhouettes, cinematic depth and rim lighting. Reserve upper 20 percent for interface title overlay and bottom 27 percent as a quiet dark navy foreground for readable captions. Strong coherent blue palette with small warm golden highlights on faces and street lights. Beautiful composition, theatrical-film quality, inviting humor, appealing facial expressions. No text, typography, labels, logos, watermark, extra main characters, weapons, photoreal human likenesses or existing franchise characters. Output a single high quality portrait 1024x1536 image.
+```
