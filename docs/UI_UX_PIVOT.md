@@ -1,12 +1,12 @@
 # Minimalist hackathon UI strategy
 
-Status is proposed design, pending review after the preservation checkpoint. This sprint changes documentation only. The existing Manila Journey at application commit `1a7baf3` remains the current implementation. Its supplied visual-reference styling and earlier verification remain part of the preserved baseline.
+Status: the user authorized the first frontend implementation phase on November 12, 2026, from preservation checkpoint `81e975e`. Landing, public navigation, universe discovery and responsive layouts are in scope. Backend APIs, schemas, identity policy, providers and infrastructure remain preserved. Manila Journey remains the presenter layout. Later workspace/editor proposals below remain future phases.
 
 ## Design direction
 
 Make AIRL's entertainment value clear before exposing its technical settings. Use strong typography, intentional spacing, cinematic composition, restrained motion and progressive disclosure. Every visible element should explain a world, guide an action or show truthful state. Lightweight CSS motion and reusable media assets should work on the M2 Pro with 16 GB RAM and ordinary audience phones.
 
-The proposed public landing contains AIRL identity, the tagline, a short explanation, a compelling existing visual, Explore Universes as the main action, a permission-aware Create a Universe action, the featured official world and account access. Keep Launch Journey visibly available for presenters while giving public discovery first priority. Explore currently has Launch Journey as its main action. Changing that hierarchy is part of the future design review.
+The proposed public landing contains AIRL identity, the tagline, a short explanation, a compelling existing visual, Explore Universes as the main action, a permission-aware Create a Universe action, the featured official world and account access. Keep Launch Journey visibly available for presenters while giving public discovery first priority. The first increment makes Explore Universes primary and retains the context-preserving Journey entry. Discovery adds visual cards, local search/genre filters and explicit loading, empty and error states over the existing API.
 
 ## Information architecture for the next implementation
 
@@ -23,7 +23,7 @@ These labels are design targets mapped to existing routes. No new route or autho
 | Admin workspace | Creator permissions, official canon and protected operations | Existing admin surfaces and APIs |
 | Presenter mode | Direct Journey entry, chapters and Exit to Explore | `/journey` and existing shared URL context |
 
-CinemAI and PersonaAI remain reachable through contextual universe navigation and existing deep links. Existing discovery and future-module pages may be visually de-emphasized on the landing, with route compatibility retained. This is a presentation decision requiring design review, with implementation scheduled only after approval.
+CinemAI and PersonaAI remain reachable through contextual universe navigation and existing deep links. Existing discovery and future-module pages may be visually de-emphasized on the landing, with route compatibility retained. The authorized first increment de-emphasizes those module names in the header while retaining contextual links and All experiences in the footer.
 
 ## Journeys
 

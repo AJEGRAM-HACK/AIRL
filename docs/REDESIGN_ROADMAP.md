@@ -1,12 +1,12 @@
 # Redesign roadmap
 
-Phase 0 is the active documentation/preservation task. Every implementation phase below is a proposal awaiting review. The existing code already implements substantial parts of phases 2–6. Each phase starts by checking its actual remaining gaps. Reuse boundaries are defined by [ARCHITECTURE_PLAN.md](../ARCHITECTURE_PLAN.md), model extensions by [UNIVERSE_MODEL.md](UNIVERSE_MODEL.md), and UI goals by [UI_UX_PIVOT.md](UI_UX_PIVOT.md).
+Phase 0 is complete at documentation checkpoint `81e975e`. The user authorized Phase 1 on November 12, 2026, including universe discovery and responsive refinement. Later implementation phases remain proposals awaiting separate review. The existing code already implements substantial parts of phases 2–6. Each phase starts by checking its actual remaining gaps. Reuse boundaries are defined by [ARCHITECTURE_PLAN.md](../ARCHITECTURE_PLAN.md), model extensions by [UNIVERSE_MODEL.md](UNIVERSE_MODEL.md), and UI goals by [UI_UX_PIVOT.md](UI_UX_PIVOT.md).
 
 ## Phase 0 — Preservation and documentation
 
 Record the clean `main` baseline at `fc48254`, retain application acceptance at `1a7baf3`, create the checkpoint branch, inventory ignored data, audit conflicting claims and prepare this plan. Validate source/data/dependency preservation and document the backup procedure. Commit intended documentation separately. Stop for user review after reporting the result.
 
-## Phase 1 — Design foundation, proposed first implementation sprint
+## Phase 1 — Design foundation, authorized frontend sprint
 
 **Objective.** Refine the everyday landing and public navigation to communicate creator-made universes and community-shaped entertainment immediately. Keep the verified Journey as a working presenter route.
 
@@ -14,11 +14,11 @@ Record the clean `main` baseline at `fc48254`, retain application acceptance at 
 
 **Expected changes.** Establish a reviewed desktop/mobile information hierarchy. Make Explore Universes the primary public action and Create a Universe permission-aware, routing through existing Studio creation. Retain a visible Launch Journey entry and account access. Simplify top-level public labels while preserving contextual CinemAI/PersonaAI links, selected-universe context and legacy URLs. Adjust spacing/type/responsive styles within the existing design system. Do not implement later character/schema proposals as part of this visual phase.
 
-**Dependencies.** User approval of the information architecture and actual remaining design gaps. Source checkpoint and ignored-data backup procedure are available. An existing admin/creator account and approved saved episode support later acceptance.
+**Dependencies.** The user authorized this frontend phase after reviewing the preservation checkpoint; the existing frontend and design direction were summarized before implementation. Source checkpoint and ignored-data backup procedure are available. An existing admin/creator account and approved saved episode support later acceptance.
 
 **Security and database implications.** Keep the server permission snapshot and independent API checks. Hide unauthorized creator actions and retain server denials. No schema or authentication-policy change is proposed for this phase. Fixture and provider labels remain accurate.
 
-**Acceptance criteria.** The landing contains identity, tagline, short product explanation, one primary Explore action, permission-aware creation, featured official world and profile access. Guest/viewer/creator/admin variants agree with server permissions. Root remains Explore. Journey, direct module/legacy URLs and universe/round/episode context remain usable. At 390 × 844 and 1440 × 900, there is no overflow and the main actions have visible keyboard focus and readable contrast. Reduced motion works. With an explicit fresh temporary browser database path, existing typecheck, 38-unit baseline and nine-browser baseline pass, including real local Ollama and two audiences, private previews, canon approval, saved fallback and replay. Repeat a physical-iPhone check and record it separately.
+**Acceptance criteria.** The landing contains identity, tagline, short product explanation, one primary Explore action, permission-aware creation, featured official world and profile access. Guest/viewer/creator/admin variants agree with server permissions. Root remains Explore. Journey, direct module/legacy URLs and universe/round/episode context remain usable. At 390 × 844 and 1440 × 900, there is no overflow and the main actions have visible keyboard focus and readable contrast. Reduced motion works. With an explicit fresh temporary browser database path, existing typecheck, 38-unit baseline and nine-browser baseline pass, together with new discovery/responsive regressions, including real local Ollama and two audiences, private previews, canon approval, saved fallback and replay. Repeat a physical-iPhone check and record it separately.
 
 **Risks.** Hidden capability through oversimplified navigation, stale cached permissions, broken context links and public CSS leaking into Journey. Review each role and both modes before acceptance. Request extra tests only for a specific regression beyond existing coverage.
 

@@ -1,12 +1,12 @@
 # AIRL architecture and delivery plan
 
-_Last updated November 12, 2026. Latest verified application commit `1a7baf3a09233a3e43d01d89c93320a8e2b76a79`._
+_Last updated November 12, 2026. Latest verified application commit `1731549c43f82ca760a1b814c030c167831afe9f`._
 
 [CHANGELOG.md](CHANGELOG.md) summarizes recent changes. [VERIFICATION.md](VERIFICATION.md) separates current acceptance results from historical checkpoints. The current delivery is Mac-hosted SQLite/Ollama with a public ngrok web tunnel. Supabase, Trigger.dev and cloud media exports remain proposed architecture.
 
 ## Current status and proposed redesign
 
-The preservation source reference is `checkpoint/pre-hackathon-ui-pivot-2026-11-12` at original HEAD `fc48254`. The active sprint changes documentation only. The proposed design plan is [UI_UX_PIVOT.md](docs/UI_UX_PIVOT.md) and the review gates are [REDESIGN_ROADMAP.md](docs/REDESIGN_ROADMAP.md). The technical route/provider/lifecycle sections below describe existing code or explicitly labeled future options. Browser acceptance needs an explicit disposable AIRL_LIVE_DB_PATH because playwright.config.ts preserves an inherited value. See README for the safe command.
+The preservation source reference is `checkpoint/pre-hackathon-ui-pivot-2026-11-12` at original HEAD `fc48254`. The user authorized the first Hackathon UI/UX Optimization frontend sprint from documentation checkpoint `81e975e`. It refines the landing, public navigation, discovery and responsive CSS without changing server APIs, schemas, providers or authentication. The proposed design plan is [UI_UX_PIVOT.md](docs/UI_UX_PIVOT.md) and the review gates are [REDESIGN_ROADMAP.md](docs/REDESIGN_ROADMAP.md). The technical route/provider/lifecycle sections below describe existing code or explicitly labeled future options. Browser acceptance needs an explicit disposable AIRL_LIVE_DB_PATH because playwright.config.ts preserves an inherited value. See README for the safe command.
 
 | Status | Capability | Evidence or boundary |
 | --- | --- | --- |
@@ -14,7 +14,8 @@ The preservation source reference is `checkpoint/pre-hackathon-ui-pivot-2026-11-
 | Implemented and previously verified | Offline Demo, real local Ollama, Journey, QR and saved playback | Browser acceptance, real inference and public/device records at their stated checkpoints |
 | Partially implemented | Hosted OpenAI and HTTPS BYOK | Adapters, consent/credential isolation and contract tests exist, actual paid inference remains unverified |
 | Partially implemented | Reference-image and character visual customization | Protected storage/profile linking exists, upload UI and custom artwork rendering remain future work |
-| Planned, awaiting review | Next landing/navigation refinement, numeric traits, character/profile/prompt-policy versions and richer universe identity/preferences | Product/design/model proposal documents, without code/schema changes in this sprint |
+| Frontend increment | Explore-led landing, simplified public navigation, visual universe discovery with local search and genre filters | Existing APIs, permissions, routes and provider contracts retained; see VERIFICATION for new evidence |
+| Planned, awaiting review | Numeric traits, character/profile/prompt-policy versions and richer universe identity/preferences | Later product/model proposals, outside this frontend sprint |
 | Deferred infrastructure | Supabase Auth/Postgres/RLS/Storage/Realtime, Trigger.dev and always-on hosted execution | Configuration placeholders and architectural options, with separate approval required |
 | Deferred product/media | MP4/audio/voice generation, forks, teams and broader moderation | Later bounded milestones |
 

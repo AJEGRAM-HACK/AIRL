@@ -6,9 +6,9 @@ AIRL is a creator-driven, community-powered AI entertainment platform. Creators 
 
 ## Current checkpoint
 
-The preservation source branch is `checkpoint/pre-hackathon-ui-pivot-2026-11-12`, pinned to original HEAD `fc48254f74262756c6a630fd1b83aac26bc7467d`. Latest verified application code is `1a7baf3a09233a3e43d01d89c93320a8e2b76a79`. Its recorded checks passed typecheck, production build, 38 unit tests and nine browser cases. This documentation sprint does not rerun application acceptance. Ignored databases/configuration require a separate backup. [Preservation record and procedure](docs/PRESERVATION_CHECKPOINT.md)
+The preservation source branch is `checkpoint/pre-hackathon-ui-pivot-2026-11-12`, pinned to original HEAD `fc48254f74262756c6a630fd1b83aac26bc7467d`. Latest verified application code is `1731549c43f82ca760a1b814c030c167831afe9f`. Typecheck, production build, 38 unit tests and 11 production-browser cases passed for the first frontend increment. Detailed evidence and historical results remain in VERIFICATION.md. Ignored databases/configuration require a separate backup. [Preservation record and procedure](docs/PRESERVATION_CHECKPOINT.md)
 
-The next minimalist redesign is a plan awaiting review. This checkpoint preserves the already working Explore and Manila Journey experiences. [UI strategy](docs/UI_UX_PIVOT.md), [phase roadmap](docs/REDESIGN_ROADMAP.md)
+Hackathon UI/UX Optimization is authorized from preservation checkpoint `81e975e`. The first increment adds an Explore-led cinematic landing, simplified Home/Explore/Live navigation, permission-aware creation/profile access and visual universe discovery with local search and genre filters. Episodes and Characters remain contextual universe links, all legacy routes remain available, and Manila Journey is preserved. Backend APIs, schemas, authentication and providers are unchanged. [UI strategy](docs/UI_UX_PIVOT.md), [phase roadmap](docs/REDESIGN_ROADMAP.md)
 
 ## Working capabilities
 

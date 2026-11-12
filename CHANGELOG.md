@@ -1,6 +1,14 @@
 # AIRL development changes
 
-Updated November 12, 2026. Latest verified application commit is `1a7baf3a09233a3e43d01d89c93320a8e2b76a79`. This file summarizes implemented changes. Detailed checks, earlier failures and remaining verification limits are in [VERIFICATION.md](VERIFICATION.md).
+Updated November 12, 2026. Latest verified application commit is `1731549c43f82ca760a1b814c030c167831afe9f`. This file summarizes implemented changes. Detailed checks, earlier failures and remaining verification limits are in [VERIFICATION.md](VERIFICATION.md).
+
+## Hackathon UI/UX Optimization — `1731549`
+
+- Made Explore Universes the main landing action, with featured-world artwork, a short participation story, permission-aware creation and a visible Journey entry.
+- Simplified public navigation to Home, Explore, Live, Sign in/Profile and authorized Studio. Kept Episodes/Characters contextual and retained legacy routes and mode context.
+- Added visual universe discovery with local search/genre filters and explicit loading, empty and error states over the existing API.
+- Scoped responsive typography/colors/styles to the public surfaces; preserved the Manila Journey and all backend/schema/provider/authentication contracts.
+- Passed typecheck/build, all 38 unit tests and all 11 production-browser cases on isolated databases, including real local Ollama. Preserved runtime-file fingerprints. No paid operation, deployment or remote push occurred. Physical-device/venue checks remain open.
 
 ## Preservation and next redesign planning
 
