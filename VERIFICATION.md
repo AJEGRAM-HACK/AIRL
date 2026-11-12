@@ -3,6 +3,22 @@
 
 
 
+
+## Journey wheel/swipe transitions — November 12, 2026
+
+Frontend follow-up to `54f6d48` adds stage-scoped wheel/touch chapter navigation with directional 380 ms exit and 900 ms entrance depth/rotation/blur transitions. Native content scrolling, control/sheet exclusions, one-gesture locking, URL context, focus and reduced-motion behavior are preserved. No navigation API mutation or provider/production change is introduced. [JOURNEY_GESTURES.md](docs/JOURNEY_GESTURES.md) owns behavior, inspected transition captures and rollback.
+
+- PASS — strict typecheck, production build and all 38 unit/regression tests in 3.356 seconds.
+- PASS — two focused gesture cases in 13.4 seconds on `/tmp/airl-gesture-focused-final-20261112.sqlite`, with paid requests disabled. Actual Chrome wheel and native CDP touch-event injection cover directional navigation, long-content scrolling before an edge, one-chapter momentum protection, first/last bounds, keyboard focus, preserved URL context, modal/video/form exclusions, actual playback and reduced motion. Navigation produces no page POST requests.
+- PASS — complete Chrome production-browser acceptance: all 20 cases in 2.9 minutes on explicit `/tmp/airl-gesture-browser-20261112.sqlite` with `AIRL_ALLOW_LIVE_REQUESTS=false`. The temporary config reuses the unchanged successful production build and overrides only the start command/cwd. The two pre-existing uncommitted rehearsal cases remain separate from the UI commit.
+- PASS — retained roles/ownership/private/unknown page/API checks, actual two-audience voting, real local Ollama four-stage production, early private preview, review/publication/canon, stored fallback, genuine scene citations, playback/captions/repeated seek/replay, shared blue themes, responsive layouts and sheet/keyboard behavior. Observed community Ollama production 33.1 seconds; max sampled audience API latency 30 ms. Journey job `58ea4aed-30ce-4adf-a185-2dd78974b0a2` retained its early preview and cited scene-003 at 12 seconds. No paid inference.
+- PASS — two real mid-animation frames were inspected and retained under `docs/screenshots/journey-gestures-2026-11-12/`. Blur is intentional navigation feedback; the screenshots use stored, labeled Demo fixture data.
+- PASS — loopback production preview restarted at 3110 on its earlier isolated acceptance database, with paid requests disabled. Public Home/Journey 200; unknown room and guest Studio 404. Private/authorized cases are covered by the complete browser suite. Protected source/runtime files and the original 14-file uncommitted patch remain preserved outside the explicitly changed Journey CSS. Original checkpoints and unrelated port 3000 remain untouched. No dependency/API/schema/provider/video change, migration, deployment or push.
+
+The first touch case was interrupted and a focused retry timed out because an exact implicit-label locator did not match the present textarea. Switching to its accessible textbox role/name corrected the test; no application fix was needed. The final focused and complete runs passed. Touch injection is browser emulation, not a fresh physical-iPhone/Safari result. Physical devices, screen-reader usability, venue hardware and sustained animation performance remain open; the visible browser host is unavailable.
+
+---
+
 ## Unified blue spatial Journey — November 12, 2026
 
 Frontend increment from `f1c371f4d0714426de02f03ffb1a55c33e47d1ba` on `ui/unified-airl`. The user's latest request supersedes Journey's independent Manila palette. Explore, Dashboard and Journey now share blue dark/light tokens and saved theme selection, with a CSS 3D world and spatial Journey surfaces. Existing full-screen chapters and all underlying behavior remain. [BLUE_SPATIAL_REPORT.md](docs/BLUE_SPATIAL_REPORT.md) records the source scope, nine inspected screenshots and rollback.

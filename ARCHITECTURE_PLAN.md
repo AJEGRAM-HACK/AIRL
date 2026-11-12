@@ -4,6 +4,10 @@ _Last updated November 12, 2026. Latest verified application commit `da763cfa502
 
 [CHANGELOG.md](CHANGELOG.md) summarizes recent changes. [VERIFICATION.md](VERIFICATION.md) separates current acceptance results from historical checkpoints. The current delivery is Mac-hosted SQLite/Ollama with a public ngrok web tunnel. Supabase, Trigger.dev and cloud media exports remain proposed architecture.
 
+## Journey gesture navigation — November 12, 2026
+
+`src/components/journey/use-chapter-gestures.ts` adds stage-scoped wheel/touch navigation through the existing context-preserving chapter URL callback. Scrollable content and interactive targets retain native input. Deliberate gestures produce one bounded chapter change; momentum, modal/pending state, endpoints and reduced-motion preferences are handled client-side. The stage animates directionally while fixed chrome and genuine live status remain steady. No API mutation, orchestration or persistence change is involved. [Behavior and acceptance](docs/JOURNEY_GESTURES.md).
+
 ## Shared blue spatial frontend — November 12, 2026
 
 Explore, Dashboard and Journey share semantic blue dark/light tokens and the existing saved Light/Dark/System preference. Journey keeps its independent full-screen flow but no longer forces a separate Manila palette. A client-only `SpatialWorld` component renders CSS 3D prisms, a planet and a platform, with requestAnimationFrame-bounded mouse depth and a static reduced-motion/touch camera. The component is decorative and has a textual image alternative; it does not add a provider, generated asset, canvas/WebGL dependency or backend call. Existing stored stage events, API authorization, review/publication, video composition and URL contexts remain authoritative. See [BLUE_SPATIAL_REPORT.md](docs/BLUE_SPATIAL_REPORT.md).

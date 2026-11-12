@@ -258,3 +258,35 @@
 @media(prefers-reduced-motion:reduce) {
   .journey-experience .journey-agents li[data-active=true],.journey-vote-options li { transform: none; }
 }
+
+/* Deliberate wheel/swipe navigation with a directional camera transition. */
+.journey-experience .journey-stage { overflow-x: hidden; touch-action: pan-y pinch-zoom; }
+.journey-chapter { transform-origin: 50% 50%; backface-visibility: hidden; }
+.journey-experience[data-transition=idle] .journey-chapter { animation: none; transition: transform 300ms var(--motion-ease); }
+.journey-experience[data-transition=out] .journey-chapter { pointer-events: none; animation-duration: 380ms; animation-timing-function: cubic-bezier(.7,0,.84,0); animation-fill-mode: both; }
+.journey-experience[data-transition=in] .journey-chapter { animation-duration: 900ms; animation-timing-function: cubic-bezier(.16,1,.3,1); animation-fill-mode: both; }
+.journey-experience[data-transition=out][data-direction=forward] .journey-chapter { animation-name: journey-leave-forward; }
+.journey-experience[data-transition=out][data-direction=backward] .journey-chapter { animation-name: journey-leave-backward; }
+.journey-experience[data-transition=in][data-direction=forward] .journey-chapter { animation-name: journey-enter-forward; }
+.journey-experience[data-transition=in][data-direction=backward] .journey-chapter { animation-name: journey-enter-backward; }
+.journey-stage[data-gesture=pulling] .journey-chapter { animation: none; transform: translate3d(var(--journey-drag-x,0px),var(--journey-drag-y,0px),-65px) rotateX(var(--journey-tilt-x,0deg)) rotateY(var(--journey-tilt-y,0deg)); transition: transform 100ms ease-out; }
+@keyframes journey-leave-forward {
+  from { opacity: 1; transform: none; filter: blur(0); }
+  to { opacity: 0; transform: translate3d(0,-18vh,-360px) rotateX(16deg) scale(.92); filter: blur(7px); }
+}
+@keyframes journey-leave-backward {
+  from { opacity: 1; transform: none; filter: blur(0); }
+  to { opacity: 0; transform: translate3d(0,18vh,-360px) rotateX(-16deg) scale(.92); filter: blur(7px); }
+}
+@keyframes journey-enter-forward {
+  from { opacity: 0; transform: translate3d(0,26vh,-440px) rotateX(-16deg) scale(.86); filter: blur(9px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes journey-enter-backward {
+  from { opacity: 0; transform: translate3d(0,-26vh,-440px) rotateX(16deg) scale(.86); filter: blur(9px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+.journey-status .journey-gesture-hint { font-family: 'AIRL Public',Arial,sans-serif; font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+@media(prefers-reduced-motion:reduce) {
+  .journey-experience .journey-chapter { animation: none!important; transition: none!important; transform: none!important; filter: none!important; }
+}

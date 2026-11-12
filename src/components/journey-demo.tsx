@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, SlidersHorizontal, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { JourneySheet } from '@/components/journey/sheet';
+import { useChapterGestures } from '@/components/journey/use-chapter-gestures';
 import { SpatialWorld } from '@/components/spatial-world';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { useAccess } from '@/components/platform/access';
@@ -52,6 +53,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
   const [transcriptSource, setTranscriptSource] = useState<'episode' | 'preview'>('episode');
   const [artifactChoice, setArtifactChoice] = useState<'excerpt' | 'preview' | null>(null);
   const [excerptIndex, setExcerptIndex] = useState(0);
+  const stageRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -134,6 +136,10 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
       saved: rehearsal ? '1' : undefined,
     }), { scroll: false });
   }, [router, world.id, roundId, selectedId, saved]);
+  const chapterMotion = useChapterGestures({
+    stageRef, index: stepIndex, count: journeySteps.length, disabled: sheet !== null || pending,
+    onNavigate: next => go(journeySteps[next]),
+  });
 
   useEffect(() => {
     function keydown(event: KeyboardEvent) {
@@ -223,7 +229,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
   }
 
   return (
-    <div className="journey-experience" data-chapter={step}>
+    <div className="journey-experience" data-chapter={step} data-transition={chapterMotion.phase} data-direction={chapterMotion.direction}>
       <div className="journey-atmosphere" aria-hidden="true"><i /><i /><i /></div>
       <header className="journey-chrome">
         <Link className="journey-brand" href={experienceUrl('explore', context)}>AIRL<span>/ Journey</span></Link>
@@ -241,7 +247,8 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
       <nav className="journey-rail" aria-label="Journey steps">
         {journeySteps.map((item, index) => <Link key={item} href={experienceUrl('journey', { ...context, step: item })} aria-current={step === item ? 'step' : undefined} aria-label={stepTitles[index]}><span className="journey-rail-marker" /><span className="journey-rail-label">{stepTitles[index]}</span></Link>)}
       </nav>
-      <main id="main" className="journey-stage" tabIndex={-1}>
+      <p className="sr-only" role="status">Chapter {stepIndex + 1} of {journeySteps.length}: {stepTitles[stepIndex]}</p>
+      <main ref={stageRef} id="main" className="journey-stage" tabIndex={-1} aria-busy={chapterMotion.phase === 'out'}>
         {error && <div role="alert" className="journey-error">{error} <button onClick={() => window.dispatchEvent(new Event('focus'))}>Reconnect</button></div>}
         {roundId !== room.roundId && <p className="journey-recorded">Recorded round · <Link href={experienceUrl('journey', { universe: world.id, round: room.roundId, step: 'vote' })}>Open the current voting round</Link></p>}
         <section className={`journey-chapter journey-chapter-${step}`} aria-label={stepTitles[stepIndex]} key={step}>
@@ -304,7 +311,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
         </section>
       </main>
       <footer className="journey-controls">
-        <div className="journey-status"><p data-testid="journey-live-status">Live production · {liveStatus}</p>{saved && job?.progress && <small>{job.progress.stage} · {job.progress.status}</small>}<button className="journey-text-button" disabled={!fallback} onClick={() => fallback && go('premiere', fallback.episode_id, true)}>Play a saved episode</button>{episodes.length > 0 && <button className="journey-text-button" onClick={() => setSheet('saved')}>Choose saved episode</button>}</div>
+        <div className="journey-status"><p className="journey-gesture-hint">Scroll or swipe between chapters</p><p data-testid="journey-live-status">Live production · {liveStatus}</p>{saved && job?.progress && <small>{job.progress.stage} · {job.progress.status}</small>}<button className="journey-text-button" disabled={!fallback} onClick={() => fallback && go('premiere', fallback.episode_id, true)}>Play a saved episode</button>{episodes.length > 0 && <button className="journey-text-button" onClick={() => setSheet('saved')}>Choose saved episode</button>}</div>
         <div className="journey-primary">{primaryAction()}</div>
         <div className="journey-page-controls"><button className="journey-icon-button" aria-label="Previous chapter" disabled={stepIndex === 0} onClick={() => go(journeySteps[stepIndex - 1])}><ArrowLeft size={18} /></button><span>{String(stepIndex + 1).padStart(2, '0')} / 05</span><button className="journey-icon-button" aria-label="Next chapter" disabled={stepIndex === journeySteps.length - 1} onClick={() => go(journeySteps[stepIndex + 1])}><ArrowRight size={18} /></button></div>
         {saved && job && <div className="journey-live-return">{liveEpisode ? <button onClick={() => go('premiere', liveEpisode.episode_id, false)}>Open the completed live episode <ArrowRight size={15} /></button> : <button onClick={() => go('production', null, false)}>Return to live production <ArrowRight size={15} /></button>}</div>}
