@@ -109,6 +109,8 @@
 .journey-film-links { display: flex; gap: 30px; align-items: center; font-size: 12px; }
 .journey-film-links a { display: inline-flex; align-items: center; gap: 10px; text-decoration: underline; text-underline-offset: 4px; }
 .journey-film-links .journey-text-button { font-size: 12px; padding: 0; }
+.journey-film.journey-demo-film { width: min(100%, 960px, calc((100svh - 340px) * 1.7778)); }
+.journey-demo-film video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: inherit; background: #000; }
 .journey-premiere-wait { justify-self: start; width: 100%; }
 .journey-experience .journey-question { width: min(100%, 860px); margin: 0 auto; }
 .journey-experience .journey-question h1 { font-size: clamp(48px, 6vw, 84px); }

@@ -8,6 +8,8 @@ AIRL is the platform. **AIRL Live** powers community participation, **CinemAI** 
 
 ## Features
 
+The local first-production film plays in Journey at `/journey?universe=barangay-2099&step=premiere&film=veo&saved=1`. Choose **Play first production** from Journey to open the four-shot, approximately 32-second **Taho Tender** export. The original is retained in `.data/flow-demo/DEMO B2099.mp4`. The H.264/AAC playback copy and poster live in the same ignored folder, exposed through the ignored `public/demo-media` symlink. This is a user-supplied external Flow/Veo export with native video controls. Published story playback and story questions continue to use their stored episode sources.
+
 - **Universe discovery and creation** — browse public worlds or create and manage universes with scoped characters, relationships, and story canon.
 - **Community participation** — join live story rounds, vote on what happens next, and follow updates as results come in.
 - **Episodic production** — turn a winning choice into a structured story through Director, Screenwriter, Visual Producer, and Critic stages.

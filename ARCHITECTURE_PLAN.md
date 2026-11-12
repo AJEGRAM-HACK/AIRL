@@ -1,5 +1,9 @@
 # AIRL architecture and delivery plan
 
+## Local first-production film — November 12, 2026
+
+Journey supports an explicitly selected external film through `film=veo`. The server exposes **Play first production** for Barangay 2099 when the local MP4 exists. A native landscape video player loads the user-supplied Flow/Veo export through the ignored `public/demo-media` symlink into `.data/flow-demo`. Episode-specific navigation selects the stored episode player, while chapter and mode navigation preserve the film selection. Native video targets retain keyboard and touch controls. The reveal displays **First production**, **Taho Tender**, four shots and an approximately 32-second runtime. [Local playback procedure](PRESENTER_RUNBOOK.md#first-production-film).
+
 ## Episode audio and next-episode direction generation — November 12, 2026
 
 Saved episode and authorized room-preview audio is generated locally into a private content-addressed WAV cache, then played by a native audio element synchronized to Remotion frame events. `GET /api/universes/[id]/audio` enforces the existing visibility and draft permissions. `POST /api/universes/[id]/suggestions` uses the current structured provider gateway with latest published story/canon/cast, account permission and paid consent. Next-round requests accept an optional source episode identifier, checked inside the existing transaction before inserting options. Database tables and production artifact contracts retain their existing shapes. The paid seeded-premise MP4 remains a separately rendered local artifact. [Behavior, local dependencies and evidence](docs/AUDIO_AND_NEXT_EPISODE.md).

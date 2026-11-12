@@ -1,5 +1,9 @@
 # AIRL hackathon presenter runbook
 
+## First production film
+
+Open `/journey?universe=barangay-2099&step=premiere&film=veo&saved=1`, or choose **Play first production** in Journey. The reveal is labeled **First production** and plays the user’s four-shot **Taho Tender** export, approximately 32 seconds at 1920 × 1080. Press Play for sound. Native controls support pause, volume, seeking, replay and full screen. The original remains in Downloads and `.data/flow-demo/DEMO B2099.mp4`. The browser copy is `.data/flow-demo/Taho-Tender.mp4`, served through the ignored `public/demo-media` symlink. The film is externally generated Flow/Veo media. Story questions use the published episode’s stored canon.
+
 ## Dialogue and the next episode
 
 Saved episode and Studio room-preview players prepare their dialogue audio on first load. Wait for preparation, press Play, then use Mute dialogue and Volume as needed. After publication, open Studio room controls or Journey Presentation settings, choose Generate next-episode suggestions, edit the three directions and choose Open voting with these suggestions. Suggestion settings have their own provider and paid consent. A separate complete seeded-premise MP4 is available through the local port-3112 viewer. [Media paths and operating details](docs/AUDIO_AND_NEXT_EPISODE.md).

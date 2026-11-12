@@ -20,6 +20,7 @@ export function ModeSwitcher({ universeId, roundId }: { universeId?: string; rou
       ? segments[4] : query.get('episode') || undefined,
     step: query.get('step') || undefined,
     saved: query.get('saved') || undefined,
+    film: query.get('film') || undefined,
   };
   return <nav className="experience-switch" aria-label="Experience mode">
     <Link href={experienceUrl('explore', context)} aria-current={pathname !== '/journey' ? 'page' : undefined}>Explore mode</Link>

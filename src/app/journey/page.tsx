@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import './journey.css';
 import { notFound } from 'next/navigation';
 import JourneyDemo from '@/components/journey-demo';
@@ -25,6 +27,7 @@ export default async function JourneyPage({ searchParams }: {
       .map(item => ({ id: item.id, title: item.title }));
     let round;
     try { round = live.snapshot(query.round); } catch { notFound(); }
-    return <JourneyDemo key={id} world={world} characters={store.characters(id, actor)} rooms={rooms} initialRound={round} />;
+    const hasDemoFilm = id === 'barangay-2099' && existsSync(resolve('public/demo-media/Taho-Tender.mp4'));
+    return <JourneyDemo key={id} world={world} characters={store.characters(id, actor)} rooms={rooms} initialRound={round} hasDemoFilm={hasDemoFilm} />;
   } finally { live.dispose(); store.close(); }
 }

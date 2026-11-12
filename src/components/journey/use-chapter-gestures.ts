@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 
-const INTERACTIVE = 'a,button,input,select,textarea,summary,[role="slider"],[contenteditable="true"],.remotion-preview,dialog';
+const INTERACTIVE = 'a,button,input,select,textarea,summary,video,[role="slider"],[contenteditable="true"],.remotion-preview,dialog';
 const WHEEL_THRESHOLD = 100;
 const SWIPE_THRESHOLD = 64;
 const GESTURE_GAP = 200;

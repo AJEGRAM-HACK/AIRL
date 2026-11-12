@@ -31,11 +31,12 @@ const Production = z.object({ jobs: z.array(Job) });
 const WorldEpisodes = z.object({ episodes: z.array(Episode) });
 const stepTitles = ['Enter the world', 'Let the audience decide', 'Watch the episode take shape', 'Review and premiere', 'Ask what happened'];
 
-export default function JourneyDemo({ world, characters, rooms, initialRound }: {
+export default function JourneyDemo({ world, characters, rooms, initialRound, hasDemoFilm = false }: {
   world: World;
   characters: z.infer<typeof WorldCharacter>[];
   rooms: { id: string; title: string }[];
   initialRound: RoomState;
+  hasDemoFilm?: boolean;
 }) {
   const router = useRouter();
   const query = useSearchParams();
@@ -145,19 +146,21 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
   const selectedEpisode = episodes.find(item => item.episode_id === query.get('episode')) ||
     (!query.get('episode') ? liveEpisode : undefined);
   const saved = query.get('saved') === '1';
+  const film = hasDemoFilm && query.get('film') === 'veo' ? 'veo' : undefined;
   const explicitStep = query.get('step');
   const step: JourneyStep = journeySteps.includes(explicitStep as JourneyStep) ? explicitStep as JourneyStep : 'world';
   const stepIndex = journeySteps.indexOf(step);
   const selectedId = query.get('episode') || undefined;
-  const context = { universe: world.id, round: roundId, episode: selectedId, saved: saved ? '1' : undefined, step };
+  const context = { universe: world.id, round: roundId, episode: selectedId, saved: saved ? '1' : undefined, step, film };
   const go = useCallback((next: JourneyStep, episode?: string | null, rehearsal = saved) => {
     setSheet(null);
     router.push(experienceUrl('journey', {
       universe: world.id, round: roundId, step: next,
       episode: episode === null ? undefined : episode || selectedId,
       saved: rehearsal ? '1' : undefined,
+      film: episode === undefined ? film : undefined,
     }), { scroll: false });
-  }, [router, world.id, roundId, selectedId, saved]);
+  }, [router, world.id, roundId, selectedId, saved, film]);
   const chapterMotion = useChapterGestures({
     stageRef, index: stepIndex, count: journeySteps.length, disabled: sheet !== null || pending,
     onNavigate: next => go(journeySteps[next]),
@@ -167,7 +170,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
     function keydown(event: KeyboardEvent) {
       const target = event.target as HTMLElement;
       if (sheet || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey ||
-        target.closest('input, select, textarea, [contenteditable="true"], .remotion-preview')) return;
+        target.closest('input, select, textarea, video, [contenteditable="true"], .remotion-preview')) return;
       const direction = ['ArrowRight', 'PageDown'].includes(event.key) ? 1 : ['ArrowLeft', 'PageUp'].includes(event.key) ? -1 : 0;
       const next = journeySteps[stepIndex + direction];
       if (direction && next) { event.preventDefault(); go(next); }
@@ -237,6 +240,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
   }
 
   function primaryAction() {
+    if (step === 'premiere' && film) return <Button onClick={() => go('world')}>Return to the world <ArrowRight size={18} /></Button>;
     if (step === 'world') return <Button onClick={() => go('vote')}>{recordedRound.status === 'open' ? 'Open the voting stage' : 'Resume this audience decision'} <ArrowRight size={18} /></Button>;
     if (step === 'vote') {
       if (recordedRound.status === 'closed') return <Button onClick={() => go('production', null, false)}>Follow the production <ArrowRight size={18} /></Button>;
@@ -324,20 +328,30 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
             </>}
           </div>}
           {step === 'premiere' && <div className="journey-premiere">
-            {selectedEpisode ? <>
+            {film ? <>
+              <div className="journey-film-heading"><p className="journey-kicker">First production · 4 shots · 32 seconds</p><h1>Taho Tender</h1><p>Captain Bot declares taho the barangay’s official currency.</p></div>
+              <div className="journey-film journey-demo-film" aria-label="First production player">
+                <video controls playsInline preload="metadata" poster="/demo-media/Taho-Tender.jpg" aria-label="Taho Tender — First production">
+                  <source src="/demo-media/Taho-Tender.mp4" type="video/mp4" />
+                  <a href="/demo-media/Taho-Tender.mp4">Download Taho Tender</a>
+                </video>
+              </div>
+              <div className="journey-film-links"><a href="/demo-media/Taho-Tender.mp4" download>Download video <ArrowRight size={16} /></a></div>
+            </> : selectedEpisode ? <>
               <div className="journey-film-heading"><p className="journey-kicker">{saved ? 'Pre-generated rehearsal episode' : 'Approved episode'}</p><h1>{selectedEpisode.artifact.manifest.title}</h1></div>
               <div className="journey-film" aria-label="Premiere player"><EpisodePreview key={selectedEpisode.episode_id} manifest={selectedEpisode.artifact.manifest} universeId={world.id} episodeId={selectedEpisode.episode_id} externalTranscript /></div>
               <div className="journey-film-links"><button className="journey-text-button" onClick={() => openTranscript('episode')}><BookOpen size={16} /> Episode transcript</button><Link href={watchUrl!}>Audience watch link <ArrowRight size={16} /></Link></div>
             </> : <div className="journey-premiere-wait"><p className="journey-kicker">{job?.status === 'review' ? 'A chapter ready for approval' : 'The premiere'}</p><h1>{job?.status === 'review' ? 'Ready for review.' : 'A story worth waiting for.'}</h1><p>{selectedId ? 'This approved episode is unavailable in the selected universe.' : 'Review the live production or play an approved saved episode.'}</p></div>}
           </div>}
           {step === 'ask' && <div className="journey-question">
+            {film && <p className="journey-kicker">Questions use the published episode’s stored canon.</p>}
             <p className="journey-kicker">{selectedEpisode?.artifact.manifest.title || 'The story so far'}</p><h1>Ask what happened.</h1>
             {selectedEpisode ? <StoryHelper key={selectedEpisode.episode_id} universeId={world.id} episodeId={selectedEpisode.episode_id} characterId={featured?.id} suggestedQuestion={featured ? `How did ${featured.name} react to the audience’s decision in this episode?` : 'What happened in this episode?'} /> : <p>Choose an approved episode in the premiere chapter to ask about it.</p>}
           </div>}
         </section>
       </main>
       <footer className="journey-controls">
-        <div className="journey-status"><p className="journey-gesture-hint">Scroll or swipe between chapters</p><p data-testid="journey-live-status">Live production · {liveStatus}</p>{saved && job?.progress && <small>{job.progress.stage} · {job.progress.status}</small>}<button className="journey-text-button" disabled={!fallback} onClick={() => fallback && go('premiere', fallback.episode_id, true)}>Play a saved episode</button>{episodes.length > 0 && <button className="journey-text-button" onClick={() => setSheet('saved')}>Choose saved episode</button>}</div>
+        <div className="journey-status"><p className="journey-gesture-hint">Scroll or swipe between chapters</p><p data-testid="journey-live-status">Live production · {liveStatus}</p>{saved && job?.progress && <small>{job.progress.stage} · {job.progress.status}</small>}{hasDemoFilm && <Link className="journey-text-button" href={experienceUrl('journey', { ...context, step: 'premiere', episode: undefined, saved: '1', film: 'veo' })}>Play first production</Link>}<button className="journey-text-button" disabled={!fallback} onClick={() => fallback && go('premiere', fallback.episode_id, true)}>Play a saved episode</button>{episodes.length > 0 && <button className="journey-text-button" onClick={() => setSheet('saved')}>Choose saved episode</button>}</div>
         <div className="journey-primary">{primaryAction()}</div>
         <div className="journey-page-controls"><button className="journey-icon-button" aria-label="Previous chapter" disabled={stepIndex === 0} onClick={() => go(journeySteps[stepIndex - 1])}><ArrowLeft size={18} /></button><span>{String(stepIndex + 1).padStart(2, '0')} / 05</span><button className="journey-icon-button" aria-label="Next chapter" disabled={stepIndex === journeySteps.length - 1} onClick={() => go(journeySteps[stepIndex + 1])}><ArrowRight size={18} /></button></div>
         {saved && job && <div className="journey-live-return">{liveEpisode ? <button onClick={() => go('premiere', liveEpisode.episode_id, false)}>Open the completed live episode <ArrowRight size={15} /></button> : <button onClick={() => go('production', null, false)}>Return to live production <ArrowRight size={15} /></button>}</div>}

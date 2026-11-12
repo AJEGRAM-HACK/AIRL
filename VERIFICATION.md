@@ -1,5 +1,17 @@
 # AIRL verification record
 
+## User-supplied first-production film — November 12, 2026
+
+Implemented from `978e7d8` with the user's four-shot Flow/Veo export from Downloads. The display label is **First production**, with **Taho Tender**, four shots, approximately 32 seconds and a matching premise synopsis. The original copy has SHA-256 `a0c2af40de8b8c882d6063ae9e83720f6b59fd979e009fd425f06872e2c83213`, matching Downloads. The browser copy is H.264/AAC, 1920 × 1080, 31.741 seconds, with MP4 fast-start metadata. Media and QA captures remain ignored in `.data/flow-demo`, exposed through the ignored local `public/demo-media` symlink.
+
+- PASS — strict typecheck, production build through the browser harness, all 43 unit tests and all 24 production Chrome browser cases. Acceptance used explicit fresh `/tmp/airl-first-production-browser-final-20261112.sqlite`, `AIRL_ALLOW_LIVE_REQUESTS=false` and an empty `OPENAI_API_KEY`. Existing tests cover two participants, roles/ownership, Studio, private/unknown 404s, publication, local Ollama production, canon, captions and saved playback. The new film case covers desktop/phone layouts, actual native video progression, decoded audio, repeated seeking/replay, keyboard isolation, mode context and HTTP 206 byte ranges. It skips when the separately installed local film is absent.
+- PASS — public ngrok playback decodes video and audio unmuted, advances beyond one second, seeks beyond 20 seconds and replays from the beginning. Public media range requests return 206 with the requested 1,024 bytes. Home, Journey and Live return 200, with unknown Live and guest Studio returning 404. Public desktop 1440 × 1000 and phone 390 × 844 captures were inspected. Existing presentation services were restarted against `.data/demo-paid-showcase-20261112.sqlite` after the production build.
+- RECOVERED — the first acceptance build found missing DOM element types in the new test. Explicit HTMLVideoElement annotations corrected the test, then the complete acceptance run passed. No paid generation was performed for this change.
+
+The source film has no separately supplied caption track. Physical iPhone/Safari and venue audio/projector checks remain unverified. The four-shot film is a user-supplied external export. Story questions use their selected published episode's stored canon.
+
+---
+
 ## Audio, next-episode suggestions and a complete voiced demo — November 12, 2026
 
 Implemented from `b1faa8b` under the user's audio/suggestion request and subsequent single-run $6 paid-demo authorization. [AUDIO_AND_NEXT_EPISODE.md](docs/AUDIO_AND_NEXT_EPISODE.md) records behavior, sources, permissions, media paths, costs and limitations. Acceptance includes the preserved route/accessibility working-tree patch and rehearsal tests.
