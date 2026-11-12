@@ -1,6 +1,20 @@
 # AIRL verification record
 
 
+
+## Motion and visible theme controls — November 12, 2026
+
+Frontend follow-up to `44a6b9a` on `ui/unified-airl`. The existing theme selector now appears in the public header, with a compact 44 px native selector on phones; Dashboard theme access and saved Light/Dark/System behavior remain. Shared CSS adds short page/card entrances, hover/press responses, theme-color transitions, actual vote-result/confirmation motion, episode reveal and real production-stage transitions. Journey styling, production semantics and media composition are preserved. No dependency was added.
+
+- PASS — strict typecheck, production build and all 38 unit/regression tests in 3.420 seconds.
+- PASS — full production-build Chrome acceptance: all 17 cases in 2.7 minutes, using explicit `/tmp/airl-motion-browser-20261112.sqlite` with `AIRL_ALLOW_LIVE_REQUESTS=false`. Includes two preserved uncommitted rehearsal cases. The added case verifies header theme access for guest/admin at 320/390/1440 widths, no horizontal overflow, keyboard focus, one selector per page, saved Light across navigation/reload, System responding to OS changes, actual entrance/hover motion and disabled motion/transitions under reduced-motion preferences.
+- PASS — existing independent audience voting, real local Ollama four-stage production, review/publication/canon, private/role boundaries, playback/captions/repeated replay, Journey source citations/fallback and sheet focus behavior. Observed community Ollama production was 33.8 seconds; maximum sampled audience API latency was 18 ms. No paid operation occurred.
+- Two new actual light-theme screenshots were captured and inspected: [desktop](docs/screenshots/motion-theme-2026-11-12/light-desktop.png) and [phone](docs/screenshots/motion-theme-2026-11-12/light-mobile.png). Physical-device, venue and screen-reader checks remain open. The visible browser host remains unavailable; Chrome automation and screenshot inspection provide local evidence.
+
+Final accessibility polish keeps the production live-status region mounted while animating only its changed content. A fresh build/typecheck and two focused production-browser cases passed in 6.4 seconds on explicit `/tmp/airl-motion-focused-20261112.sqlite`, with paid requests disabled. The added status-update assertion uses an explicitly mocked public job response and verifies that the live-region DOM node survives a stage update. All 576 protected source/runtime hashes match; the original uncommitted patch is preserved exactly. The preview is restarted on port 3110 against its earlier isolated acceptance database, with paid requests disabled; the live database and unrelated port-3000 service remain untouched. No deployment or remote push.
+
+---
+
 ## Complete frontend restructure — November 12, 2026
 
 Implemented on `ui/unified-airl` from `aeb84927ea19f76aabf6a5def41651c1cacdfdf6`. Public AIRL and the protected Dashboard now share one editorial design system; the existing Studio URLs, server permission boundaries and Manila Journey remain. [UNIFIED_FRONTEND_REPORT.md](docs/UNIFIED_FRONTEND_REPORT.md) records the full route/feature/file map, tokens, thirteen inspected actual screenshots and rollback procedure.

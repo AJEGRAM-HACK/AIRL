@@ -2,6 +2,14 @@
 
 Implemented November 12, 2026 on `ui/unified-airl`, starting at `aeb84927ea19f76aabf6a5def41651c1cacdfdf6`. The brief authorizes a frontend replacement while preserving the existing platform. Original preservation references remain pinned: source branch `checkpoint/pre-hackathon-ui-pivot-2026-11-12` at `fc48254`, documentation checkpoint at `81e975e`.
 
+## Motion and theme follow-up
+
+The next frontend increment makes the existing Light / Dark / System theme selector visible in the public header, retaining the Dashboard topbar control and saved preferences. Phones use a 44 px theme icon with the native accessible selector. Selection changes the entire shared palette; Journey retains its independent presentation.
+
+Shared CSS motion tokens define 160 ms interaction, 260 ms color and 560 ms page transitions. The hero and actual catalog entries use short staggered entrances; buttons/covers respond to interaction; real vote totals transition between recorded values; vote confirmation and episode reveal enter once. Production headlines/updates animate only when their real status/stage changes. Completed checkmarks use one brief entrance, while the existing working-stage indicator remains driven by actual job state. Mobile workspace navigation enters when opened. No artificial job progress, added dependencies, media-composition changes or constant ambient motion is introduced. Reduced-motion preferences disable CSS animations and transitions.
+
+Verification is recorded in the newest [VERIFICATION.md](../VERIFICATION.md) entry. The new header/theme captures were inspected at [desktop](screenshots/motion-theme-2026-11-12/light-desktop.png) and [phone](screenshots/motion-theme-2026-11-12/light-mobile.png) sizes. The original restructure evidence below remains tied to its implementation checkpoint.
+
 ## Preservation and reuse audit
 
 The initial tree contained 14 modified route/community files and an untracked `tests/browser/rehearsal.spec.ts`. These remain in place and are excluded from the redesign commit. A private patch was retained outside Git at `/tmp/airl-before-unified-ui.patch`; the immediate source rollback anchor is `checkpoint/pre-unified-ui-2026-11-12` at `aeb8492`. This patch is a local preservation aid, not a full runtime backup. The private-data procedure in [PRESERVATION_CHECKPOINT.md](PRESERVATION_CHECKPOINT.md) still applies before any future migration.

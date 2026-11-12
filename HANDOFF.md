@@ -2,6 +2,10 @@
 
 Updated November 12, 2026. Repository `/Users/ajegram/CinemAI`. Continue in this conversation. Read `AGENTS.md`, this file, `ARCHITECTURE_PLAN.md` and `VERIFICATION.md` before editing.
 
+## Motion and theme follow-up — November 12, 2026
+
+The public header now exposes Light/Dark/System preferences, with an accessible 44 px icon selector on phones. Shared CSS adds short entrances, interaction responses, theme transitions, genuine vote/production feedback and episode reveal; reduced-motion preferences disable animations/transitions. Production announcements keep their live region mounted. Typecheck/build, all 38 unit tests and the complete 17-case browser run passed, plus two focused cases after the live-region polish. New desktop/phone captures and exact evidence are in VERIFICATION.md and docs/UNIFIED_FRONTEND_REPORT.md. All original uncommitted work remains separate. The updated local preview is running at `http://127.0.0.1:3110` on its earlier isolated acceptance database, with paid requests disabled. Do not rebuild while that preview is serving; stop it first and restart it afterward when further application work requires a build.
+
 ## Unified frontend continuation — November 12, 2026
 
 The full restructure brief is implemented on `ui/unified-airl`, starting at `aeb8492`. Public AIRL now has minimal navigation, rebuilt landing, simplified discovery, unified universe/vote/production/playback presentation and dark-first preferences. Existing `/studio` routes share a responsive Dashboard; mobile workspace navigation collapses behind a keyboard-accessible Menu. Manila Journey and all server/API/schema/provider/video source remain preserved. [UNIFIED_FRONTEND_REPORT.md](docs/UNIFIED_FRONTEND_REPORT.md) owns the full feature mapping, files, actual screenshots, acceptance and rollback instructions. See the newest VERIFICATION entry for evidence and final-polish test boundaries.

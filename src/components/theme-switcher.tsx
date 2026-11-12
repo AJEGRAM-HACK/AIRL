@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { SunMoon } from 'lucide-react';
+import { Moon, Sun, SunMoon } from 'lucide-react';
 type Theme = 'system' | 'light' | 'dark';
 export function ThemeSwitcher() {
   const [theme, setTheme] = useState<Theme>('dark');
@@ -23,5 +23,6 @@ export function ThemeSwitcher() {
     try { localStorage.setItem('airl-theme', value); } catch {}
     document.documentElement.dataset.theme = value === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : value;
   }
-  return <label className="theme-switcher"><SunMoon size={16} aria-hidden="true"/><span className="sr-only">Color theme</span><select value={theme} onChange={event => change(event.target.value as Theme)} aria-label="Color theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>;
+  const Icon = theme === 'light' ? Sun : theme === 'dark' ? Moon : SunMoon;
+  return <label className="theme-switcher" title={`Color theme: ${theme}`}><Icon size={17} aria-hidden="true"/><span className="sr-only">Color theme</span><select value={theme} onChange={event => change(event.target.value as Theme)} aria-label="Color theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>;
 }

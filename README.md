@@ -12,7 +12,7 @@ Hackathon UI/UX Optimization is authorized from preservation checkpoint `81e975e
 
 ## Unified frontend
 
-The public interface now uses a dark-first editorial theme and a minimal Explore / Live / Profile header, with the AIRL wordmark returning home. The rebuilt landing presents the required product story, Explore Universes / Join Live actions and the official universe. Existing creator tools share a responsive Dashboard at the retained `/studio` URLs; owner/admin permissions are unchanged. Theme choices and the contextual Journey mode switch remain available in the footer. Public story questions use the local provider default; advanced provider settings remain in protected creator tools and Journey. [Complete screen/feature map, screenshots, checks and rollback](docs/UNIFIED_FRONTEND_REPORT.md).
+The public interface now uses a dark-first editorial theme and a minimal Explore / Live / Profile header, with the AIRL wordmark returning home. The rebuilt landing presents the required product story, Explore Universes / Join Live actions and the official universe. Existing creator tools share a responsive Dashboard at the retained `/studio` URLs; owner/admin permissions are unchanged. The header exposes Light, Dark and System theme choices; the contextual Journey mode switch remains in the footer. Subtle entrance and interaction motion respects reduced-motion preferences. Public story questions use the local provider default; advanced provider settings remain in protected creator tools and Journey. [Complete screen/feature map, screenshots, checks and rollback](docs/UNIFIED_FRONTEND_REPORT.md).
 
 ## Working capabilities
 

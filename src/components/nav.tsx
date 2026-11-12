@@ -12,8 +12,9 @@ export function Nav({ active = '', universeId, roundId }: { active?: string; uni
       <StudioNavigation active={active === 'studio'} universeId={universeId}/>
       <AccountNavigation active={active === 'account'}/>
     </nav>
+    <ThemeSwitcher/>
   </header>;
 }
 export function Footer({ universeId, roundId }: { universeId?: string; roundId?: string | null }) {
-  return <footer className="public-footer"><div><Link href="/" className="brand">AIRL.</Link><p>Artificial In Real Life</p></div><div className="footer-links"><Link href="/discover">All experiences ↗</Link><ModeSwitcher universeId={universeId} roundId={roundId}/><ThemeSwitcher/></div></footer>;
+  return <footer className="public-footer"><div><Link href="/" className="brand">AIRL.</Link><p>Artificial In Real Life</p></div><div className="footer-links"><Link href="/discover">All experiences ↗</Link><ModeSwitcher universeId={universeId} roundId={roundId}/></div></footer>;
 }

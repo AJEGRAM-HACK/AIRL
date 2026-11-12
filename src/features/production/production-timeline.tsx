@@ -20,10 +20,10 @@ const headlines: Record<string, string> = {
 // Public reads expose only the latest stage. Never invent per-stage event history.
 export function ProductionTimeline({ job }: { job: ProductionState }) {
   const finished = ['review', 'published', 'rejected'].includes(job.status);
-  return <section className="production-progress" aria-label="Episode production">
+  return <section className="production-progress" aria-label="Episode production" data-status={job.status}>
     <div className="production-progress-heading"><p className="eyebrow">{job.mode === 'demo' ? 'DEMO WORKFLOW · DETERMINISTIC TEMPLATES' : 'FROM COMMUNITY CHOICE TO EPISODE'}</p><span className="state-label">{statusNames[job.status] || 'Production update'}</span></div>
-    <h2>{headlines[job.status] || 'Production update'}</h2>
-    <p className="production-update" role="status">{job.progress ? `${stageNames[job.progress.stage] || job.progress.stage} · ${job.progress.status === 'started' ? 'Creating this chapter' : job.progress.status === 'succeeded' ? 'Stage complete' : job.progress.status === 'failed' ? 'Production paused' : 'Update received'}` : job.status === 'queued' ? 'Your chapter will begin when production is ready.' : headlines[job.status] || 'Production update'}</p>
+    <h2 key={job.status}>{headlines[job.status] || 'Production update'}</h2>
+    <p className="production-update" role="status"><span key={`${job.status}-${job.progress?.stage}-${job.progress?.status}`}>{job.progress ? `${stageNames[job.progress.stage] || job.progress.stage} · ${job.progress.status === 'started' ? 'Creating this chapter' : job.progress.status === 'succeeded' ? 'Stage complete' : job.progress.status === 'failed' ? 'Production paused' : 'Update received'}` : job.status === 'queued' ? 'Your chapter will begin when production is ready.' : headlines[job.status] || 'Production update'}</span></p>
     <ol className="production-stages" aria-label="Recorded production stages">
       {Stages.map((stage, index) => {
         const recorded = job.events?.filter(event => event.stage === stage).at(-1);
