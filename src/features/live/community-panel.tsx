@@ -76,7 +76,7 @@ export function CommunityPanel({ operatorView = false,roomId='barangay-2099', sh
   return <section id="community-vote" className="vote-panel community-panel" aria-label={operatorView ? 'Room voting controls' : 'Community vote'}>
     <div className="eyebrow"><Radio size={15} aria-hidden="true"/>{connected ? 'ROOM CONNECTED' : 'RECONNECTING AUTOMATICALLY'}</div>
     <h2>{operatorView ? 'Community control' : 'What happens next?'}</h2>
-    <p className="vote-intro">{operatorView ? 'Invite the audience. Close the vote. Review the next episode.' : 'The community chooses. The next episode follows.'}</p>
+    <p className="vote-intro">{operatorView ? 'Invite the audience. Close the vote. Review the next episode.' : access.viewerDemo ? 'Cast a vote and follow the live audience tally.' : 'The community chooses. The next episode follows.'}</p>
     {error && <div className="form-error" role="alert">{error}</div>}
     {!room ? <p role="status">Loading room…</p> : <>
       <div className="community-stats"><span><b>{room.participantCount}</b> joined sessions</span><span><b>{room.totalVotes}</b> votes this round</span></div>
