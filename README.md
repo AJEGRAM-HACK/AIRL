@@ -1,5 +1,7 @@
 # AIRL — Don't just watch the story. Shape it.
 
+**AIRL stands for Artificial In Real Life.** The real world is the prompt. Creators take familiar places, people, and everyday dilemmas and ask what would happen if the rules changed.
+
 AIRL is an interactive entertainment platform for creator-built universes and stories shaped by their audiences. Discover a world in the **AIRL Multiverse**, watch an episode, and vote on a decision that could change what happens next. Creators design the choices and use AI-assisted production to turn the winning direction into an episode they can review and publish.
 
 A universe gives a creator's characters, lore, and stories a home that can grow across episodes. Imagine watching a neighborhood council in **Barangay 2099** run out of options, then joining the audience to decide whether its next move should be to make taho legal tender, mandate karaoke, or send Captain Bot offline. The vote gives the next episode its direction. The creator decides what becomes canon.
