@@ -4,6 +4,10 @@ _Last updated November 12, 2026. Latest verified application commit `da763cfa502
 
 [CHANGELOG.md](CHANGELOG.md) summarizes recent changes. [VERIFICATION.md](VERIFICATION.md) separates current acceptance results from historical checkpoints. The current delivery is Mac-hosted SQLite/Ollama with a public ngrok web tunnel. Supabase, Trigger.dev and cloud media exports remain proposed architecture.
 
+## Shared blue spatial frontend — November 12, 2026
+
+Explore, Dashboard and Journey share semantic blue dark/light tokens and the existing saved Light/Dark/System preference. Journey keeps its independent full-screen flow but no longer forces a separate Manila palette. A client-only `SpatialWorld` component renders CSS 3D prisms, a planet and a platform, with requestAnimationFrame-bounded mouse depth and a static reduced-motion/touch camera. The component is decorative and has a textual image alternative; it does not add a provider, generated asset, canvas/WebGL dependency or backend call. Existing stored stage events, API authorization, review/publication, video composition and URL contexts remain authoritative. See [BLUE_SPATIAL_REPORT.md](docs/BLUE_SPATIAL_REPORT.md).
+
 ## Unified frontend — November 12, 2026
 
 The current frontend adds a shared responsive Dashboard around the retained protected Studio routes, a rebuilt public landing and minimal Explore / Live / Profile navigation. The root remains public Explore mode; the AIRL wordmark is Home, and Journey keeps independent full-screen Manila chrome. Existing universe/round/episode context survives the footer mode switch. A compact mobile workspace menu discloses the same authorized tools. Server permission snapshots, API contracts, persistence, providers, production and media composition are unchanged. Public story helpers use the existing local-provider default; advanced provider selection stays in Dashboard draft helpers and Journey. [Implementation and feature-location report](docs/UNIFIED_FRONTEND_REPORT.md); [current observed evidence](VERIFICATION.md).

@@ -2,6 +2,23 @@
 
 
 
+
+## Unified blue spatial Journey — November 12, 2026
+
+Frontend increment from `f1c371f4d0714426de02f03ffb1a55c33e47d1ba` on `ui/unified-airl`. The user's latest request supersedes Journey's independent Manila palette. Explore, Dashboard and Journey now share blue dark/light tokens and saved theme selection, with a CSS 3D world and spatial Journey surfaces. Existing full-screen chapters and all underlying behavior remain. [BLUE_SPATIAL_REPORT.md](docs/BLUE_SPATIAL_REPORT.md) records the source scope, nine inspected screenshots and rollback.
+
+- PASS — strict typecheck, production build and all 38 unit/regression tests in 3.293 seconds.
+- PASS — complete Chrome production-browser run: 18 cases in 2.7 minutes on explicit `/tmp/airl-blue-browser-20261112.sqlite`, with paid requests disabled. The temporary config imports repository configuration and reuses the unchanged production build, overriding only the start command/cwd. Two preserved uncommitted rehearsal tests were included without absorbing them into the UI commit.
+- PASS — computed shared themes across Explore/Journey, saved preference/reload, actual preserve-3d scene geometry, mouse depth/reset and reduced-motion fallback. All four main Journey chapters were checked in dark/light at 320/390/1440/1920 widths; no horizontal overflow, theme controls/chapter arrows reachable, player visible. Existing focus containment, shortcuts, Escape/restoration and caption/seek/replay behavior remain covered. Primary-action computed contrast is 8.82:1 dark and 6.56:1 light.
+- PASS — real independent voting, actual local Ollama production, early private preview, review/publication/canon propagation, saved playback without inference, real scene citations and guest/viewer/creator/admin plus private/unknown URL/API boundaries. Community Ollama production: 31.5 seconds; maximum sampled audience API latency: 12 ms. Journey job `504c2e0e-4bf2-410b-afe9-caa60fbd7368` retained its early preview and cited scene-003 at 12 seconds. No paid provider was invoked.
+- PASS — nine actual Chrome captures inspected, covering shared dark/light Explore/Journey, phone, voting, recorded Demo production and approved Demo premiere. These use disposable fixtures, with deterministic provenance retained. No screenshot is presented as a just-generated live episode.
+- PASS — production `npm run start` smoke on loopback 3110: public Home/Explore/Live/Journey 200; unknown/private room and guest Studio 404. The local preview remains running on its earlier isolated acceptance database with paid requests disabled. The unrelated port-3000 service was untouched.
+- PASS — 575 protected source/runtime hashes unchanged outside the explicitly authorized Journey CSS; no runtime additions/removals. Original 14 uncommitted modifications and rehearsal file remain separate. Checkpoint `checkpoint/pre-blue-spatial-2026-11-12` retains `f1c371f`; original source/documentation checkpoints and main remain pinned. No schema/API/auth/provider/orchestration/video/dependency change, migration, live-data write, deployment or push.
+
+Fresh physical-device/Safari, venue projector, screen-reader usability and sustained resource checks remain open. The visible browser host is unavailable; local Chrome automation and screenshot inspection provide visual evidence. CSS perspective is a browser 3D presentation rather than a new game/rendering or generated-model pipeline. Earlier Manila results below remain historical evidence for their own commits.
+
+---
+
 ## Motion and visible theme controls — November 12, 2026
 
 Frontend follow-up to `44a6b9a` on `ui/unified-airl`. The existing theme selector now appears in the public header, with a compact 44 px native selector on phones; Dashboard theme access and saved Light/Dark/System behavior remain. Shared CSS adds short page/card entrances, hover/press responses, theme-color transitions, actual vote-result/confirmation motion, episode reveal and real production-stage transitions. Journey styling, production semantics and media composition are preserved. No dependency was added.

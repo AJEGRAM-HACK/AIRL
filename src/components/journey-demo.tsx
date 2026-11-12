@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, SlidersHorizontal, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { JourneySheet } from '@/components/journey/sheet';
+import { SpatialWorld } from '@/components/spatial-world';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 import { useAccess } from '@/components/platform/access';
 import { StoryHelper } from '@/components/platform/story-helper';
 import { api } from '@/components/platform/api';
@@ -226,6 +228,7 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
       <header className="journey-chrome">
         <Link className="journey-brand" href={experienceUrl('explore', context)}>AIRL<span>/ Journey</span></Link>
         <div className="journey-chrome-actions">
+          <ThemeSwitcher/>
           {canManage && <button className="journey-icon-button" aria-label="Presentation settings" onClick={() => setSheet('settings')}><SlidersHorizontal size={18} /></button>}
           <Link className="journey-exit" href={experienceUrl('explore', context)}>Exit to Explore <ArrowRight size={16} /></Link>
         </div>
@@ -243,10 +246,13 @@ export default function JourneyDemo({ world, characters, rooms, initialRound }: 
         {roundId !== room.roundId && <p className="journey-recorded">Recorded round · <Link href={experienceUrl('journey', { universe: world.id, round: room.roundId, step: 'vote' })}>Open the current voting round</Link></p>}
         <section className={`journey-chapter journey-chapter-${step}`} aria-label={stepTitles[stepIndex]} key={step}>
           {step === 'world' && <div className="journey-intro">
+            <div className="journey-intro-copy">
             <p className="journey-kicker">A story shaped by its audience</p>
             <h1>{world.title}<span className="journey-period">.</span></h1>
             <p className="journey-premise">{world.settings.premise || world.settings.storyline}</p>
             <button className="journey-text-button" onClick={() => setSheet('cast')}><Users size={18} /> Meet the cast</button>
+            </div>
+            <div className="journey-world-view"><SpatialWorld title={world.title} official={world.official}/></div>
           </div>}
           {step === 'vote' && <div className="journey-vote-stage">
             <div className="journey-vote-heading"><p className="journey-kicker">The audience writes the next turn</p><h1>Let the audience decide.</h1><p className="community-stats">{recordedRound.totalVotes} votes · {recordedRound.participantCount} joined sessions</p></div>

@@ -2,6 +2,10 @@
 
 Status: the user authorized the first frontend implementation phase on November 12, 2026, from preservation checkpoint `81e975e`. The expanded brief authorizes the design system, landing/navigation, discovery/universe detail, voting, production timeline, episode reveal and existing creator Studio. See [the implemented screen report](HACKATHON_UI_REPORT.md). Backend APIs, schemas, identity policy, providers and infrastructure remain preserved. Manila Journey remains the presenter layout. New identity policies, character parameter fields and persistence/model extensions remain future phases.
 
+## Shared blue spatial direction
+
+The latest user request supersedes the independent Manila palette. Explore, Dashboard and Journey now share cool-blue dark/light semantic tokens, local typography and one saved theme preference. Journey retains its presenter-controlled full-screen flow. Its world illustration uses CSS 3D geometry and pointer-responsive depth; voting, production and premiere gain spatial surfaces while controls remain usable. Motion is optional under reduced-motion preferences, touch receives a stable camera, and no WebGL dependency or provider/backend change is introduced. [BLUE_SPATIAL_REPORT.md](BLUE_SPATIAL_REPORT.md) owns this increment and its evidence.
+
 ## Full restructure implementation
 
 The subsequent complete frontend brief is implemented on `ui/unified-airl`. Public navigation is now Explore / Live / Sign in or Profile, plus permission-aware Dashboard access; the AIRL wordmark returns home. Landing, discovery, universe/story content, audience participation and the existing creator tools share one near-black/warm-white/cool-violet system. `/studio` remains the protected workspace URL with a shared sidebar, compact mobile Menu and contextual universe tools. Journey retains its separately scoped Manila presentation. [UNIFIED_FRONTEND_REPORT.md](UNIFIED_FRONTEND_REPORT.md) records actual screens, feature locations, tokens and acceptance. Earlier phase notes below remain the historical rationale.

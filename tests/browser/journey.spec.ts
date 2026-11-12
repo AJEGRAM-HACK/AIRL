@@ -191,7 +191,7 @@ test('Explore stays the everyday entry while Journey traps sheet focus and respe
     await expect(page.locator('.journey-brand')).toContainText('/ Journey');
     await expect(page.getByRole('navigation', { name: 'Main navigation', exact: true })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Exit to Explore', exact: true })).toBeVisible();
-    await expect(page.locator('.journey-experience')).toHaveCSS('background-color', 'rgb(232, 232, 227)');
+    await expect(page.locator('.journey-experience')).toHaveCSS('background-color', await page.locator('body').evaluate(element => getComputedStyle(element).backgroundColor));
     expect(await page.locator('.journey-atmosphere i').first().evaluate(element => getComputedStyle(element).animationName)).toBe('none');
     const chapterURL = page.url();
     await page.getByRole('button', { name: 'Meet the cast', exact: true }).click();

@@ -429,13 +429,13 @@ footer .brand {
   font-display: swap;
 }
 :root {
-  color-scheme: dark; --on-media: #f5f3ff; --background: var(--bg); --foreground: var(--text);
+  color-scheme: dark; --on-media: #edf5ff; --background: var(--bg); --foreground: var(--text);
   --airl-mint-glow: color-mix(in srgb,var(--mint) 12%,transparent);
-  --bg: #101012; --panel: #18181c; --surface: #18181c;
-  --surface-soft: #1e1e23; --surface-raised: #27272e;
-  --text: #f3f0ea; --muted: #aaa8b2; --subtle: #bbb8c6;
-  --border: #ffffff21; --public-accent: #c1b1f5; --public-ink: #20172f;
-  --violet: var(--public-accent); --pink: var(--public-accent); --mint: #b1c5b8;
+  --bg: #07111f; --panel: #0d1d31; --surface: #0d1d31;
+  --surface-soft: #122740; --surface-raised: #1b3755;
+  --text: #edf5ff; --muted: #a5b8d0; --subtle: #bdd0e6;
+  --border: #c6dcff26; --public-accent: #86c5ff; --public-ink: #06213f;
+  --violet: var(--public-accent); --pink: var(--public-accent); --mint: #8ccce8;
   --primary: var(--public-accent); --accent: var(--public-accent); --secondary: var(--public-accent);
   --public-surface: var(--surface); --error: #ffacb6;
   --airl-glow: color-mix(in srgb,var(--public-accent) 9%,transparent);
@@ -444,11 +444,11 @@ footer .brand {
 }
 :root[data-theme=light] {
   color-scheme: light;
-  --bg: #f4f2ed; --panel: #fffefa; --surface: #fffefa;
-  --surface-soft: #eae7e2; --surface-raised: #e2ded8;
-  --text: #25222b; --muted: #65616d; --subtle: #65616d;
-  --border: #25222b2b; --public-accent: #64439d; --public-ink: #fff;
-  --violet: var(--public-accent); --pink: var(--public-accent); --mint: #3f6552;
+  --bg: #edf5ff; --panel: #f9fcff; --surface: #f9fcff;
+  --surface-soft: #e0edfc; --surface-raised: #d4e5f8;
+  --text: #122c4a; --muted: #4b6480; --subtle: #4b6480;
+  --border: #123d6a29; --public-accent: #165ea8; --public-ink: #fff;
+  --violet: var(--public-accent); --pink: var(--public-accent); --mint: #246d9a;
   --error: #9d2940;
 }
 body { font-family: 'AIRL Public',Arial,sans-serif; font-size: 15px; }
@@ -493,18 +493,18 @@ p { line-height: 1.75; }
 .landing-secondary { display: flex; flex-wrap: wrap; gap: 4px 25px; margin-top: 26px; }
 .landing-secondary a { min-height: 44px; display: inline-flex; align-items: center; gap: 9px; font-size: 11px; color: var(--muted); }
 .landing-secondary a:hover { color: var(--text); }
-.landing-feature { position: relative; min-height: 600px; overflow: hidden; border-radius: 3px 3px 90px 3px; isolation: isolate; color: var(--on-media); background: #171522; }
-.landing-feature > .world-art,.landing-feature > .universe-abstract { position: absolute; inset: 0; height: 100%; border-radius: inherit; }
+.landing-feature { position: relative; min-height: 600px; overflow: hidden; border-radius: 3px 3px 90px 3px; isolation: isolate; color: var(--on-media); background: var(--scene-sky); }
+.landing-feature > .world-art,.landing-feature > .universe-abstract,.landing-feature > .spatial-world { position: absolute; inset: 0; height: 100%; border-radius: inherit; }
 .landing-feature > .world-art { filter: saturate(.55); }
 .landing-feature .robot { bottom: 31%; transform: scale(1.1); transform-origin: bottom center; }
 .landing-feature .taho-cart { bottom: 32%; }
 .landing-feature .holo { display: none; }
 .landing-feature-top { position: absolute; inset: 24px 24px auto; display: flex; justify-content: space-between; gap: 16px; font-size: 9px; letter-spacing: .12em; }
 .landing-feature-top span { padding: 6px 0; text-shadow: 0 1px 8px #000; }
-.landing-feature-copy { position: absolute; inset: auto 0 0; padding: 75px 32px 30px; background: linear-gradient(transparent,#111117e8 24%,#111117); }
-.landing-feature-copy .eyebrow { font-size: 9px; color: #c9bced; letter-spacing: .1em; }
+.landing-feature-copy { position: absolute; inset: auto 0 0; padding: 75px 32px 30px; background: linear-gradient(transparent, color-mix(in srgb,var(--scene-sky) 92%,transparent) 24%,var(--scene-sky)); }
+.landing-feature-copy .eyebrow { font-size: 9px; color: var(--scene-window); letter-spacing: .1em; }
 .landing-feature-copy h2 { font-size: clamp(32px,3vw,48px); font-weight: 600; margin: 12px 0; }
-.landing-feature-copy > p:not(.eyebrow) { font-size: 12px; line-height: 1.8; color: #c5c1cc; max-width: 420px; }
+.landing-feature-copy > p:not(.eyebrow) { font-size: 12px; line-height: 1.8; color: var(--scene-muted); max-width: 420px; }
 .feature-enter { display: flex; align-items: center; justify-content: space-between; min-height: 48px; margin-top: 18px; border-top: 1px solid #ffffff30; padding-top: 10px; margin-right: 28px; font-size: 12px; }
 .landing-how { margin: 0 5% 72px; padding-top: 48px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1.3fr; gap: 70px; }
 .landing-how-intro .eyebrow { color: var(--muted); font-size: 10px; }
@@ -536,7 +536,7 @@ p { line-height: 1.75; }
 .discovery-grid p { font-size: 13px; }
 .discovery-grid .provider-actions { gap: 12px 24px; margin-top: 0; }
 .discovery-state { padding: 64px 20px; text-align: center; display: grid; justify-items: center; gap: 20px; }
-.universe-abstract { height: 100%; width: 100%; display: grid; place-items: center; overflow: hidden; color: #ddd4f4; background: radial-gradient(ellipse at 80% 0,#81719660,transparent 65%),#1e1b27; }
+.universe-abstract { height: 100%; width: 100%; display: grid; place-items: center; overflow: hidden; color: var(--scene-window); background: radial-gradient(ellipse at 80% 0,var(--scene-fog),transparent 65%),var(--scene-sky); }
 .universe-abstract > span { font-size: 180px; font-weight: 600; line-height: 1; opacity: .4; transform: rotate(-12deg); }
 /* A single authenticated shell around existing Studio routes. */
 .dashboard-shell { display: grid; grid-template-columns: 232px minmax(0,1fr); min-height: 100dvh; max-width: 1920px; margin: auto; }
@@ -988,3 +988,60 @@ main.experience-shell { animation: airl-rise-in var(--motion-entrance) var(--mot
 @media(prefers-reduced-motion:reduce) {
   *,*::before,*::after { animation: none!important; transition: none!important; scroll-behavior: auto!important; }
 }
+
+/* Shared blue identity and spatial illustration materials. */
+:root {
+  --scene-sky: #081a32; --scene-fog: #1c6cb16b;
+  --scene-road: #123354; --scene-roof: #80c4f4; --scene-face: #286da8; --scene-side: #164570;
+  --scene-window: #c3e6ff; --scene-muted: #acc8e3; --scene-outline: #8bcaff50;
+  --shadow-elevated: 0 24px 70px #000a1f45;
+}
+:root[data-theme=light] { --shadow-elevated: 0 24px 70px #153e691c; }
+.spatial-world {
+  position: relative; width: 100%; height: 100%; min-height: 220px; overflow: hidden;
+  perspective: 950px; perspective-origin: 50% 42%; color: var(--scene-window);
+  background: radial-gradient(ellipse at 65% 26%,var(--scene-fog),transparent 64%),var(--scene-sky);
+  isolation: isolate;
+}
+.spatial-stars { position: absolute; inset: 0; opacity: .3; background-image: radial-gradient(circle,var(--scene-window) 1px,transparent 1px); background-size: 54px 58px; mask-image: linear-gradient(black,transparent 85%); }
+.spatial-planet { position: absolute; top: 11%; right: 15%; width: 112px; height: 112px; border-radius: 50%; background: radial-gradient(circle at 30% 25%,var(--scene-window),var(--scene-roof) 26%,var(--scene-face) 58%,var(--scene-sky) 95%); box-shadow: 0 0 80px var(--scene-fog); }
+.spatial-planet::after { content: ''; position: absolute; inset: -35% -50%; border: 1px solid var(--scene-outline); border-radius: 50%; transform: rotateX(67deg) rotateY(-20deg) rotateZ(-20deg); }
+.spatial-planet i { position: absolute; inset: 10%; border: 1px solid var(--scene-outline); border-radius: 50%; transform: rotateY(65deg); }
+.spatial-planet i + i { transform: rotateX(65deg); }
+.spatial-rig { position: absolute; top: 48%; left: 50%; width: 320px; height: 270px; margin: -135px 0 0 -160px; transform-style: preserve-3d; transform: rotateX(var(--view-y,0deg)) rotateY(var(--view-x,0deg)) scale(var(--world-scale,1)); transition: transform 600ms var(--motion-ease); }
+.spatial-city { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(58deg) rotateZ(-35deg); }
+.spatial-ground { position: absolute; inset: 0; transform: translateZ(-3px); transform-style: preserve-3d; border: 1px solid var(--scene-outline); background: repeating-linear-gradient(0deg,transparent 0 39px,var(--scene-outline) 39px 40px),repeating-linear-gradient(90deg,transparent 0 39px,var(--scene-outline) 39px 40px),var(--scene-road); box-shadow: 0 0 65px var(--scene-fog); }
+.spatial-ground::before,.spatial-ground::after { content: ''; position: absolute; background: var(--scene-side); border: 1px solid var(--scene-outline); }
+.spatial-ground::before { left: 0; top: 100%; width: 100%; height: 18px; transform-origin: top; transform: rotateX(-90deg); }
+.spatial-ground::after { left: 100%; top: 0; width: 18px; height: 100%; transform-origin: left; transform: rotateY(90deg); }
+.spatial-road { position: absolute; background: var(--scene-sky); transform: translateZ(1px); border-block: 1px solid var(--scene-outline); }
+.spatial-road-one { top: 84px; left: 0; width: 100%; height: 17px; }
+.spatial-road-two { top: 0; left: 192px; width: 17px; height: 100%; border-inline: 1px solid var(--scene-outline); border-block: 0; }
+.spatial-building { position: absolute; left: var(--block-x); top: var(--block-y); width: var(--block-w); height: var(--block-d); transform-style: preserve-3d; }
+.spatial-building i { position: absolute; display: block; border: 1px solid var(--scene-outline); }
+.spatial-face-roof { inset: 0; transform: translateZ(var(--block-h)); background: linear-gradient(135deg,var(--scene-roof),var(--scene-face)); }
+.spatial-face-front { left: 0; top: 100%; width: 100%; height: var(--block-h); transform-origin: top; transform: rotateX(90deg); background: repeating-linear-gradient(0deg,transparent 0 12px,var(--scene-window) 12px 13px),linear-gradient(90deg,var(--scene-face),var(--scene-side)); }
+.spatial-face-side { left: 100%; top: 0; width: var(--block-h); height: 100%; transform-origin: left; transform: rotateY(-90deg); background: repeating-linear-gradient(90deg,transparent 0 17px,var(--scene-outline) 17px 18px),var(--scene-side); }
+.spatial-building-center .spatial-face-roof { box-shadow: inset 0 0 0 10px var(--scene-face); }
+.spatial-beacon { position: absolute; left: 146px; top: 125px; width: 13px; height: 13px; border-radius: 50%; background: var(--scene-window); transform: translateZ(164px); transform-style: preserve-3d; box-shadow: 0 0 24px var(--scene-roof); }
+.spatial-beacon i { position: absolute; inset: -20px; border: 1px solid var(--scene-window); border-radius: 50%; }
+.spatial-beacon span { position: absolute; left: -20px; top: -30px; transform: rotateZ(35deg) rotateX(-58deg); font-size: 12px; font-weight: 700; letter-spacing: .1em; }
+.spatial-orbit { position: absolute; left: -40px; top: 80px; width: 400px; height: 190px; border: 1px solid var(--scene-outline); border-radius: 50%; transform: rotateX(68deg) rotateZ(-20deg); transform-style: preserve-3d; }
+.spatial-orbit i { position: absolute; width: 9px; height: 9px; border-radius: 50%; background: var(--scene-window); box-shadow: 0 0 22px var(--scene-roof); }
+.spatial-orbit i:first-child { left: 50%; top: -4px; }.spatial-orbit i:nth-child(2) { left: 6%; bottom: 24%; }.spatial-orbit i:nth-child(3) { right: 6%; bottom: 24%; }
+.spatial-world-label { position: absolute; left: 28px; right: 28px; bottom: 26px; display: grid; gap: 5px; pointer-events: none; }
+.spatial-world-label span { font-size: 8px; letter-spacing: .16em; color: var(--scene-muted); }
+.spatial-world-label b { font-size: 21px; font-weight: 550; letter-spacing: -.03em; }
+.landing-feature .spatial-world { --world-scale: 1.12; }
+.landing-feature .spatial-world-label { display: none; }
+.landing-feature .spatial-rig { top: 41%; }
+.discovery-cover .spatial-world { --world-scale: .75; }
+.discovery-cover .spatial-rig { top: 53%; }
+.discovery-cover .spatial-planet { width: 74px; height: 74px; }
+.discovery-cover .spatial-world-label { display: none; }
+.discovery-cover > .spatial-world { transition: transform 600ms var(--motion-ease); }
+.world-overview-art .spatial-world { --world-scale: 1.05; }
+.character-portrait,.pink .character-portrait,.mint .character-portrait { background: radial-gradient(ellipse at bottom,var(--airl-glow),transparent 75%),var(--panel); color: var(--public-accent); }
+@media(hover:hover) and (pointer:fine) { .discovery-cover:hover > .spatial-world { transform: scale(1.025); } }
+@media(max-width:540px) { .landing-feature .spatial-world { --world-scale: .88; }.spatial-world-label { left: 22px; right: 22px; }.world-overview-art .spatial-world { --world-scale: .84; } }
+@media(prefers-reduced-motion:reduce) { .spatial-rig { transform: scale(var(--world-scale,1))!important; } }
