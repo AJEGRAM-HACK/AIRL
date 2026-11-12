@@ -1,5 +1,13 @@
 # AIRL verification record
 
+## Mixed presentation vote distribution — November 12, 2026
+
+At the user's request, added five seeded demo votes to the same presentation round, with three for karaoke and two for sending Captain Bot offline. Taho retains seven votes and the winning position, totaling 12 votes with a 58.3% share for taho. The transaction was validated first on `/tmp/airl-mixed-demo-votes-4hadjszx.sqlite`, then applied to the presentation database. SQLite integrity checks returned `ok`. A restricted backup is retained at `.data/showcase-diagnostics/before-mixed-demo-votes-20261112-192824.sqlite`, with a private receipt identifying the new synthetic rows.
+
+Public API counts and the Live/Journey displays were checked through ngrok in Chrome. This presentation-data and documentation adjustment required scoped integrity/UI checks. Application suites were not rerun and no inference was performed.
+
+---
+
 ## Seven seeded presentation votes — November 12, 2026
 
 The user requested a demo display of seven votes for the taho-currency option. The existing presentation round `af38c22f-c2f8-4aba-a1e2-42583781ae1a` had one taho vote. Six seeded participant sessions, memberships and taho votes were added transactionally to `.data/demo-paid-showcase-20261112.sqlite`. The closed round still has taho as its winner. The total is seven, with zero votes for karaoke or offline.
