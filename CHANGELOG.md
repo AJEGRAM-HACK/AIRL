@@ -1,6 +1,15 @@
 # AIRL development changes
 
-Updated November 12, 2026. Latest verified application commit is `05e1542bcf02d191c07eee5e8e98a82915399125`. This file summarizes implemented changes. Detailed checks, earlier failures and remaining verification limits are in [VERIFICATION.md](VERIFICATION.md).
+Updated November 12, 2026. Latest verified application commit is `1a7baf3a09233a3e43d01d89c93320a8e2b76a79`. This file summarizes implemented changes. Detailed checks, earlier failures and remaining verification limits are in [VERIFICATION.md](VERIFICATION.md).
+
+## Manila Journey presentation — `1a7baf3`
+
+- Restored `/` as the everyday Explore entry with regular navigation. `/platform` remains an alias. Added prominent Launch Journey and dedicated Exit to Explore actions carrying universe, round, episode and selected chapter context.
+- Rebuilt Journey around the supplied Manila Hack palette, oversized local Schibsted Grotesk, ambient CSS motion, slim chapter rail and a persistent winning decision. The font and SIL Open Font License are bundled locally.
+- Made chapter changes presenter-controlled. Generation animates recorded agent events and reveals one validated excerpt or versioned preview at a time. Premiere uses the media stage with shared playback controls.
+- Added native slide-up sheets for cast, transcripts, authorized review, presentation settings and saved selection. Tab stays in the sheet, Escape closes it and focus returns to its trigger. Reduced motion disables decorative and transition animations.
+- Passed typecheck, production build, 38 unit tests and nine browser cases in 1.8 minutes. Public mobile Chrome and 1440 × 900 / 390 × 844 visual checks passed, including movie-control fit, saved replay, captions, sheets and exact QR decoding.
+- The physical iPhone user confirmed clear mode distinction and working Exit. Fresh cast/transcript/playback device checks are deferred. Earlier physical playback remains recorded at its original checkpoint.
 
 ## Guided hackathon Journey — `05e1542`
 

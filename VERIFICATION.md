@@ -2,23 +2,42 @@
 
 ## Current verified status — November 12, 2026
 
-Latest verified application commit is `05e1542bcf02d191c07eee5e8e98a82915399125`. This summary describes recorded checks for the current application and identifies earlier evidence separately. Historical entries below retain the outcomes and limitations that applied at each checkpoint. Their pending items may have been completed in later entries.
+Latest verified application commit is `1a7baf3a09233a3e43d01d89c93320a8e2b76a79`. This summary describes recorded checks for the current application and identifies earlier evidence separately. Historical entries below retain the outcomes and limitations that applied at each checkpoint. Their pending items may have been completed in later entries.
 
 | Area | Latest evidence | Limits |
 | --- | --- | --- |
-| Static checks | `npm run typecheck` and final `npm run build` passed at `05e1542` | Final public/visual smoke passed after presentation polish |
-| Unit/regression suite | `npm test` passed all 38 tests, zero failures, 4.492 s | Includes identified transport/executor doubles |
-| Production-browser suite | `npm run test:browser` passed eight cases in 2.0 min | Installed Chrome, isolated database, real Ollama in its provider case |
-| Real creative workflow | Vote → frozen winner → four Ollama stages → preview → review → publication → audience playback passed | Latest community browser production 26.5 s, maximum sampled audience API latency 23 ms |
+| Static checks | `npm run typecheck` and final `npm run build` passed at `1a7baf3` | Final public/visual smoke passed after presentation polish |
+| Unit/regression suite | `npm test` passed all 38 tests, zero failures, 3.457 s | Includes identified transport/executor doubles |
+| Production-browser suite | `npm run test:browser` passed nine cases in 1.8 min | Installed Chrome, isolated database, real Ollama in its provider case |
+| Real creative workflow | Vote → frozen winner → four Ollama stages → preview → review → publication → audience playback passed | Latest community browser production 25.4 s, maximum sampled audience API latency 8 ms |
 | Roles and ownership | Guest/viewer/creator/admin UI, direct page/API protection, owned-world controls and sign-in/sign-out passed | Request-time permission snapshot refreshes with authentication/navigation |
-| Public HTTPS | Guest mobile Chrome Journey smoke passed at `05e1542`, saved playback/replay/captions worked, Studio returned 404, zero JS errors | Requires running Mac, internet and tunnel |
-| Physical iPhone | User confirmed Journey saved-episode playback, seeking, replay and captions at `05e1542`, in addition to earlier public voting checks | One physical iPhone. Venue load and broader device coverage remain open |
+| Public HTTPS | Guest mobile Chrome Journey smoke passed at `1a7baf3`, saved playback/replay/captions worked, Studio returned 404, zero JS errors | Requires running Mac, internet and tunnel |
+| Physical iPhone | User confirmed clear Explore/Journey distinction and working Exit at `1a7baf3`. Saved playback/seek/replay/captions were previously confirmed at `05e1542` | Fresh Manila cast/transcript/playback check deferred by the user. One device, venue and broader coverage remain open |
 | 35-session public rehearsal | Earlier `01e710d` run passed, 23.639 s real production, 157 ms request p95 | Simulated HTTP/2 sessions, one mobile Chrome context, no 35-device claim, not rerun after role UI changes |
 | Restart recovery | Earlier genuine interrupted job recovered after lease expiry in 178.3 s, publication stayed idempotent | Repeat crash/restart on the presentation build remains a priority |
 | Local fixed-input benchmark | Official/private episodes 38.569/27.498 s, pitches 14.370 s, cited answer 4.195 s | Short measurements, model residency/load vary, semantic/style review remains necessary |
 | Paid providers and media export | OpenAI/BYOK contracts and isolation tested with doubles, live paid inference unverified | No paid call made, no MP4/voice/art generation implemented |
 
 See the chronological sections for failed attempts, corrections, source artifacts, measurements and exact test boundaries. [CHANGELOG.md](CHANGELOG.md) provides a concise implementation summary. [HANDOFF.md](HANDOFF.md) provides launch and continuation instructions.
+
+## Manila Journey presentation — November 12, 2026
+
+Application checkpoint is `1a7baf3a09233a3e43d01d89c93320a8e2b76a79`. The starting tree was clean at documentation commit `8446869`, with verified application `05e1542`. The existing Copilot-derived routes, shared workflow, scoped state and saved fallback were preserved as the foundation. The supplied Manila Hack HTML included its palette, typography and chapter/sheet CSS. Its external canvas bundle was outside the supplied file. Ambient motion was implemented in CSS, and Schibsted Grotesk was bundled locally with its SIL Open Font License.
+
+Explore now always opens at `/`, including through the public tunnel. `/platform` remains a working alias. Launch Journey and Exit to Explore carry universe/round/episode/chapter context. Journey has independent full-screen chrome, a slim chapter rail, persistent recorded winning choice, manual Next/Previous controls and Left/Right or Page Up/Page Down shortcuts. Job events update the current chapter without automatically moving the presenter. The active agent animates from its recorded stage/status/timestamp. A single validated excerpt or last valid preview/version is displayed at a time. Cast, transcripts and authorized review use modal sheets, with Tab wrapping, Escape close and trigger focus restoration. Editable fields and player controls retain their native keyboard behavior. Reduced motion disables background, chapter, artifact and sheet animation.
+
+- PASS — strict typecheck, production build through the production-browser launcher, and all 38 unit/regression tests in 3.457 seconds. No paid inference was performed.
+- PASS — all nine production-browser cases in 1.8 minutes. Roles took 3.1 s, Demo community 7.6 s, real Ollama community 32.7 s including 25.4 s production, delayed session 483 ms, real Journey 44.5 s, custom Journey 770 ms, dedicated layout/keyboard/focus/reduced-motion 525 ms, creator flow 3.2 s and silent replay 4.2 s. Maximum sampled audience API latency during community Ollama production was 8 ms.
+- PASS — the real Journey case used an admin presenter and two independent mobile audience contexts, real votes and qwen3:4b-instruct. Mode switching/refresh retained the same job/round and single attempt. Approved Demo playback incurred zero POST requests during fallback selection/playback/refresh. Draft fields remained private. An early preview was observed before Critic completion. Publication required explicit approval in the review sheet and left the presenter in the production chapter until the premiere action.
+- PASS — isolated Journey job `0cc66457-0736-4dea-b676-0cb7327334be` recorded all four stages and a versioned preview. The actual Ollama story answer cited Tita Nena's recorded line in scene-003 at 12 seconds. The source episode and round context survived returning through Explore/Journey. Test storage was `/tmp/airl-browser-42383.sqlite`.
+- PASS — the sheet regression exercised cast content, initial close-button focus, Tab containment, keyboard chapter suppression while modal, Escape close, restored trigger focus and unchanged chapter. The transcript check also preserved the paused playback frame. Next/Previous and arrow/Page shortcuts worked. Reduced-motion computed animation was none. Root Explore retained regular navigation and Journey displayed its own explicit mode/Exit chrome.
+- PASS — public ngrok mobile Chrome, using the normal database, verified root Explore, Launch Journey, cast sheet close, saved playback, three seek/replay cycles, captions, transcript sheet close and Exit. There were zero page JavaScript errors or horizontal overflow. QR PNG decoded through macOS CoreImage to the exact existing `/live/barangay-2099` audience URL.
+- PASS — final 1440 × 900 projector and 390 × 844 phone visual checks. Movie controls and transcript/watch links fit within the media stage, verified from element bounds. Intro, vote, generation, premiere and cast sheet screenshots remain under `/tmp/airl-manila-*.png`. Local reference font rendered successfully.
+- USER CONFIRMED — on the physical iPhone, the stone Journey mode is clearly different from Explore and Exit returns to regular navigation. The user cannot check cast, transcript, playback/seek/replay/captions now. These remain fresh-device follow-ups for the Manila layout. Prior physical playback results remain attributed to `05e1542`.
+
+The first visual check found an invisible chapter-label hit area intercepting the cast trigger and media controls extending below the stage. Rail hit areas and video sizing were corrected. The first full run exposed a navigation test refreshing before Next had entered Journey. That test now waits for the destination URL. A targeted run then passed the real Journey and custom-world cases but exposed Tab leaving a native sheet with a single focusable control. Explicit Tab wrapping corrected it. The earlier failing full run was interrupted during the creator case while diagnosing these issues. The final complete nine-case run passed, including the creator and replay regressions.
+
+The final public launcher and recovery worker were restored on the normal database. The root stayed Explore even with the tunnel's public-origin environment. Existing votes, jobs, episodes and canon were preserved. Hosted OpenAI validation, venue hardware/network rehearsal, a new 35-session load run and sustained memory profiling remain open. The UI sprint used the existing Node/SQLite/Ollama/ngrok architecture and added no npm dependency or infrastructure service.
 
 ## Guided Journey completion — November 12, 2026
 

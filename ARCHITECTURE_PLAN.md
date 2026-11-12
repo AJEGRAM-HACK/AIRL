@@ -1,6 +1,6 @@
 # AIRL architecture and delivery plan
 
-_Last updated November 12, 2026. Latest verified application commit `05e1542bcf02d191c07eee5e8e98a82915399125`._
+_Last updated November 12, 2026. Latest verified application commit `1a7baf3a09233a3e43d01d89c93320a8e2b76a79`._
 
 [CHANGELOG.md](CHANGELOG.md) summarizes recent changes. [VERIFICATION.md](VERIFICATION.md) separates current acceptance results from historical checkpoints. The current delivery is Mac-hosted SQLite/Ollama with a public ngrok web tunnel. Supabase, Trigger.dev and cloud media exports remain proposed architecture.
 
@@ -53,13 +53,13 @@ The primary demonstration connects participation, creative workflow, review and 
 
 ## 2.1 Experience mode strategy
 
-Explore mode at `/platform` and guided Journey mode at `/journey` share the existing room, production, canon and provider services. The root chooses Journey for the public tunnel or explicit journey environment setting. Existing routes remain available. A shared mode switch carries universe, round, episode, selected step and saved-playback context through URLs. Episode pages supply their stored source round to the switch.
+Explore mode at `/` and guided Journey at `/journey` share the existing room, production, canon and provider services. `/platform` remains an Explore alias. The root always uses regular AIRL navigation. Journey uses its own full-screen chrome and Exit to Explore action. Existing routes remain available. A shared mode switch carries universe, round, episode, selected step and saved-playback context through URLs. Episode pages supply their stored source round to the switch.
 
-`src/app/journey/page.tsx` validates universe visibility, the selected recorded round and configured room choices. `src/components/journey-demo.tsx` presents five stages from stored state. SSE supplies room changes and production invalidation notices, with five-second presenter and thirty-second audience status fallbacks. Production review reuses `RoomProduction`, and playback/retrieval reuse `EpisodePreview` and `StoryHelper`. Draft fields are fetched through the existing protected production endpoint. Server authorization remains authoritative for every action.
+`src/app/journey/page.tsx` validates universe visibility, the selected recorded round and configured room choices. `src/components/journey-demo.tsx` presents five chapters from stored state. Chapter selection is explicit in the URL and remains presenter-controlled during job changes. The vote chapter reuses the live/session/close/next API contracts for authorized presenter actions, with a session revision guard against stale session reads. Audience voting remains on the existing phone page. SSE supplies room changes and production invalidation notices, with five-second presenter and thirty-second audience status fallbacks. Production review reuses `RoomProduction`, and playback/retrieval reuse `EpisodePreview` and `StoryHelper`. Draft fields are fetched through the existing protected production endpoint. Server authorization remains authoritative for every action.
 
 Journey live generation selects Ollama `qwen3:4b-instruct`. The existing Studio selector supports Demo and explicitly consented Hosted OpenAI preparation. Saved fallback reads approved `universe_episodes` manifests with no generation request, keeps the active round job visible and preserves access to the live result. URLs retain the fallback selection through refresh and mode switches.
 
-The tunnel prints separate presenter `/journey` and audience `/live/barangay-2099` addresses. All QR codes encode the selected universe's focused audience route. Projector styling enlarges headings, stage status, dialogue and the QR. Phone layouts prioritize the voting controls. [PRESENTER_RUNBOOK.md](PRESENTER_RUNBOOK.md) records the presentation procedure and gated hosted preparation.
+The tunnel prints separate presenter `/journey` and audience `/live/barangay-2099` addresses. All QR codes encode the selected universe's focused audience route. Journey styling lives in `src/app/journey/journey.css`, using the supplied Manila Hack stone/ink/olive colors and locally bundled Schibsted Grotesk with its SIL Open Font License. CSS supplies ambient motion and recorded-event handoff animation. Generation keeps the active agent central and displays one validated dialogue excerpt or preview version at a time. Native modal sheets in `src/components/journey/sheet.tsx` provide cast, transcripts, authorized review and settings with Tab wrapping, Escape close and restored focus. Preview controls remain shared through `EpisodePreview`, with Journey opting into an external transcript sheet. Layout checks covered 1440 × 900 projector and 390 × 844 phone viewports, including all premiere controls within the stage. [PRESENTER_RUNBOOK.md](PRESENTER_RUNBOOK.md) records the presentation procedure and gated hosted preparation.
 
 ## 3. Current implementation map
 
