@@ -1,5 +1,13 @@
 # AIRL verification record
 
+## Seven seeded presentation votes — November 12, 2026
+
+The user requested a demo display of seven votes for the taho-currency option. The existing presentation round `af38c22f-c2f8-4aba-a1e2-42583781ae1a` had one taho vote. Six seeded participant sessions, memberships and taho votes were added transactionally to `.data/demo-paid-showcase-20261112.sqlite`. The closed round still has taho as its winner. The total is seven, with zero votes for karaoke or offline.
+
+The same transaction was tested first on an explicit isolated SQLite backup at `/var/folders/5v/3_tkjch522b8lmlm1_mwz15c0000gn/T/airl-seven-demo-votes-nsjk5jhy.sqlite`. Integrity checks returned `ok`. A restricted online backup precedes the live adjustment at `.data/showcase-diagnostics/before-seven-demo-votes-20261112-192713.sqlite`. A private receipt identifies the synthetic rows for audit. Public state, Live vote totals and Journey's taho option were verified through ngrok in Chrome. This was a presentation-data and documentation change. Application typecheck/build/unit/full-browser suites were not rerun, and no inference was performed.
+
+---
+
 ## First production across all demo surfaces — November 12, 2026
 
 Implemented from `3b33293`. Shared metadata binds the installed external Taho Tender film to the existing published demo episode `efbdba79-9564-4de1-8ca0-984c26d284f5` and job `a74e1393-1260-4a13-a8a7-ffa3c13335bd`. Explore features the native film. Discovery, universe overview and episode library link to its canonical detail page. Live, legacy watch routes, episode detail, Journey's regular premiere/saved selection and published Studio previews use the same native player. Displayed metadata consistently reads First production, four shots and approximately 32 seconds. Film-specific views use the four-shot synopsis and summary. The public media directory links only the playback MP4 and poster into ignored local media.
