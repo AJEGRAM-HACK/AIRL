@@ -25,11 +25,12 @@ export async function readableStoryItem(
     store.getWorld(id, actor);
     const found =
       kind === "character"
-        ? store.characters(id, actor).some((character) => character.id === item)
+        ? store.characters(id, actor).find((character) => character.id === item)
         : store
             .episodes(id, actor)
-            .some((episode) => episode.episode_id === item);
+            .find((episode) => episode.episode_id === item);
     if (!found) notFound();
+    return found;
   } finally {
     store.close();
   }

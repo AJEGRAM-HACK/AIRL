@@ -7,7 +7,7 @@ import { Check, Radio, Vote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RoomSnapshot, type RoomState, type SessionState } from './types';
 import { ProviderPicker } from '@/components/platform/provider-picker';
-export function CommunityPanel({ operatorView = false,roomId='barangay-2099' }: { operatorView?: boolean;roomId?:string }) {
+export function CommunityPanel({ operatorView = false,roomId='barangay-2099', showProduction = true, fixedOllama = false }: { operatorView?: boolean;roomId?:string;showProduction?:boolean;fixedOllama?:boolean }) {
   const access=useAccess();
   const base=`/api/live/rooms/${roomId}`;
   const sessionRevision = useRef(0);
@@ -82,8 +82,8 @@ export function CommunityPanel({ operatorView = false,roomId='barangay-2099' }: 
       {session.joined && <Button disabled={pending || !!session.vote || !selection || room.status !== 'open'} onClick={() => action(`${base}/vote`, { roundId: room.roundId, optionId: selection })}>{session.vote ? <><Check size={16}/> Vote recorded</> : pending ? 'Saving…' : 'Cast my vote'}</Button>}
       {winner && <div className="winner-callout" role="status"><b>Winning direction</b><p>{winner.title}</p><small>Ties use the displayed option order. Production is queued from this finalized direction. An operator reviews the result before publication.</small></div>}
       <p className="fine-print">One vote per anonymous session per round. Clearing cookies creates a new identity. Counts update across sessions through the local server.</p>
-      {showOperator && <div className="operator-controls"><h3>Operator controls</h3><ProviderPicker background value={provider} onChange={value=>setProvider({mode:value.mode as RoomProvider["mode"],model:value.model,consent:value.consent})}/><Button variant="outline" disabled={pending || room.status !== 'open' || (provider.mode === 'hosted_openai' && !provider.consent)} onClick={() => action(`${base}/close`, { roundId: room.roundId, provider })}>Close voting & produce</Button><Button variant="outline" disabled={pending || room.status !== 'closed'} onClick={() => action(`${base}/next`, { roundId: room.roundId })}>Start next round</Button></div>}
+      {showOperator && <div className="operator-controls"><h3>Operator controls</h3><>{fixedOllama ? <p>Live generation · Ollama · qwen3:4b-instruct</p> : <ProviderPicker background value={provider} onChange={value=>setProvider({mode:value.mode as RoomProvider["mode"],model:value.model,consent:value.consent})}/>}</><Button variant="outline" disabled={pending || room.status !== 'open' || (provider.mode === 'hosted_openai' && !provider.consent)} onClick={() => action(`${base}/close`, { roundId: room.roundId, provider: fixedOllama ? {mode:'ollama',model:'qwen3:4b-instruct',consent:false} : provider })}>Close voting & produce</Button><Button variant="outline" disabled={pending || room.status !== 'closed'} onClick={() => action(`${base}/next`, { roundId: room.roundId })}>Start next round</Button></div>}
     </>}
-    {showOperator && <RoomProduction operator={session.operator} roomId={roomId}/>}
+    {showOperator && showProduction && <RoomProduction operator={session.operator} roomId={roomId}/>}
   </section>;
 }

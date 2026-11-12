@@ -1,10 +1,11 @@
+import { ModeSwitcher } from './journey/mode-switcher';
 import { StudioNavigation } from './platform/access';
 import { ThemeSwitcher } from './theme-switcher';
 import Link from 'next/link';
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { features } from '@/lib/config/features';
 import { Button } from './ui/button';
-export function Nav({ active = '', universeId }: { active?: string; universeId?:string }) {
+export function Nav({ active = '', universeId, roundId }: { active?: string; universeId?:string; roundId?:string|null }) {
   return <header className="nav airl-nav">
     <Link href="/" className="brand" aria-label="AIRL home"><Sparkles aria-hidden="true"/><span>AIRL<span className="brand-period">.</span></span></Link>
     <nav aria-label="Main navigation">
@@ -15,6 +16,7 @@ export function Nav({ active = '', universeId }: { active?: string; universeId?:
       <StudioNavigation active={active === 'studio'} universeId={universeId}/>
       <Link href="/account">Account</Link>
     </nav>
+    <ModeSwitcher universeId={universeId} roundId={roundId}/>
     <ThemeSwitcher/>
     <Button asChild variant="outline" size="sm"><Link href="/discover">Find your experience <ArrowUpRight size={14}/></Link></Button>
   </header>;

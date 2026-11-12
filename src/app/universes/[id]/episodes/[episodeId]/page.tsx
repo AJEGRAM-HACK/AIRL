@@ -1,6 +1,6 @@
 import { PublicShell } from "@/components/layout/public-shell";
 import { WorldView } from "@/components/platform/world-view";
-import { readableUniverse, readableStoryItem } from "@/server/platform/page";
+import { readableStoryItem } from "@/server/platform/page";
 export const dynamic = "force-dynamic";
 export default async function Page({
   params,
@@ -10,10 +10,10 @@ export default async function Page({
   searchParams: Promise<{ t?: string }>;
 }) {
   const { id, episodeId } = await params;
-  await readableStoryItem(id, episodeId, "episode");
+  const episode = await readableStoryItem(id, episodeId, "episode");
   const seconds = Number((await searchParams).t || 0);
   return (
-    <PublicShell universeId={id}>
+    <PublicShell universeId={id} roundId={"round_id" in episode ? episode.round_id : null}>
       <WorldView
         id={id}
         mode="episodes"

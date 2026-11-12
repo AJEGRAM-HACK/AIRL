@@ -136,7 +136,7 @@ try {
       stdio: "ignore",
     });
   console.log(
-    `Audience and QR destination ${origin}/live/barangay-2099\nStudio and QR ${origin}/studio/barangay-2099\nKeep this Mac plugged in, its lid open, and this terminal running. Press Ctrl+C to stop.`,
+    `Audience and QR destination ${origin}/live/barangay-2099\nPresenter Journey ${origin}/journey\nStudio and QR ${origin}/studio/barangay-2099\nKeep this Mac plugged in, its lid open, and this terminal running. Press Ctrl+C to stop.`,
   );
 } catch (error) {
   console.error(error.message);

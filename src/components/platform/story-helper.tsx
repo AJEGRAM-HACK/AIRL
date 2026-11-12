@@ -10,14 +10,16 @@ export function StoryHelper({
   episodeId,
   characterId,
   draftRun,
+  suggestedQuestion,
 }: {
   universeId: string;
   episodeId?: string;
   characterId?: string;
   draftRun?: string;
+  suggestedQuestion?: string;
 }) {
   const {account}=useAccess();
-  const [question, setQuestion] = useState("What happened most recently?"),
+  const [question, setQuestion] = useState(suggestedQuestion || "What happened most recently?"),
     [scope, setScope] = useState(episodeId ? "episode" : "latest"),
     [provider, setProvider] = useState(defaultProvider),
     [answer, setAnswer] = useState<any>(null),
